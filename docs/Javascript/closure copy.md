@@ -2,7 +2,7 @@
 sidebar_position: 6
 ---
 
-# Closure trong JavaScript - Hướng dẫn cho người mới bắt đầu
+# Closure trong JavaScript
 
 ## Closure là gì?
 
