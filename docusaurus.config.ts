@@ -5,7 +5,7 @@ import type * as Preset from "@docusaurus/preset-classic";
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: "My Site",
+  title: "My inteview question site",
   tagline: "Dinosaurs are cool",
   favicon: "img/favicon.ico",
 
@@ -33,7 +33,7 @@ const config: Config = {
   // may want to replace "en" with "zh-Hans".
   i18n: {
     defaultLocale: "en",
-    locales: ["en"],
+    locales: ["en", "vi"],
   },
 
   presets: [
@@ -76,6 +76,9 @@ const config: Config = {
       },
       items: [
         {
+          type: "localeDropdown",
+        },
+        {
           type: "docSidebar",
           sidebarId: "tutorialSidebar",
           position: "left",
@@ -97,7 +100,7 @@ const config: Config = {
           items: [
             {
               label: "Interview Question",
-              to: "/interview/intro",
+              to: "/docs/intro",
             },
           ],
         },
