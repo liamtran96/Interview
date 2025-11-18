@@ -1,0 +1,8 @@
+{
+  "label": "PostgreSQL",
+  "position": 8,
+  "link": {
+    "type": "generated-index",
+    "description": "Master PostgreSQL 18 interview questions covering ACID transactions, indexes, query optimization, MVCC, and advanced database concepts."
+  }
+}
