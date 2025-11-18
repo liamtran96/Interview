@@ -1,0 +1,201 @@
+---
+sidebar_position: 1
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Two Sum
+
+<AlgorithmProblem
+  title="Two Sum"
+  difficulty="Easy"
+  description={`
+<p>Given an array of integers <code>nums</code> and an integer <code>target</code>, return indices of the two numbers such that they add up to <code>target</code>.</p>
+<p>You may assume that each input would have <strong>exactly one solution</strong>, and you may not use the same element twice.</p>
+<p>You can return the answer in any order.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>2 ≤ nums.length ≤ 10<sup>4</sup></li>
+  <li>-10<sup>9</sup> ≤ nums[i] ≤ 10<sup>9</sup></li>
+  <li>-10<sup>9</sup> ≤ target ≤ 10<sup>9</sup></li>
+  <li>Only one valid answer exists.</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'nums = [2,7,11,15], target = 9',
+      output: '[0,1]',
+      explanation: 'Because nums[0] + nums[1] == 9, we return [0, 1].'
+    },
+    {
+      input: 'nums = [3,2,4], target = 6',
+      output: '[1,2]'
+    },
+    {
+      input: 'nums = [3,3], target = 6',
+      output: '[0,1]'
+    }
+  ]}
+  starterCode={`function twoSum(nums, target) {
+  // Write your code here
+
+}`}
+  solution={`function twoSum(nums, target) {
+  // Hash map approach: O(n) time, O(n) space
+  const map = new Map();
+
+  for (let i = 0; i < nums.length; i++) {
+    const complement = target - nums[i];
+
+    if (map.has(complement)) {
+      return [map.get(complement), i];
+    }
+
+    map.set(nums[i], i);
+  }
+
+  return [];
+}`}
+  testCases={[
+    {
+      input: [[2, 7, 11, 15], 9],
+      expected: [0, 1],
+      description: 'Basic case: [2,7,11,15], target 9'
+    },
+    {
+      input: [[3, 2, 4], 6],
+      expected: [1, 2],
+      description: 'Different order: [3,2,4], target 6'
+    },
+    {
+      input: [[3, 3], 6],
+      expected: [0, 1],
+      description: 'Duplicate numbers: [3,3], target 6'
+    },
+    {
+      input: [[-1, -2, -3, -4, -5], -8],
+      expected: [2, 4],
+      description: 'Negative numbers: [-1,-2,-3,-4,-5], target -8'
+    },
+    {
+      input: [[0, 4, 3, 0], 0],
+      expected: [0, 3],
+      description: 'Zero values: [0,4,3,0], target 0'
+    }
+  ]}
+  functionName="twoSum"
+/>
+
+## Solution Explanation
+
+### Approach 1: Brute Force (Not Recommended)
+
+**Time Complexity:** O(n²)
+**Space Complexity:** O(1)
+
+Check every pair of numbers:
+
+```javascript
+function twoSum(nums, target) {
+  for (let i = 0; i < nums.length; i++) {
+    for (let j = i + 1; j < nums.length; j++) {
+      if (nums[i] + nums[j] === target) {
+        return [i, j];
+      }
+    }
+  }
+  return [];
+}
+```
+
+**Why not use this?**
+- Nested loops make it slow for large arrays
+- Interview red flag: Shows lack of optimization
+
+### Approach 2: Hash Map (Optimal) ✅
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(n)
+
+Use a hash map to store seen numbers and their indices:
+
+```javascript
+function twoSum(nums, target) {
+  const map = new Map();
+
+  for (let i = 0; i < nums.length; i++) {
+    const complement = target - nums[i];
+
+    // Check if complement exists
+    if (map.has(complement)) {
+      return [map.get(complement), i];
+    }
+
+    // Store current number and index
+    map.set(nums[i], i);
+  }
+
+  return [];
+}
+```
+
+**How it works:**
+
+1. **Iterate once** through the array
+2. For each number, calculate its **complement**: `target - currentNumber`
+3. **Check** if complement exists in the map
+4. If yes → return indices
+5. If no → store current number in map
+
+**Example walkthrough:**
+
+```
+nums = [2, 7, 11, 15], target = 9
+
+i=0: num=2, complement=7
+  - map is empty, add 2→0
+  - map = {2: 0}
+
+i=1: num=7, complement=2
+  - map has 2 at index 0
+  - return [0, 1] ✅
+```
+
+### Key Insights
+
+1. **Trade space for time**: Using extra memory (hash map) reduces time complexity
+2. **One pass**: We solve it in a single loop
+3. **Early return**: Stop as soon as we find the answer
+
+### Common Mistakes
+
+❌ Using the same element twice:
+```javascript
+if (nums[i] + nums[i] === target) // Wrong!
+```
+
+❌ Not checking if complement exists before accessing:
+```javascript
+return [map.get(complement), i] // May return undefined
+```
+
+✅ Correct approach checks existence first:
+```javascript
+if (map.has(complement)) {
+  return [map.get(complement), i];
+}
+```
+
+## Interview Tips
+
+**When discussing:**
+1. Start with brute force, explain why it's inefficient
+2. Suggest hash map optimization
+3. Walk through an example
+4. Mention time/space complexity
+5. Consider edge cases (duplicates, negatives, zeros)
+
+**Follow-up questions you might get:**
+- What if the array is sorted? → Use two pointers
+- What if we need all pairs? → Continue searching instead of early return
+- What about three sum? → Different approach needed (two pointers or hash map with iteration)
