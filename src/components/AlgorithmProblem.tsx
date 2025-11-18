@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
-import { Sandpack } from '@codesandbox/sandpack-react';
+import {
+  SandpackProvider,
+  SandpackLayout,
+  SandpackCodeEditor,
+  SandpackConsole,
+  SandpackPreview
+} from '@codesandbox/sandpack-react';
 
 interface TestCase {
   input: any[];
@@ -139,24 +145,87 @@ if (passed === testCases.length) {
 
       {/* Code Editor with Test Runner */}
       <div style={{ marginBottom: '1rem' }}>
-        <Sandpack
+        <SandpackProvider
           template="vanilla"
           theme="dark"
-          options={{
-            showNavigator: false,
-            showTabs: false,
-            showLineNumbers: true,
-            editorHeight: 400,
-            showConsole: true,
-            showConsoleButton: true,
-          }}
           files={{
-            '/index.js': testRunnerCode,
+            '/index.js': {
+              code: testRunnerCode,
+            },
           }}
-          customSetup={{
-            dependencies: {}
+          options={{
+            autorun: false,
           }}
-        />
+        >
+          <div style={{
+            border: '1px solid var(--ifm-color-emphasis-300)',
+            borderRadius: '8px',
+            overflow: 'hidden',
+            backgroundColor: '#1e1e1e'
+          }}>
+            {/* Header with Run Button */}
+            <div style={{
+              padding: '0.75rem 1rem',
+              backgroundColor: '#2d2d2d',
+              borderBottom: '1px solid var(--ifm-color-emphasis-300)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                Code Editor
+              </span>
+              <button
+                onClick={() => window.location.reload()}
+                style={{
+                  padding: '0.5rem 1.5rem',
+                  backgroundColor: '#00b8a3',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  fontSize: '0.9rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+              >
+                ▶ Run Code
+              </button>
+            </div>
+
+            {/* Code Editor */}
+            <SandpackCodeEditor
+              showLineNumbers={true}
+              showInlineErrors={true}
+              style={{ height: '400px', fontSize: '14px' }}
+            />
+
+            {/* Console Output */}
+            <div style={{
+              borderTop: '1px solid var(--ifm-color-emphasis-300)',
+              backgroundColor: '#1e1e1e'
+            }}>
+              <div style={{
+                padding: '0.75rem 1rem',
+                backgroundColor: '#2d2d2d',
+                borderBottom: '1px solid var(--ifm-color-emphasis-300)'
+              }}>
+                <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                  📊 Test Results
+                </span>
+              </div>
+              <SandpackConsole
+                showHeader={false}
+                style={{
+                  height: '300px',
+                  overflow: 'auto'
+                }}
+              />
+            </div>
+          </div>
+        </SandpackProvider>
       </div>
 
       {/* Solution Toggle */}
@@ -189,10 +258,11 @@ if (passed === testCases.length) {
       }}>
         <strong>💡 How to use:</strong>
         <ol style={{ marginBottom: 0, marginTop: '0.5rem' }}>
-          <li>Write your solution in the editor above</li>
-          <li>Click the "▶" button or refresh icon to run tests</li>
-          <li>Check the console output for test results</li>
-          <li>Click "Show Solution" to see the answer</li>
+          <li>Write your solution in the <strong>Code Editor</strong></li>
+          <li>Click the <strong>"▶ Run Code"</strong> button to test</li>
+          <li>See test results in the <strong>"📊 Test Results"</strong> section below</li>
+          <li>✅ = Passed, ❌ = Failed - check the output details</li>
+          <li>Click <strong>"Show Solution"</strong> to learn the optimal approach</li>
         </ol>
       </div>
     </div>
