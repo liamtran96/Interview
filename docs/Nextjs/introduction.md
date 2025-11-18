@@ -2,14 +2,14 @@
 sidebar_position: 1
 ---
 
-# Next.js Fundamentals (v14+)
+# Next.js Fundamentals (v16+)
 
 ## What is Next.js?
 
 Next.js is a **React framework** for building full-stack web applications. It provides features like server-side rendering, static site generation, and API routes out of the box.
 
 :::info Latest Version
-This guide covers **Next.js 14+** with the **App Router** (the recommended approach as of 2024).
+This guide covers **Next.js 16** (released October 2025) with the **App Router** and **Turbopack** as the default bundler.
 :::
 
 ## Key Features (Beginner Level)

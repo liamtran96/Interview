@@ -2,11 +2,15 @@
 sidebar_position: 1
 ---
 
-# Tailwind CSS Fundamentals
+# Tailwind CSS Fundamentals (v4)
 
 ## What is Tailwind CSS?
 
 Tailwind CSS is a **utility-first CSS framework** that provides low-level utility classes to build custom designs directly in your HTML.
+
+:::info Latest Version
+This guide covers **Tailwind CSS v4.0** (released 2025) with the new CSS-based configuration, OKLCH colors, and 5x faster builds.
+:::
 
 ## Utility-First Approach
 

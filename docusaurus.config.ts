@@ -6,7 +6,7 @@ import type * as Preset from "@docusaurus/preset-classic";
 
 const config: Config = {
   title: "Fullstack Interview Preparation",
-  tagline: "Master React, Node.js, MongoDB, Next.js & More - From Beginner to Senior",
+  tagline: "Master React 19, Next.js 16, Tailwind v4, Node.js & More - From Beginner to Senior",
   favicon: "img/favicon.ico",
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future

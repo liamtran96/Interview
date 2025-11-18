@@ -12,13 +12,13 @@ This comprehensive guide covers essential interview topics for fullstack develop
 
 ### Technologies Covered
 
-- **JavaScript** - Closures, Promises, Async/Await, Event Loop
-- **React** - Hooks, useState, useEffect, Custom Hooks
-- **Node.js** - Express, Middleware, Async Patterns, Event Loop
-- **MongoDB** - Aggregation, Indexing, Schema Design
-- **HTML & CSS** - Semantic HTML, Flexbox, Grid, Responsive Design
-- **Tailwind CSS** - Utility Classes, Responsive Design, Best Practices
-- **Next.js 14+** - App Router, Server Components, SSR, SSG, ISR
+- **JavaScript (ES2024+)** - Closures, Promises, Async/Await, Event Loop
+- **React 19** - Hooks (including NEW use(), useActionState, useOptimistic), Server Components
+- **Node.js (Latest)** - Express, Middleware, Async Patterns, Event Loop
+- **MongoDB (Latest)** - Aggregation, Indexing, Schema Design, CRUD Operations
+- **HTML & CSS (Modern)** - Semantic HTML, Flexbox, Grid, Responsive Design
+- **Tailwind CSS v4** - CSS Config, OKLCH Colors, Container Queries, 5x Faster Builds
+- **Next.js 16** - Turbopack, App Router, Server Components, SSR, SSG, ISR
 
 ## How to Use This Guide
 
@@ -73,20 +73,20 @@ Next.js Advanced
 
 Use the sidebar to navigate to any topic. All content is organized by technology:
 
-- **JavaScript** - Closures, Promises, Async/Await, Event Loop
-- **React** - Hooks, useState, useEffect, Custom Hooks
-- **Node.js** - Express, Middleware, Async Patterns
-- **MongoDB** - Aggregation, Indexing, Schema Design
+- **JavaScript (ES2024+)** - Closures, Promises, Async/Await, Event Loop
+- **React 19** - Traditional Hooks + NEW Hooks (use(), useActionState, useOptimistic)
+- **Node.js (Latest)** - Express, Middleware, Async Patterns
+- **MongoDB (Latest)** - Aggregation, Indexing, Schema Design
 - **HTML & CSS** - Flexbox, Grid, Responsive Design
-- **Tailwind CSS** - Utility Classes, Responsive Design
-- **Next.js** - App Router, Server Components, SSR, SSG
+- **Tailwind CSS v4** - CSS Config, OKLCH Colors, Container Queries
+- **Next.js 16** - Turbopack, Proxy System, App Router, Server Components
 
 ## Content Structure
 
 Each section includes:
 - ✅ **Official documentation** references
 - ✅ **Beginner to Advanced** progression
-- ✅ **Latest versions** (2024-2025)
+- ✅ **Latest versions** (React 19, Next.js 16, Tailwind v4, 2025)
 - ✅ **Common interview questions**
 - ✅ **Practical code examples**
 - ✅ **Best practices**
