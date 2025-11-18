@@ -1,11 +1,5 @@
-import React, { useState } from 'react';
-import {
-  SandpackProvider,
-  SandpackLayout,
-  SandpackCodeEditor,
-  SandpackConsole,
-  SandpackPreview
-} from '@codesandbox/sandpack-react';
+import React, { useState, useRef } from 'react';
+import Editor from '@monaco-editor/react';
 
 interface TestCase {
   input: any[];
@@ -28,6 +22,16 @@ interface AlgorithmProblemProps {
   functionName: string;
 }
 
+interface TestResult {
+  index: number;
+  passed: boolean;
+  input: any[];
+  expected: any;
+  actual?: any;
+  error?: string;
+  description?: string;
+}
+
 export default function AlgorithmProblem({
   title,
   difficulty,
@@ -38,7 +42,11 @@ export default function AlgorithmProblem({
   testCases,
   functionName,
 }: AlgorithmProblemProps) {
+  const [code, setCode] = useState(starterCode);
   const [showSolution, setShowSolution] = useState(false);
+  const [testResults, setTestResults] = useState<TestResult[]>([]);
+  const [isRunning, setIsRunning] = useState(false);
+  const editorRef = useRef<any>(null);
 
   const difficultyColor = {
     Easy: '#00b8a3',
@@ -46,54 +54,90 @@ export default function AlgorithmProblem({
     Hard: '#ef4743',
   };
 
-  // Create test runner code
-  const testRunnerCode = `
-${showSolution ? solution : starterCode}
+  const handleEditorDidMount = (editor: any) => {
+    editorRef.current = editor;
+  };
 
-// Test Runner
-const testCases = ${JSON.stringify(testCases)};
+  const runTests = () => {
+    setIsRunning(true);
+    const results: TestResult[] = [];
 
-console.log('\\n🧪 Running Test Cases...\\n');
+    try {
+      // Create a function from the user's code
+      const userCode = editorRef.current?.getValue() || code;
 
-let passed = 0;
-let failed = 0;
+      // Execute the user's code in a safe context
+      const codeToExecute = `
+        ${userCode}
 
-testCases.forEach((test, index) => {
-  try {
-    const result = ${functionName}(...test.input);
-    const expected = test.expected;
+        // Return the function for testing
+        if (typeof ${functionName} === 'function') {
+          return ${functionName};
+        } else {
+          throw new Error('Function ${functionName} is not defined');
+        }
+      `;
 
-    const isEqual = JSON.stringify(result) === JSON.stringify(expected);
+      const userFunction = new Function(codeToExecute)();
 
-    if (isEqual) {
-      console.log(\`✅ Test \${index + 1}: PASSED\`);
-      if (test.description) console.log(\`   \${test.description}\`);
-      console.log(\`   Input: \${JSON.stringify(test.input)}\`);
-      console.log(\`   Output: \${JSON.stringify(result)}\`);
-      passed++;
-    } else {
-      console.log(\`❌ Test \${index + 1}: FAILED\`);
-      if (test.description) console.log(\`   \${test.description}\`);
-      console.log(\`   Input: \${JSON.stringify(test.input)}\`);
-      console.log(\`   Expected: \${JSON.stringify(expected)}\`);
-      console.log(\`   Got: \${JSON.stringify(result)}\`);
-      failed++;
+      // Run each test case
+      testCases.forEach((test, index) => {
+        try {
+          const result = userFunction(...test.input);
+          const passed = JSON.stringify(result) === JSON.stringify(test.expected);
+
+          results.push({
+            index: index + 1,
+            passed,
+            input: test.input,
+            expected: test.expected,
+            actual: result,
+            description: test.description,
+          });
+        } catch (error: any) {
+          results.push({
+            index: index + 1,
+            passed: false,
+            input: test.input,
+            expected: test.expected,
+            error: error.message,
+            description: test.description,
+          });
+        }
+      });
+    } catch (error: any) {
+      // If code doesn't compile or function doesn't exist
+      results.push({
+        index: 0,
+        passed: false,
+        input: [],
+        expected: null,
+        error: `Code Error: ${error.message}`,
+      });
     }
-    console.log('');
-  } catch (error) {
-    console.log(\`❌ Test \${index + 1}: ERROR\`);
-    console.log(\`   \${error.message}\`);
-    failed++;
-    console.log('');
-  }
-});
 
-console.log(\`\\n📊 Results: \${passed} passed, \${failed} failed out of \${testCases.length} tests\`);
+    setTestResults(results);
+    setIsRunning(false);
+  };
 
-if (passed === testCases.length) {
-  console.log('\\n🎉 All tests passed! Great job!');
-}
-`;
+  const handleShowSolution = () => {
+    if (!showSolution && solution) {
+      setCode(solution);
+      if (editorRef.current) {
+        editorRef.current.setValue(solution);
+      }
+    } else {
+      setCode(starterCode);
+      if (editorRef.current) {
+        editorRef.current.setValue(starterCode);
+      }
+    }
+    setShowSolution(!showSolution);
+    setTestResults([]); // Clear results when toggling solution
+  };
+
+  const passedCount = testResults.filter(r => r.passed).length;
+  const totalCount = testResults.length;
 
   return (
     <div style={{ marginTop: '2rem' }}>
@@ -143,99 +187,189 @@ if (passed === testCases.length) {
         )}
       </div>
 
-      {/* Code Editor with Test Runner */}
-      <div style={{ marginBottom: '1rem' }}>
-        <SandpackProvider
-          template="vanilla"
-          theme="dark"
-          files={{
-            '/index.js': {
-              code: testRunnerCode,
-            },
-          }}
-          options={{
-            autorun: false,
-          }}
-        >
-          <div style={{
-            border: '1px solid var(--ifm-color-emphasis-300)',
-            borderRadius: '8px',
-            overflow: 'hidden',
-            backgroundColor: '#1e1e1e'
-          }}>
-            {/* Header with Run Button */}
-            <div style={{
-              padding: '0.75rem 1rem',
-              backgroundColor: '#2d2d2d',
-              borderBottom: '1px solid var(--ifm-color-emphasis-300)',
+      {/* Code Editor */}
+      <div style={{
+        border: '1px solid var(--ifm-color-emphasis-300)',
+        borderRadius: '8px',
+        overflow: 'hidden',
+        marginBottom: '1rem'
+      }}>
+        {/* Header with Run Button */}
+        <div style={{
+          padding: '0.75rem 1rem',
+          backgroundColor: 'var(--ifm-background-surface-color)',
+          borderBottom: '1px solid var(--ifm-color-emphasis-300)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <span style={{ fontWeight: 'bold', fontSize: '0.95rem' }}>
+            💻 Code Editor
+          </span>
+          <button
+            onClick={runTests}
+            disabled={isRunning}
+            style={{
+              padding: '0.5rem 1.5rem',
+              backgroundColor: isRunning ? '#6c757d' : '#00b8a3',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: isRunning ? 'not-allowed' : 'pointer',
+              fontWeight: 'bold',
+              fontSize: '0.95rem',
               display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                Code Editor
-              </span>
-              <button
-                onClick={() => window.location.reload()}
-                style={{
-                  padding: '0.5rem 1.5rem',
-                  backgroundColor: '#00b8a3',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
-                  fontSize: '0.9rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
-                }}
-              >
-                ▶ Run Code
-              </button>
-            </div>
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            {isRunning ? '⏳ Running...' : '▶ Run Code'}
+          </button>
+        </div>
 
-            {/* Code Editor */}
-            <SandpackCodeEditor
-              showLineNumbers={true}
-              showInlineErrors={true}
-              style={{ height: '400px', fontSize: '14px' }}
-            />
-
-            {/* Console Output */}
-            <div style={{
-              borderTop: '1px solid var(--ifm-color-emphasis-300)',
-              backgroundColor: '#1e1e1e'
-            }}>
-              <div style={{
-                padding: '0.75rem 1rem',
-                backgroundColor: '#2d2d2d',
-                borderBottom: '1px solid var(--ifm-color-emphasis-300)'
-              }}>
-                <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                  📊 Test Results
-                </span>
-              </div>
-              <SandpackConsole
-                showHeader={false}
-                style={{
-                  height: '300px',
-                  overflow: 'auto'
-                }}
-              />
-            </div>
-          </div>
-        </SandpackProvider>
+        {/* Monaco Editor */}
+        <Editor
+          height="400px"
+          defaultLanguage="javascript"
+          defaultValue={starterCode}
+          value={code}
+          onChange={(value) => setCode(value || '')}
+          onMount={handleEditorDidMount}
+          theme="vs-dark"
+          options={{
+            minimap: { enabled: false },
+            fontSize: 14,
+            lineNumbers: 'on',
+            roundedSelection: false,
+            scrollBeyondLastLine: false,
+            automaticLayout: true,
+            tabSize: 2,
+            wordWrap: 'on',
+          }}
+        />
       </div>
 
-      {/* Solution Toggle */}
-      {solution && (
-        <div style={{ marginTop: '1rem' }}>
+      {/* Test Results */}
+      {testResults.length > 0 && (
+        <div style={{
+          border: '1px solid var(--ifm-color-emphasis-300)',
+          borderRadius: '8px',
+          overflow: 'hidden',
+          marginBottom: '1rem'
+        }}>
+          {/* Results Header */}
+          <div style={{
+            padding: '0.75rem 1rem',
+            backgroundColor: 'var(--ifm-background-surface-color)',
+            borderBottom: '1px solid var(--ifm-color-emphasis-300)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <span style={{ fontWeight: 'bold', fontSize: '0.95rem' }}>
+              📊 Test Results
+            </span>
+            <span style={{
+              padding: '0.25rem 0.75rem',
+              borderRadius: '4px',
+              fontSize: '0.875rem',
+              fontWeight: 'bold',
+              backgroundColor: passedCount === totalCount ? '#00b8a3' : '#ef4743',
+              color: 'white'
+            }}>
+              {passedCount} / {totalCount} Passed
+            </span>
+          </div>
+
+          {/* Results List */}
+          <div style={{
+            padding: '1rem',
+            backgroundColor: 'var(--ifm-background-surface-color)',
+            maxHeight: '400px',
+            overflowY: 'auto'
+          }}>
+            {testResults.map((result) => (
+              <div
+                key={result.index}
+                style={{
+                  marginBottom: '1rem',
+                  padding: '1rem',
+                  backgroundColor: 'var(--ifm-code-background)',
+                  borderRadius: '6px',
+                  borderLeft: `4px solid ${result.passed ? '#00b8a3' : '#ef4743'}`
+                }}
+              >
+                <div style={{
+                  fontWeight: 'bold',
+                  marginBottom: '0.5rem',
+                  color: result.passed ? '#00b8a3' : '#ef4743'
+                }}>
+                  {result.passed ? '✅' : '❌'} Test {result.index}: {result.passed ? 'PASSED' : 'FAILED'}
+                </div>
+
+                {result.description && (
+                  <div style={{ marginBottom: '0.5rem', fontStyle: 'italic', opacity: 0.8 }}>
+                    {result.description}
+                  </div>
+                )}
+
+                <div style={{ fontFamily: 'monospace', fontSize: '0.875rem' }}>
+                  {result.index > 0 && (
+                    <>
+                      <div style={{ marginBottom: '0.25rem' }}>
+                        <strong>Input:</strong> {JSON.stringify(result.input)}
+                      </div>
+                      <div style={{ marginBottom: '0.25rem' }}>
+                        <strong>Expected:</strong> {JSON.stringify(result.expected)}
+                      </div>
+                      {!result.passed && (
+                        <div style={{ color: '#ef4743' }}>
+                          <strong>{result.error ? 'Error:' : 'Got:'}</strong>{' '}
+                          {result.error || JSON.stringify(result.actual)}
+                        </div>
+                      )}
+                      {result.passed && (
+                        <div style={{ color: '#00b8a3' }}>
+                          <strong>Output:</strong> {JSON.stringify(result.actual)}
+                        </div>
+                      )}
+                    </>
+                  )}
+                  {result.index === 0 && result.error && (
+                    <div style={{ color: '#ef4743' }}>
+                      <strong>Error:</strong> {result.error}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+
+            {/* Success Message */}
+            {passedCount === totalCount && totalCount > 0 && (
+              <div style={{
+                padding: '1rem',
+                backgroundColor: '#00b8a3',
+                color: 'white',
+                borderRadius: '6px',
+                textAlign: 'center',
+                fontWeight: 'bold',
+                fontSize: '1.1rem'
+              }}>
+                🎉 All tests passed! Great job!
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Action Buttons */}
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+        {solution && (
           <button
-            onClick={() => setShowSolution(!showSolution)}
+            onClick={handleShowSolution}
             style={{
               padding: '0.5rem 1rem',
-              backgroundColor: showSolution ? '#ef4743' : '#00b8a3',
+              backgroundColor: showSolution ? '#ef4743' : '#ffc01e',
               color: 'white',
               border: 'none',
               borderRadius: '4px',
@@ -245,12 +379,11 @@ if (passed === testCases.length) {
           >
             {showSolution ? '👁️ Hide Solution' : '💡 Show Solution'}
           </button>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Instructions */}
       <div style={{
-        marginTop: '1.5rem',
         padding: '1rem',
         backgroundColor: 'var(--ifm-alert-background-color)',
         borderRadius: '4px',
@@ -258,11 +391,11 @@ if (passed === testCases.length) {
       }}>
         <strong>💡 How to use:</strong>
         <ol style={{ marginBottom: 0, marginTop: '0.5rem' }}>
-          <li>Write your solution in the <strong>Code Editor</strong></li>
-          <li>Click the <strong>"▶ Run Code"</strong> button to test</li>
-          <li>See test results in the <strong>"📊 Test Results"</strong> section below</li>
-          <li>✅ = Passed, ❌ = Failed - check the output details</li>
-          <li>Click <strong>"Show Solution"</strong> to learn the optimal approach</li>
+          <li>Write your solution in the <strong>Code Editor</strong> (Monaco - same as VS Code!)</li>
+          <li>Click <strong>"▶ Run Code"</strong> to test your solution</li>
+          <li>See detailed results below - ✅ = Passed, ❌ = Failed</li>
+          <li>If tests fail, check the Expected vs Got values</li>
+          <li>Click <strong>"Show Solution"</strong> to see the optimal approach</li>
         </ol>
       </div>
     </div>

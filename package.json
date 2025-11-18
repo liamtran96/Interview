@@ -15,11 +15,12 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@codesandbox/sandpack-react": "^2.20.0",
     "@docusaurus/core": "3.8.1",
     "@docusaurus/preset-classic": "3.8.1",
     "@mdx-js/react": "^3.0.0",
+    "@monaco-editor/react": "^4.7.0",
     "clsx": "^2.0.0",
+    "monaco-editor": "^0.54.0",
     "prism-react-renderer": "^2.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
