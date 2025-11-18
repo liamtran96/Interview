@@ -1,0 +1,8 @@
+{
+  "label": "Supabase",
+  "position": 9,
+  "link": {
+    "type": "generated-index",
+    "description": "Master Supabase interview questions covering authentication, database (PostgreSQL), real-time subscriptions, storage, Row Level Security, and Edge Functions."
+  }
+}
