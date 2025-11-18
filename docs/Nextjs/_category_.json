@@ -1,0 +1,8 @@
+{
+  "label": "Next.js",
+  "position": 7,
+  "link": {
+    "type": "generated-index",
+    "description": "Master Next.js 14+ interview questions covering App Router, Server Components, SSR, SSG, ISR, and modern React Server Components."
+  }
+}

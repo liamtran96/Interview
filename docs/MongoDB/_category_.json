@@ -1,0 +1,8 @@
+{
+  "label": "MongoDB",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "description": "Master MongoDB interview questions covering aggregation, indexing, schema design, and database operations."
+  }
+}

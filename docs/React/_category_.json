@@ -1,0 +1,8 @@
+{
+  "label": "React",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "description": "Master React interview questions covering hooks, state management, component lifecycle, and best practices."
+  }
+}

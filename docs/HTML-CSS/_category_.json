@@ -1,0 +1,8 @@
+{
+  "label": "HTML & CSS",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "description": "Master HTML and CSS interview questions covering semantic HTML, Flexbox, Grid, responsive design, and modern CSS features."
+  }
+}

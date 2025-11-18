@@ -1,8 +1,8 @@
 {
-  "label": "Javascript",
-  "position": 2,
+  "label": "JavaScript",
+  "position": 1,
   "link": {
     "type": "generated-index",
-    "description": "5 minutes to learn the most important Docusaurus concepts."
+    "description": "Master JavaScript interview questions covering closures, promises, async/await, event loop, and core language features."
   }
 }
