@@ -76,31 +76,38 @@ await refresh()
 await revalidateTag('products')
 ```
 
-### 3. Proxy System (Replaces Middleware)
+### 3. Proxy System (Primary Network Boundary)
 
-**Breaking Change:** `middleware.ts` is replaced by `proxy.ts`
+**proxy.ts** is the new primary approach for network boundaries in Next.js 16:
 
 ```tsx
-// proxy.ts (NEW in v16)
-export default function proxy(request: Request) {
-  const url = new URL(request.url)
+// proxy.ts (NEW in v16 - Node.js runtime)
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+export default function proxy(request: NextRequest) {
+  const url = request.nextUrl
 
   // Authentication check
   if (!request.headers.get('authorization')) {
-    return Response.redirect(new URL('/login', url))
+    return NextResponse.redirect(new URL('/login', url))
   }
 
   // Rewrite request
   if (url.pathname.startsWith('/api/v1')) {
-    return Response.rewrite(new URL('/api/v2' + url.pathname.slice(7), url))
+    return NextResponse.rewrite(new URL('/api/v2' + url.pathname.slice(7), url))
   }
 }
 ```
 
-**Key Differences:**
+**Key Benefits:**
 - Clearer network boundary
-- Better performance
-- Simplified API
+- Runs on Node.js runtime (better performance)
+- Simplified mental model
+
+:::info Middleware.ts Status
+`middleware.ts` is **deprecated** but remains available for Edge runtime use cases. It will be removed in a future version. For new projects, use `proxy.ts` as the primary approach.
+:::
 
 ### 4. React 19.2 Support
 
@@ -253,19 +260,25 @@ export async function MyComponent() {
 }
 ```
 
-### 3. Middleware Replaced by Proxy
+### 3. Proxy.ts as Primary Approach (Middleware Deprecated)
 
 ```tsx
-// ❌ middleware.ts (removed)
+// ⚠️ middleware.ts (deprecated - Edge runtime only)
 export function middleware(request) {
-  // ...
+  // Still available for Edge runtime use cases
+  // Will be removed in a future version
 }
 
-// ✅ proxy.ts (new)
-export default function proxy(request) {
-  // ...
+// ✅ proxy.ts (new primary approach - Node.js runtime)
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+export default function proxy(request: NextRequest) {
+  // Use this for new projects
 }
 ```
+
+**Migration:** Rename `middleware.ts` → `proxy.ts` and update function signature to use `NextRequest/NextResponse`.
 
 ### 4. Removed Features
 
@@ -292,16 +305,28 @@ export default async function Page({ params }) {
 }
 ```
 
-### Step 3: Migrate Middleware to Proxy
+### Step 3: Migrate Middleware to Proxy (Optional)
 
 ```bash
 # Rename file
 mv middleware.ts proxy.ts
-
-# Update function signature
-# Change: export function middleware()
-# To: export default function proxy()
 ```
+
+```tsx
+// Update imports and function signature
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+// Before:
+// export function middleware(request) { ... }
+
+// After:
+export default function proxy(request: NextRequest) {
+  // Logic stays the same, but use NextRequest/NextResponse types
+}
+```
+
+**Note:** `middleware.ts` is deprecated but still works for Edge runtime use cases. Migration is recommended but not required immediately.
 
 ### Step 4: Update Cache APIs
 
@@ -322,7 +347,7 @@ await revalidateTag('products') // Add await if needed
 |---------|------------|------------|
 | **Bundler** | Webpack (default) | Turbopack (default) |
 | **Build Speed** | Baseline | 2-5x faster |
-| **Middleware** | middleware.ts | proxy.ts |
+| **Network Boundary** | middleware.ts | proxy.ts (primary), middleware.ts (deprecated) |
 | **Data Access** | Synchronous OK | Must be async |
 | **React Version** | React 18 | React 19.2 |
 | **Compiler** | Experimental | Stable |
@@ -355,7 +380,7 @@ This aligns with Next.js's move toward more explicit async behavior.
 2. **Await everything** - params, searchParams, cookies, headers
 3. **Use cache() for expensive operations** - Explicit caching
 4. **Enable React Compiler** - Automatic optimization
-5. **Migrate to proxy.ts** - Better network boundaries
+5. **Use proxy.ts for new projects** - Primary approach for network boundaries (Node.js runtime)
 6. **Use updateTag/refresh** - New cache control APIs
 7. **Leverage DevTools MCP** - AI-assisted debugging
 
@@ -382,7 +407,8 @@ Production Build:
 - Next.js 16 is a major performance upgrade
 - Turbopack is now stable and default
 - All data access must be async (breaking change)
-- proxy.ts replaces middleware.ts
+- proxy.ts is the new primary network boundary (Node.js runtime)
+- middleware.ts is deprecated but still available for Edge runtime (will be removed)
 - React 19.2 and React Compiler are fully supported
 - Cache control is more explicit and powerful
 - DevTools MCP provides AI-assisted debugging
