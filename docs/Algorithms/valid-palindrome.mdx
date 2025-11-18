@@ -1,0 +1,266 @@
+---
+sidebar_position: 2
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Valid Palindrome
+
+<AlgorithmProblem
+  title="Valid Palindrome"
+  difficulty="Easy"
+  description={`
+<p>A phrase is a <strong>palindrome</strong> if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters, it reads the same forward and backward. Alphanumeric characters include letters and numbers.</p>
+<p>Given a string <code>s</code>, return <code>true</code> if it is a palindrome, or <code>false</code> otherwise.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 ≤ s.length ≤ 2 × 10<sup>5</sup></li>
+  <li>s consists only of printable ASCII characters.</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 's = "A man, a plan, a canal: Panama"',
+      output: 'true',
+      explanation: '"amanaplanacanalpanama" is a palindrome.'
+    },
+    {
+      input: 's = "race a car"',
+      output: 'false',
+      explanation: '"raceacar" is not a palindrome.'
+    },
+    {
+      input: 's = " "',
+      output: 'true',
+      explanation: 'After removing non-alphanumeric characters, s is an empty string "" which is a palindrome.'
+    }
+  ]}
+  starterCode={`function isPalindrome(s) {
+  // Write your code here
+
+}`}
+  solution={`function isPalindrome(s) {
+  // Two pointer approach: O(n) time, O(1) space
+  let left = 0;
+  let right = s.length - 1;
+
+  while (left < right) {
+    // Skip non-alphanumeric characters from left
+    while (left < right && !isAlphanumeric(s[left])) {
+      left++;
+    }
+
+    // Skip non-alphanumeric characters from right
+    while (left < right && !isAlphanumeric(s[right])) {
+      right--;
+    }
+
+    // Compare characters (case-insensitive)
+    if (s[left].toLowerCase() !== s[right].toLowerCase()) {
+      return false;
+    }
+
+    left++;
+    right--;
+  }
+
+  return true;
+}
+
+function isAlphanumeric(char) {
+  const code = char.charCodeAt(0);
+  return (code >= 48 && code <= 57) ||  // 0-9
+         (code >= 65 && code <= 90) ||  // A-Z
+         (code >= 97 && code <= 122);   // a-z
+}`}
+  testCases={[
+    {
+      input: ['A man, a plan, a canal: Panama'],
+      expected: true,
+      description: 'Classic palindrome with spaces and punctuation'
+    },
+    {
+      input: ['race a car'],
+      expected: false,
+      description: 'Not a palindrome'
+    },
+    {
+      input: [' '],
+      expected: true,
+      description: 'Empty string after removing non-alphanumeric'
+    },
+    {
+      input: ['0P'],
+      expected: false,
+      description: 'Alphanumeric: number and letter'
+    },
+    {
+      input: ['ab_a'],
+      expected: true,
+      description: 'Palindrome with underscore'
+    },
+    {
+      input: ['Madam'],
+      expected: true,
+      description: 'Simple palindrome, different case'
+    }
+  ]}
+  functionName="isPalindrome"
+/>
+
+## Solution Explanation
+
+### Approach 1: Clean String First
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(n)
+
+Clean the string, then check:
+
+```javascript
+function isPalindrome(s) {
+  // Remove non-alphanumeric and convert to lowercase
+  const cleaned = s.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+  // Compare with reversed string
+  const reversed = cleaned.split('').reverse().join('');
+  return cleaned === reversed;
+}
+```
+
+**Pros:**
+- Simple and readable
+- Easy to understand
+
+**Cons:**
+- Uses extra space for cleaned string and reversed string
+- Multiple passes through the string
+
+### Approach 2: Two Pointers (Optimal) ✅
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1)
+
+```javascript
+function isPalindrome(s) {
+  let left = 0;
+  let right = s.length - 1;
+
+  while (left < right) {
+    // Skip non-alphanumeric from left
+    while (left < right && !isAlphanumeric(s[left])) {
+      left++;
+    }
+
+    // Skip non-alphanumeric from right
+    while (left < right && !isAlphanumeric(s[right])) {
+      right--;
+    }
+
+    // Compare characters
+    if (s[left].toLowerCase() !== s[right].toLowerCase()) {
+      return false;
+    }
+
+    left++;
+    right--;
+  }
+
+  return true;
+}
+
+function isAlphanumeric(char) {
+  const code = char.charCodeAt(0);
+  return (code >= 48 && code <= 57) ||  // 0-9
+         (code >= 65 && code <= 90) ||  // A-Z
+         (code >= 97 && code <= 122);   // a-z
+}
+```
+
+**How it works:**
+
+1. **Two pointers**: Start from both ends
+2. **Skip invalid characters**: Move pointers until alphanumeric
+3. **Compare**: Check if characters match (case-insensitive)
+4. **Move inward**: Continue until pointers meet
+
+**Example walkthrough:**
+
+```
+s = "A man, a plan, a canal: Panama"
+
+     A   m a n ,   a   p l a n ,   a   c a n a l :   P a n a m a
+     ↑                                                         ↑
+   left                                                     right
+
+Step 1: 'A' vs 'a' → same (case-insensitive) ✓
+Step 2: 'm' vs 'm' → same ✓
+Step 3: 'a' vs 'a' → same ✓
+... continue until pointers meet
+```
+
+### isAlphanumeric Helper
+
+Instead of regex, we check character codes for efficiency:
+
+```javascript
+function isAlphanumeric(char) {
+  const code = char.charCodeAt(0);
+  return (code >= 48 && code <= 57) ||  // '0'-'9'
+         (code >= 65 && code <= 90) ||  // 'A'-'Z'
+         (code >= 97 && code <= 122);   // 'a'-'z'
+}
+
+// Alternative using regex (simpler but slightly slower)
+function isAlphanumeric(char) {
+  return /[a-z0-9]/i.test(char);
+}
+```
+
+### Pattern Recognition
+
+This uses the **Two Pointers** pattern:
+- ✅ Good for: Palindromes, finding pairs, in-place operations
+- ✅ Best with: Arrays, strings
+- ✅ Key benefit: O(1) space complexity
+
+## Common Mistakes
+
+❌ **Forgetting to handle empty strings:**
+```javascript
+if (!s) return true; // Empty string is a palindrome
+```
+
+❌ **Not being case-insensitive:**
+```javascript
+if (s[left] !== s[right]) // Should be toLowerCase()
+```
+
+❌ **Including non-alphanumeric in comparison:**
+```javascript
+// Should skip spaces, punctuation, etc.
+```
+
+❌ **Creating new strings (wastes space):**
+```javascript
+const cleaned = s.replace(/[^a-z0-9]/gi, ''); // O(n) space
+```
+
+## Interview Tips
+
+**Discussion points:**
+1. Ask about constraints (ASCII only? Unicode?)
+2. Clarify if empty string is palindrome
+3. Mention two approaches (clean first vs two pointers)
+4. Explain why two pointers is optimal (O(1) space)
+
+**Follow-up questions:**
+- What if string is very large? → Two pointers avoids extra memory
+- What about Unicode characters? → Use locale-aware comparison
+- Can we do it recursively? → Yes, but uses O(n) stack space
+
+## Related Problems
+
+- **Longest Palindromic Substring** (Medium)
+- **Valid Palindrome II** (Easy) - Delete one character
+- **Palindrome Linked List** (Easy) - Same concept, different data structure

@@ -1,0 +1,322 @@
+---
+sidebar_position: 4
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Contains Duplicate
+
+<AlgorithmProblem
+  title="Contains Duplicate"
+  difficulty="Easy"
+  description={`
+<p>Given an integer array <code>nums</code>, return <code>true</code> if any value appears <strong>at least twice</strong> in the array, and return <code>false</code> if every element is distinct.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 ≤ nums.length ≤ 10<sup>5</sup></li>
+  <li>-10<sup>9</sup> ≤ nums[i] ≤ 10<sup>9</sup></li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'nums = [1,2,3,1]',
+      output: 'true'
+    },
+    {
+      input: 'nums = [1,2,3,4]',
+      output: 'false'
+    },
+    {
+      input: 'nums = [1,1,1,3,3,4,3,2,4,2]',
+      output: 'true'
+    }
+  ]}
+  starterCode={`function containsDuplicate(nums) {
+  // Write your code here
+
+}`}
+  solution={`function containsDuplicate(nums) {
+  // Hash Set approach: O(n) time, O(n) space
+  const seen = new Set();
+
+  for (const num of nums) {
+    if (seen.has(num)) {
+      return true; // Found duplicate!
+    }
+    seen.add(num);
+  }
+
+  return false; // No duplicates
+}`}
+  testCases={[
+    {
+      input: [[1, 2, 3, 1]],
+      expected: true,
+      description: 'Has duplicate: 1 appears twice'
+    },
+    {
+      input: [[1, 2, 3, 4]],
+      expected: false,
+      description: 'All unique elements'
+    },
+    {
+      input: [[1, 1, 1, 3, 3, 4, 3, 2, 4, 2]],
+      expected: true,
+      description: 'Multiple duplicates'
+    },
+    {
+      input: [[1]],
+      expected: false,
+      description: 'Single element (no duplicate)'
+    },
+    {
+      input: [[1, 5, -2, 4]],
+      expected: false,
+      description: 'No duplicates with negative numbers'
+    },
+    {
+      input: [[0, 0]],
+      expected: true,
+      description: 'Duplicate zeros'
+    }
+  ]}
+  functionName="containsDuplicate"
+/>
+
+## Solution Explanation
+
+### Approach 1: Brute Force (Not Recommended)
+
+**Time Complexity:** O(n²)
+**Space Complexity:** O(1)
+
+Compare each element with every other element:
+
+```javascript
+function containsDuplicate(nums) {
+  for (let i = 0; i < nums.length; i++) {
+    for (let j = i + 1; j < nums.length; j++) {
+      if (nums[i] === nums[j]) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+```
+
+**Why avoid?** Too slow for large arrays.
+
+### Approach 2: Sorting
+
+**Time Complexity:** O(n log n)
+**Space Complexity:** O(1) or O(n) depending on sort
+
+Sort array, then check adjacent elements:
+
+```javascript
+function containsDuplicate(nums) {
+  nums.sort((a, b) => a - b);
+
+  for (let i = 0; i < nums.length - 1; i++) {
+    if (nums[i] === nums[i + 1]) {
+      return true;
+    }
+  }
+
+  return false;
+}
+```
+
+**Pros:** No extra space needed
+**Cons:** Modifies original array, slower than hash set
+
+### Approach 3: Hash Set (Optimal) ✅
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(n)
+
+Use Set to track seen numbers:
+
+```javascript
+function containsDuplicate(nums) {
+  const seen = new Set();
+
+  for (const num of nums) {
+    if (seen.has(num)) {
+      return true;
+    }
+    seen.add(num);
+  }
+
+  return false;
+}
+```
+
+**How it works:**
+
+```
+nums = [1, 2, 3, 1]
+
+i=0: num=1
+  - seen = {}
+  - not in set, add it
+  - seen = {1}
+
+i=1: num=2
+  - seen = {1}
+  - not in set, add it
+  - seen = {1, 2}
+
+i=2: num=3
+  - seen = {1, 2}
+  - not in set, add it
+  - seen = {1, 2, 3}
+
+i=3: num=1
+  - seen = {1, 2, 3}
+  - FOUND! 1 is already in set
+  - return true ✅
+```
+
+### Approach 4: One-Liner (Also Optimal)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(n)
+
+```javascript
+function containsDuplicate(nums) {
+  return new Set(nums).size !== nums.length;
+}
+```
+
+**Explanation:**
+- Create Set from array (removes duplicates)
+- If Set size < array length → duplicates exist!
+
+**Example:**
+```javascript
+nums = [1, 2, 3, 1]
+Set: {1, 2, 3}
+
+Set size = 3
+Array length = 4
+3 !== 4 → true (has duplicates)
+```
+
+## Comparison of Approaches
+
+| Approach | Time | Space | Modifies Array? | Best For |
+|----------|------|-------|----------------|----------|
+| Brute Force | O(n²) | O(1) | No | Tiny arrays only |
+| Sorting | O(n log n) | O(1)* | Yes | Memory-constrained |
+| Hash Set | O(n) | O(n) | No | **Best overall** |
+| Set size check | O(n) | O(n) | No | Quick solution |
+
+*Sort might use O(n) space depending on implementation
+
+## When to Use Each
+
+**Hash Set (Recommended):**
+- ✅ Fast: O(n) time
+- ✅ Clear code
+- ✅ Doesn't modify input
+- ❌ Uses extra space
+
+**Sorting:**
+- ✅ Saves space
+- ❌ Modifies array
+- ❌ Slower: O(n log n)
+
+**Set Size Check:**
+- ✅ Most concise
+- ✅ Same performance as hash set
+- ❌ Must process entire array (can't early return)
+
+## Pattern Recognition
+
+This demonstrates the **Hash Set pattern**:
+- ✅ Check for existence in O(1)
+- ✅ Track seen elements
+- ✅ Find duplicates/unique items
+
+**Similar problems:**
+- Happy Number
+- First Unique Character
+- Contains Duplicate II (within k distance)
+
+## Common Mistakes
+
+❌ **Forgetting Set.has() returns boolean:**
+```javascript
+if (seen.has(num) === true) // Redundant
+if (seen.has(num))          // Correct
+```
+
+❌ **Using array.includes() instead of Set:**
+```javascript
+// O(n) per lookup → O(n²) total
+if (seen.includes(num)) // Slow!
+
+// O(1) per lookup → O(n) total
+if (seen.has(num))      // Fast!
+```
+
+❌ **Checking set size without considering all elements:**
+```javascript
+// This processes entire array even if duplicate is early
+return new Set(nums).size !== nums.length;
+
+// Better: early return when found
+for (const num of nums) {
+  if (seen.has(num)) return true;
+  seen.add(num);
+}
+```
+
+## Interview Tips
+
+**What to mention:**
+1. Start with brute force, explain it's O(n²)
+2. Suggest hash set for O(n) solution
+3. Mention Set size approach as alternative
+4. Discuss time/space tradeoffs
+
+**Follow-up questions:**
+
+**Q: What if you can't use extra space?**
+A: Sort the array (modifies input) and check adjacent elements.
+
+**Q: What if duplicates must be within k indices of each other?**
+A: Contains Duplicate II - use sliding window with hash set.
+
+**Q: What if we need to find the duplicate element itself?**
+A: Return the element instead of true.
+
+## Edge Cases
+
+```javascript
+// Single element
+[1] → false
+
+// Two identical elements
+[1, 1] → true
+
+// All unique
+[1, 2, 3, 4, 5] → false
+
+// All same
+[5, 5, 5, 5] → true
+
+// With negatives
+[-1, -2, -3, -1] → true
+
+// With zeros
+[0, 1, 2, 0] → true
+```
+
+## Related Problems
+
+- **Contains Duplicate II** (Easy) - Within k distance
+- **Contains Duplicate III** (Hard) - Within k distance, value difference at most t
+- **Find the Duplicate Number** (Medium) - Array contains n+1 integers, one duplicate
