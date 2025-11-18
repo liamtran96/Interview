@@ -1,0 +1,131 @@
+---
+sidebar_position: 5
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Valid Anagram
+
+<AlgorithmProblem
+  title="Valid Anagram"
+  difficulty="Easy"
+  description={`
+<p>Given two strings <code>s</code> and <code>t</code>, return <code>true</code> if <code>t</code> is an anagram of <code>s</code>, and <code>false</code> otherwise.</p>
+<p>An <strong>anagram</strong> is a word or phrase formed by rearranging the letters of a different word or phrase, typically using all the original letters exactly once.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 ≤ s.length, t.length ≤ 5 × 10<sup>4</sup></li>
+  <li>s and t consist of lowercase English letters.</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 's = "anagram", t = "nagaram"',
+      output: 'true'
+    },
+    {
+      input: 's = "rat", t = "car"',
+      output: 'false'
+    }
+  ]}
+  starterCode={`function isAnagram(s, t) {
+  // Write your code here
+
+}`}
+  solution={`function isAnagram(s, t) {
+  // Hash map approach: O(n) time, O(1) space (26 letters max)
+  if (s.length !== t.length) return false;
+
+  const count = {};
+
+  // Count characters in s
+  for (const char of s) {
+    count[char] = (count[char] || 0) + 1;
+  }
+
+  // Subtract characters from t
+  for (const char of t) {
+    if (!count[char]) return false;
+    count[char]--;
+  }
+
+  return true;
+}`}
+  testCases={[
+    {
+      input: ['anagram', 'nagaram'],
+      expected: true,
+      description: 'Basic anagram test'
+    },
+    {
+      input: ['rat', 'car'],
+      expected: false,
+      description: 'Not an anagram'
+    },
+    {
+      input: ['a', 'a'],
+      expected: true,
+      description: 'Single character'
+    },
+    {
+      input: ['ab', 'ba'],
+      expected: true,
+      description: 'Two characters swapped'
+    },
+    {
+      input: ['abc', 'abcd'],
+      expected: false,
+      description: 'Different lengths'
+    }
+  ]}
+  functionName="isAnagram"
+/>
+
+## Solution Explanation
+
+### Approach 1: Sorting
+
+**Time Complexity:** O(n log n)
+**Space Complexity:** O(1)
+
+```javascript
+function isAnagram(s, t) {
+  if (s.length !== t.length) return false;
+
+  const sortedS = s.split('').sort().join('');
+  const sortedT = t.split('').sort().join('');
+
+  return sortedS === sortedT;
+}
+```
+
+### Approach 2: Hash Map (Optimal) ✅
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1) - max 26 letters
+
+```javascript
+function isAnagram(s, t) {
+  if (s.length !== t.length) return false;
+
+  const count = {};
+
+  for (const char of s) {
+    count[char] = (count[char] || 0) + 1;
+  }
+
+  for (const char of t) {
+    if (!count[char]) return false;
+    count[char]--;
+  }
+
+  return true;
+}
+```
+
+## Interview Tips
+
+1. Ask if input contains only lowercase letters or Unicode
+2. Mention sorting approach first, then optimize to hash map
+3. Early return if lengths differ
+4. Discuss space complexity: O(1) for fixed alphabet size
