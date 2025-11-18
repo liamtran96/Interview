@@ -83,8 +83,8 @@ function UserForm() {
   return (
     <form>
       <input value={name} onChange={e => setName(e.target.value)} />
-      <input value={email} onChange={e => setEmail(e.target.value)} />
-      <input value={age} onChange={e => setAge(e.target.value)} />
+      <input type="email" value={email} onChange={e => setEmail(e.target.value)} />
+      <input type="number" value={age} onChange={e => setAge(Number(e.target.value))} />
     </form>
   );
 }

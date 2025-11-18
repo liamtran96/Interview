@@ -419,17 +419,18 @@ const found = await User.findOne({ email: 'john@example.com' });
 **Solution:**
 
 ```javascript
+// Check hobbies array exists and is not empty
 db.users.find({
   status: "active",
   age: { $gt: 25 },
-  hobbies: { $exists: true, $not: { $size: 0 } }
+  hobbies: { $exists: true, $ne: [] }
 }).sort({ age: 1 });
 
-// Alternative with $ne
+// Alternative: Check if first element exists
 db.users.find({
   status: "active",
   age: { $gt: 25 },
-  hobbies: { $ne: [] }
+  "hobbies.0": { $exists: true }
 }).sort({ age: 1 });
 ```
 
