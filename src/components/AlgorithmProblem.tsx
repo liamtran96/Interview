@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sandpack, SandpackProvider, SandpackLayout, SandpackCodeEditor, SandpackPreview } from '@codesandbox/sandpack-react';
+import { Sandpack } from '@codesandbox/sandpack-react';
 
 interface TestCase {
   input: any[];
@@ -147,6 +147,8 @@ if (passed === testCases.length) {
             showTabs: false,
             showLineNumbers: true,
             editorHeight: 400,
+            showConsole: true,
+            showConsoleButton: true,
           }}
           files={{
             '/index.js': testRunnerCode,
