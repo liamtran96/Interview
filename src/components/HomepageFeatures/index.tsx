@@ -11,32 +11,32 @@ type FeatureItem = {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Easy to Use',
+    title: 'Beginner to Senior',
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Comprehensive interview questions structured from basic fundamentals
+        to advanced concepts, helping you progress from beginner to senior level.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
+    title: 'Official Documentation',
     Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        All content is based on official documentation and covers the latest versions
+        of JavaScript, React, Node.js, MongoDB, Tailwind CSS, and Next.js 14+.
       </>
     ),
   },
   {
-    title: 'Powered by React',
+    title: 'Practical Examples',
     Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Learn with real-world code examples, common interview questions,
+        best practices, and hands-on coding challenges for each technology.
       </>
     ),
   },

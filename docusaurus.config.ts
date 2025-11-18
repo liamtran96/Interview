@@ -5,8 +5,8 @@ import type * as Preset from "@docusaurus/preset-classic";
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: "My inteview question site",
-  tagline: "Dinosaurs are cool",
+  title: "Fullstack Interview Preparation",
+  tagline: "Master React 19, Next.js 16, Tailwind v4, Node.js & More - From Beginner to Senior",
   favicon: "img/favicon.ico",
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
