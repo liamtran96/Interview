@@ -84,6 +84,11 @@ const config: Config = {
           position: "left",
           label: "Interview Question",
         },
+        {
+          to: "/docs/Algorithms/introduction",
+          label: "Algorithms",
+          position: "left"
+        },
         { to: "/blog", label: "Blog", position: "left" },
         {
           href: "https://github.com/facebook/docusaurus",
