@@ -141,15 +141,18 @@ export default function AlgorithmProblem({
 
   return (
     <div style={{ marginTop: '2rem' }}>
-      {/* Problem Header */}
+      {/* Title Bar */}
       <div style={{
-        padding: '1.5rem',
+        padding: '1rem 1.5rem',
         backgroundColor: 'var(--ifm-background-surface-color)',
-        borderRadius: '8px',
-        marginBottom: '1rem',
-        border: '1px solid var(--ifm-color-emphasis-300)'
+        borderRadius: '8px 8px 0 0',
+        border: '1px solid var(--ifm-color-emphasis-300)',
+        borderBottom: 'none',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <h2 style={{ margin: 0 }}>{title}</h2>
           <span style={{
             padding: '0.25rem 0.75rem',
@@ -163,49 +166,25 @@ export default function AlgorithmProblem({
           </span>
         </div>
 
-        {/* Description */}
-        <div dangerouslySetInnerHTML={{ __html: description }} />
-
-        {/* Examples */}
-        {examples.length > 0 && (
-          <div style={{ marginTop: '1.5rem' }}>
-            <h3>Examples:</h3>
-            {examples.map((example, idx) => (
-              <div key={idx} style={{
-                marginBottom: '1rem',
-                padding: '1rem',
-                backgroundColor: 'var(--ifm-code-background)',
+        {/* Action Buttons */}
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          {solution && (
+            <button
+              onClick={handleShowSolution}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: showSolution ? '#ef4743' : '#ffc01e',
+                color: 'white',
+                border: 'none',
                 borderRadius: '4px',
-                fontFamily: 'monospace'
-              }}>
-                <div><strong>Input:</strong> {example.input}</div>
-                <div><strong>Output:</strong> {example.output}</div>
-                {example.explanation && <div><strong>Explanation:</strong> {example.explanation}</div>}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Code Editor */}
-      <div style={{
-        border: '1px solid var(--ifm-color-emphasis-300)',
-        borderRadius: '8px',
-        overflow: 'hidden',
-        marginBottom: '1rem'
-      }}>
-        {/* Header with Run Button */}
-        <div style={{
-          padding: '0.75rem 1rem',
-          backgroundColor: 'var(--ifm-background-surface-color)',
-          borderBottom: '1px solid var(--ifm-color-emphasis-300)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <span style={{ fontWeight: 'bold', fontSize: '0.95rem' }}>
-            💻 Code Editor
-          </span>
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                fontSize: '0.875rem'
+              }}
+            >
+              {showSolution ? '👁️ Hide Solution' : '💡 Solution'}
+            </button>
+          )}
           <button
             onClick={runTests}
             disabled={isRunning}
@@ -217,36 +196,87 @@ export default function AlgorithmProblem({
               borderRadius: '4px',
               cursor: isRunning ? 'not-allowed' : 'pointer',
               fontWeight: 'bold',
-              fontSize: '0.95rem',
+              fontSize: '0.9rem',
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem'
             }}
           >
-            {isRunning ? '⏳ Running...' : '▶ Run Code'}
+            {isRunning ? '⏳ Running...' : '▶ Run'}
           </button>
         </div>
+      </div>
 
-        {/* Monaco Editor */}
-        <Editor
-          height="400px"
-          defaultLanguage="javascript"
-          defaultValue={starterCode}
-          value={code}
-          onChange={(value) => setCode(value || '')}
-          onMount={handleEditorDidMount}
-          theme="vs-dark"
-          options={{
-            minimap: { enabled: false },
-            fontSize: 14,
-            lineNumbers: 'on',
-            roundedSelection: false,
-            scrollBeyondLastLine: false,
-            automaticLayout: true,
-            tabSize: 2,
-            wordWrap: 'on',
-          }}
-        />
+      {/* Two Column Layout: Problem Description | Code Editor */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: 0,
+        border: '1px solid var(--ifm-color-emphasis-300)',
+        borderRadius: '0 0 8px 8px',
+        overflow: 'hidden',
+        minHeight: '600px'
+      }}>
+        {/* Left Column: Problem Description */}
+        <div style={{
+          padding: '1.5rem',
+          backgroundColor: 'var(--ifm-background-surface-color)',
+          overflowY: 'auto',
+          maxHeight: '600px',
+          borderRight: '1px solid var(--ifm-color-emphasis-300)'
+        }}>
+          {/* Description */}
+          <div dangerouslySetInnerHTML={{ __html: description }} />
+
+          {/* Examples */}
+          {examples.length > 0 && (
+            <div style={{ marginTop: '1.5rem' }}>
+              <h3>Examples:</h3>
+              {examples.map((example, idx) => (
+                <div key={idx} style={{
+                  marginBottom: '1rem',
+                  padding: '1rem',
+                  backgroundColor: 'var(--ifm-code-background)',
+                  borderRadius: '4px',
+                  fontFamily: 'monospace',
+                  fontSize: '0.875rem'
+                }}>
+                  <div><strong>Input:</strong> {example.input}</div>
+                  <div><strong>Output:</strong> {example.output}</div>
+                  {example.explanation && <div style={{ marginTop: '0.5rem' }}><strong>Explanation:</strong> {example.explanation}</div>}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Right Column: Code Editor */}
+        <div style={{
+          backgroundColor: '#1e1e1e',
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
+          <Editor
+            height="600px"
+            defaultLanguage="javascript"
+            defaultValue={starterCode}
+            value={code}
+            onChange={(value) => setCode(value || '')}
+            onMount={handleEditorDidMount}
+            theme="vs-dark"
+            options={{
+              minimap: { enabled: false },
+              fontSize: 14,
+              lineNumbers: 'on',
+              roundedSelection: false,
+              scrollBeyondLastLine: false,
+              automaticLayout: true,
+              tabSize: 2,
+              wordWrap: 'on',
+              padding: { top: 16 }
+            }}
+          />
+        </div>
       </div>
 
       {/* Test Results */}
@@ -255,6 +285,7 @@ export default function AlgorithmProblem({
           border: '1px solid var(--ifm-color-emphasis-300)',
           borderRadius: '8px',
           overflow: 'hidden',
+          marginTop: '1rem',
           marginBottom: '1rem'
         }}>
           {/* Results Header */}
@@ -362,28 +393,9 @@ export default function AlgorithmProblem({
         </div>
       )}
 
-      {/* Action Buttons */}
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-        {solution && (
-          <button
-            onClick={handleShowSolution}
-            style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: showSolution ? '#ef4743' : '#ffc01e',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontWeight: 'bold'
-            }}
-          >
-            {showSolution ? '👁️ Hide Solution' : '💡 Show Solution'}
-          </button>
-        )}
-      </div>
-
       {/* Instructions */}
       <div style={{
+        marginTop: '1rem',
         padding: '1rem',
         backgroundColor: 'var(--ifm-alert-background-color)',
         borderRadius: '4px',
@@ -391,11 +403,12 @@ export default function AlgorithmProblem({
       }}>
         <strong>💡 How to use:</strong>
         <ol style={{ marginBottom: 0, marginTop: '0.5rem' }}>
-          <li>Write your solution in the <strong>Code Editor</strong> (Monaco - same as VS Code!)</li>
-          <li>Click <strong>"▶ Run Code"</strong> to test your solution</li>
+          <li>Read the problem on the <strong>left</strong></li>
+          <li>Write your solution in the <strong>Code Editor</strong> on the right (Monaco - same as VS Code!)</li>
+          <li>Click <strong>"▶ Run"</strong> in the top-right to test your solution</li>
           <li>See detailed results below - ✅ = Passed, ❌ = Failed</li>
           <li>If tests fail, check the Expected vs Got values</li>
-          <li>Click <strong>"Show Solution"</strong> to see the optimal approach</li>
+          <li>Click <strong>"💡 Solution"</strong> to see the optimal approach</li>
         </ol>
       </div>
     </div>
