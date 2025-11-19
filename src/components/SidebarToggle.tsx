@@ -8,10 +8,12 @@ export default function SidebarToggle(): JSX.Element | null {
   useEffect(() => {
     if (!ExecutionEnvironment.canUseDOM) return;
 
-    // Apply sidebar hiding
+    // Apply sidebar hiding and expand content
     const docContainer = document.querySelector('.main-wrapper') as HTMLElement;
     const leftSidebar = document.querySelector('aside.theme-doc-sidebar-container') as HTMLElement;
     const rightSidebar = document.querySelector('.theme-doc-toc-desktop') as HTMLElement;
+    const docItemWrapper = document.querySelector('.theme-doc-markdown') as HTMLElement;
+    const docItemContainer = document.querySelector('article') as HTMLElement;
 
     if (hideLeftSidebar && leftSidebar) {
       leftSidebar.style.display = 'none';
@@ -29,6 +31,23 @@ export default function SidebarToggle(): JSX.Element | null {
       rightSidebar.style.display = 'none';
     } else if (rightSidebar) {
       rightSidebar.style.display = '';
+    }
+
+    // Expand content area when sidebars are hidden
+    if (docItemWrapper) {
+      if (hideLeftSidebar || hideRightSidebar) {
+        docItemWrapper.style.maxWidth = '100%';
+      } else {
+        docItemWrapper.style.maxWidth = '';
+      }
+    }
+
+    if (docItemContainer) {
+      if (hideLeftSidebar || hideRightSidebar) {
+        docItemContainer.style.maxWidth = '100%';
+      } else {
+        docItemContainer.style.maxWidth = '';
+      }
     }
   }, [hideLeftSidebar, hideRightSidebar]);
 
