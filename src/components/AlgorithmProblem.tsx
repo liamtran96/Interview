@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import Editor from '@monaco-editor/react';
+import SidebarToggle from './SidebarToggle';
 
 interface TestCase {
   input: any[];
@@ -141,6 +142,9 @@ export default function AlgorithmProblem({
 
   return (
     <div style={{ marginTop: '2rem' }}>
+      {/* Sidebar Toggle Buttons */}
+      <SidebarToggle />
+
       {/* Title Bar */}
       <div style={{
         padding: '1rem 1.5rem',
