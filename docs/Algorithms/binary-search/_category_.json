@@ -1,0 +1,9 @@
+{
+  "label": "Binary Search",
+  "position": 5,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "description": "Achieve O(log n) search efficiency through binary search variations."
+  }
+}

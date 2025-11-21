@@ -1,0 +1,9 @@
+{
+  "label": "Trees",
+  "position": 7,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "description": "Explore binary trees, BSTs, and tree traversal algorithms."
+  }
+}
