@@ -8,6 +8,9 @@
 .docusaurus
 .cache-loader
 
+# Worktrees
+.worktrees/
+
 # Misc
 .DS_Store
 .env.local
