@@ -1,0 +1,347 @@
+---
+sidebar_position: 7
+difficulty: Medium
+tags: [arrays, string, design, google, meta]
+leetcode_url: https://leetcode.com/problems/encode-and-decode-strings/
+companies: [Google, Meta, Amazon, Apple, Microsoft]
+pattern: "Arrays & Hashing"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Encode and Decode Strings
+
+<AlgorithmProblem
+  title="Encode and Decode Strings"
+  difficulty="Medium"
+  description={`
+<p>Design an algorithm to encode a list of strings to a single string. The encoded string is then decoded back to the original list of strings.</p>
+<p>Please implement <code>encode</code> and <code>decode</code> functions.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>0 ≤ strs.length ≤ 200</li>
+  <li>0 ≤ strs[i].length ≤ 200</li>
+  <li>strs[i] contains any possible characters out of 256 valid ASCII characters.</li>
+</ul>
+<p><strong>Note:</strong> The string may contain any possible characters including non-ASCII characters. Your encode/decode should work for ANY possible characters.</p>
+`}
+  examples={[
+    {
+      input: 'strs = ["Hello","World"]',
+      output: '["Hello","World"]',
+      explanation: 'encode: "Hello" and "World" → single string. decode: single string → ["Hello","World"]'
+    },
+    {
+      input: 'strs = [""]',
+      output: '[""]',
+      explanation: 'Empty string should be handled correctly'
+    },
+    {
+      input: 'strs = ["#","##","###"]',
+      output: '["#","##","###"]',
+      explanation: 'Special characters should be preserved'
+    }
+  ]}
+  starterCode={`class Codec {
+  encode(strs) {
+    // Write your code here
+
+  }
+
+  decode(s) {
+    // Write your code here
+
+  }
+}
+
+// Usage:
+// const codec = new Codec();
+// const encoded = codec.encode(["Hello", "World"]);
+// const decoded = codec.decode(encoded);`}
+  solution={`class Codec {
+  encode(strs) {
+    // Length-prefix encoding: "length#string"
+    return strs.map(str => \`\${str.length}#\${str}\`).join('');
+  }
+
+  decode(s) {
+    const result = [];
+    let i = 0;
+
+    while (i < s.length) {
+      // Find the delimiter '#'
+      let j = i;
+      while (s[j] !== '#') {
+        j++;
+      }
+
+      // Extract length
+      const length = parseInt(s.slice(i, j));
+
+      // Extract string using length
+      const str = s.slice(j + 1, j + 1 + length);
+      result.push(str);
+
+      // Move to next encoded string
+      i = j + 1 + length;
+    }
+
+    return result;
+  }
+}`}
+  testCases={[
+    {
+      input: [["Hello","World"]],
+      expected: ["Hello","World"],
+      description: 'Basic case with two strings'
+    },
+    {
+      input: [[""]],
+      expected: [""],
+      description: 'Single empty string'
+    },
+    {
+      input: [["#","##","###"]],
+      expected: ["#","##","###"],
+      description: 'Strings containing delimiter character'
+    },
+    {
+      input: [["abc","def","ghi"]],
+      expected: ["abc","def","ghi"],
+      description: 'Multiple same-length strings'
+    },
+    {
+      input: [["a","ab","abc"]],
+      expected: ["a","ab","abc"],
+      description: 'Strings of different lengths'
+    },
+    {
+      input: [[]],
+      expected: [],
+      description: 'Empty array'
+    },
+    {
+      input: [["","",""]],
+      expected: ["","",""],
+      description: 'Multiple empty strings'
+    }
+  ]}
+  functionName="Codec"
+  isClass={true}
+/>
+
+## Solution Explanation
+
+### Approach 1: Delimiter-Based (Doesn't Work) ❌
+
+**Problem:** Cannot handle strings containing the delimiter
+
+```javascript
+class Codec {
+  encode(strs) {
+    return strs.join('#'); // What if string contains '#'?
+  }
+
+  decode(s) {
+    return s.split('#'); // Will split incorrectly!
+  }
+}
+
+// Example failure:
+encode(["a#b", "c"]) → "a#b#c"
+decode("a#b#c") → ["a", "b", "c"] // Wrong! Should be ["a#b", "c"]
+```
+
+### Approach 2: Escaping Special Characters
+
+**Problem:** Complex to handle all possible escape sequences
+
+```javascript
+class Codec {
+  encode(strs) {
+    // Need to escape delimiter and escape character itself
+    return strs.map(s => s.replace(/\\/g, '\\\\').replace(/#/g, '\\#')).join('#');
+  }
+
+  decode(s) {
+    // Complex parsing with escape handling
+    // What if string contains "\\#" originally?
+  }
+}
+```
+
+### Approach 3: Length-Prefix Encoding (Optimal) ✅
+
+**Time:** O(n) where n = total characters
+**Space:** O(n) for encoded string
+
+```javascript
+class Codec {
+  encode(strs) {
+    // Format: "length#string" for each string
+    return strs.map(str => `${str.length}#${str}`).join('');
+  }
+
+  decode(s) {
+    const result = [];
+    let i = 0;
+
+    while (i < s.length) {
+      // Find delimiter
+      let j = i;
+      while (s[j] !== '#') {
+        j++;
+      }
+
+      // Parse length
+      const length = parseInt(s.slice(i, j));
+
+      // Extract exact string using length
+      const str = s.slice(j + 1, j + 1 + length);
+      result.push(str);
+
+      // Move pointer
+      i = j + 1 + length;
+    }
+
+    return result;
+  }
+}
+```
+
+**How it works:**
+
+**Encoding:**
+- For each string, prepend its length followed by '#'
+- Example: `["abc", "de"]` → `"3#abc2#de"`
+
+**Decoding:**
+- Read length until '#'
+- Extract exactly that many characters
+- Repeat until end of encoded string
+
+**Example walkthrough:**
+
+```
+Encode: ["Hello", "World"]
+
+"Hello" → length 5 → "5#Hello"
+"World" → length 5 → "5#World"
+Result: "5#Hello5#World"
+
+Decode: "5#Hello5#World"
+
+i=0: read "5", skip '#', extract 5 chars "Hello"
+     i moves to 7
+i=7: read "5", skip '#', extract 5 chars "World"
+     i moves to 13 (end)
+
+Result: ["Hello", "World"]
+```
+
+**Why it works with special characters:**
+
+```
+Encode: ["a#b", "c"]
+
+"a#b" → length 3 → "3#a#b"
+"c" → length 1 → "1#c"
+Result: "3#a#b1#c"
+
+Decode: "3#a#b1#c"
+
+i=0: read "3", skip '#', extract 3 chars "a#b" (uses length, not delimiter!)
+     i moves to 5
+i=5: read "1", skip '#', extract 1 char "c"
+
+Result: ["a#b", "c"] ✓
+```
+
+### Alternative: Fixed-Length Prefix
+
+```javascript
+class Codec {
+  encode(strs) {
+    return strs.map(s => {
+      // Use 4-byte length prefix
+      const len = s.length.toString().padStart(4, '0');
+      return len + s;
+    }).join('');
+  }
+
+  decode(s) {
+    const result = [];
+    let i = 0;
+
+    while (i < s.length) {
+      const length = parseInt(s.slice(i, i + 4));
+      const str = s.slice(i + 4, i + 4 + length);
+      result.push(str);
+      i += 4 + length;
+    }
+
+    return result;
+  }
+}
+```
+
+## Common Mistakes
+
+❌ Using simple delimiter without escaping
+```javascript
+encode(strs) {
+  return strs.join(','); // Fails if string contains ','
+}
+```
+
+✅ Use length-prefix encoding
+```javascript
+encode(strs) {
+  return strs.map(s => `${s.length}#${s}`).join('');
+}
+```
+
+❌ Not handling empty strings
+```javascript
+// Encoding "" might produce "0#" which could be confused
+```
+
+✅ Length-prefix handles empty strings naturally
+```javascript
+encode([""]) → "0#"
+decode("0#") → [""] // Extracts 0 characters
+```
+
+❌ Splitting by delimiter in decode
+```javascript
+decode(s) {
+  return s.split('#'); // Ignores length information!
+}
+```
+
+✅ Use length to extract exact substring
+```javascript
+const str = s.slice(j + 1, j + 1 + length);
+```
+
+## Interview Tips
+
+**When discussing:**
+1. Start with simple delimiter approach and explain its flaw
+2. Discuss why escaping is complex and error-prone
+3. Introduce length-prefix encoding as elegant solution
+4. Walk through encoding and decoding with examples
+5. Show how it handles special characters including delimiter itself
+
+**Follow-up questions:**
+- What if strings are very long? → Use variable-length encoding for length field
+- Can you make it more compact? → Use binary encoding instead of ASCII
+- How to handle Unicode? → JavaScript strings already handle it
+- Is this secure? → No encryption, just encoding
+- What about network transmission? → Base64 encode if needed
+
+**Key insights:**
+- Length-prefix encoding is standard in protocols (HTTP, TCP)
+- Delimiter-based approaches fail with arbitrary data
+- Time complexity is optimal O(n) - must read all characters
+- Space complexity is O(n) - must store encoded result
