@@ -1,0 +1,404 @@
+---
+sidebar_position: 8
+difficulty: Hard
+tags: [two-pointers, array, dynamic-programming, stack, google, amazon]
+leetcode_url: https://leetcode.com/problems/trapping-rain-water/
+companies: [Google, Amazon, Meta, Microsoft, Apple]
+pattern: "Two Pointers"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Trapping Rain Water
+
+<AlgorithmProblem
+  title="Trapping Rain Water"
+  difficulty="Hard"
+  description={`
+<p>Given <code>n</code> non-negative integers representing an elevation map where the width of each bar is <code>1</code>, compute how much water it can trap after raining.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>n == height.length</li>
+  <li>1 ≤ n ≤ 2 × 10<sup>4</sup></li>
+  <li>0 ≤ height[i] ≤ 10<sup>5</sup></li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'height = [0,1,0,2,1,0,1,3,2,1,2,1]',
+      output: '6',
+      explanation: 'The elevation map traps 6 units of rain water between the bars.'
+    },
+    {
+      input: 'height = [4,2,0,3,2,5]',
+      output: '9',
+      explanation: 'Water trapped at each position: 0 + 2 + 4 + 1 + 2 + 0 = 9'
+    }
+  ]}
+  starterCode={`function trap(height) {
+  // Write your code here
+
+}`}
+  solution={`function trap(height) {
+  // Two-pointer approach: O(n) time, O(1) space
+  if (height.length === 0) return 0;
+
+  let left = 0;
+  let right = height.length - 1;
+  let leftMax = 0;
+  let rightMax = 0;
+  let totalWater = 0;
+
+  while (left < right) {
+    if (height[left] < height[right]) {
+      // Process left side
+      if (height[left] >= leftMax) {
+        leftMax = height[left];
+      } else {
+        totalWater += leftMax - height[left];
+      }
+      left++;
+    } else {
+      // Process right side
+      if (height[right] >= rightMax) {
+        rightMax = height[right];
+      } else {
+        totalWater += rightMax - height[right];
+      }
+      right--;
+    }
+  }
+
+  return totalWater;
+}`}
+  testCases={[
+    {
+      input: [[0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1]],
+      expected: 6,
+      description: 'Standard case with multiple valleys'
+    },
+    {
+      input: [[4, 2, 0, 3, 2, 5]],
+      expected: 9,
+      description: 'Deep valley case'
+    },
+    {
+      input: [[3, 0, 2, 0, 4]],
+      expected: 7,
+      description: 'Multiple gaps'
+    },
+    {
+      input: [[0, 1, 0, 1, 0]],
+      expected: 1,
+      description: 'Small valleys'
+    },
+    {
+      input: [[5, 4, 3, 2, 1]],
+      expected: 0,
+      description: 'Descending - no water trapped'
+    },
+    {
+      input: [[1, 2, 3, 4, 5]],
+      expected: 0,
+      description: 'Ascending - no water trapped'
+    }
+  ]}
+  functionName="trap"
+/>
+
+## Solution Explanation
+
+:::info Multiple Approaches
+This problem can be solved using different patterns. See also: [Trapping Rain Water (Arrays & Hashing)](/docs/Algorithms/arrays-hashing/trapping-rain-water) for alternative approaches including dynamic programming and stack-based solutions.
+
+This page focuses specifically on the **Two Pointers** approach, which is optimal for space complexity.
+:::
+
+### Core Concept: Water Level at Each Position
+
+Water trapped at position i:
+```
+water[i] = min(leftMax[i], rightMax[i]) - height[i]
+```
+
+Where:
+- `leftMax[i]`: Tallest bar to the left of i (including i)
+- `rightMax[i]`: Tallest bar to the right of i (including i)
+- Water level is limited by the shorter of the two walls
+
+### Approach 1: Brute Force (Not Recommended)
+
+**Time Complexity:** O(n²)
+**Space Complexity:** O(1)
+
+For each position, find max left and right heights:
+
+```javascript
+function trap(height) {
+  let totalWater = 0;
+
+  for (let i = 0; i < height.length; i++) {
+    // Find max height to the left
+    let leftMax = 0;
+    for (let j = 0; j <= i; j++) {
+      leftMax = Math.max(leftMax, height[j]);
+    }
+
+    // Find max height to the right
+    let rightMax = 0;
+    for (let j = i; j < height.length; j++) {
+      rightMax = Math.max(rightMax, height[j]);
+    }
+
+    // Calculate water at this position
+    totalWater += Math.min(leftMax, rightMax) - height[i];
+  }
+
+  return totalWater;
+}
+```
+
+**Why not use this?**
+- O(n²) time is too slow
+- Recalculates max values repeatedly
+- Not optimal for large inputs
+
+### Approach 2: Dynamic Programming
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(n)
+
+Precompute max heights for all positions:
+
+```javascript
+function trap(height) {
+  const n = height.length;
+  if (n === 0) return 0;
+
+  const leftMax = new Array(n);
+  const rightMax = new Array(n);
+
+  // Compute leftMax for each position
+  leftMax[0] = height[0];
+  for (let i = 1; i < n; i++) {
+    leftMax[i] = Math.max(leftMax[i - 1], height[i]);
+  }
+
+  // Compute rightMax for each position
+  rightMax[n - 1] = height[n - 1];
+  for (let i = n - 2; i >= 0; i--) {
+    rightMax[i] = Math.max(rightMax[i + 1], height[i]);
+  }
+
+  // Calculate total water
+  let totalWater = 0;
+  for (let i = 0; i < n; i++) {
+    totalWater += Math.min(leftMax[i], rightMax[i]) - height[i];
+  }
+
+  return totalWater;
+}
+```
+
+**Good, but:**
+- Uses O(n) extra space for arrays
+- Can be optimized to O(1) space
+
+### Approach 3: Two Pointers (Optimal) ✅
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1)
+
+Use two pointers to avoid storing max arrays:
+
+```javascript
+function trap(height) {
+  if (height.length === 0) return 0;
+
+  let left = 0;
+  let right = height.length - 1;
+  let leftMax = 0;
+  let rightMax = 0;
+  let totalWater = 0;
+
+  while (left < right) {
+    if (height[left] < height[right]) {
+      // Process left side
+      if (height[left] >= leftMax) {
+        leftMax = height[left];  // Update max
+      } else {
+        totalWater += leftMax - height[left];  // Add water
+      }
+      left++;
+    } else {
+      // Process right side
+      if (height[right] >= rightMax) {
+        rightMax = height[right];  // Update max
+      } else {
+        totalWater += rightMax - height[right];  // Add water
+      }
+      right--;
+    }
+  }
+
+  return totalWater;
+}
+```
+
+**How it works:**
+
+1. **Two pointers**: Start from both ends
+2. **Track max heights**: leftMax and rightMax
+3. **Process smaller side**: Move pointer from smaller height
+4. **Calculate water**: If current < max, add water
+5. **Update max**: If current ≥ max, update max
+
+**Example walkthrough:**
+
+```
+height = [4, 2, 0, 3, 2, 5]
+
+Initial:
+[4, 2, 0, 3, 2, 5]
+ L              R
+left=0, right=5
+leftMax=0, rightMax=0, water=0
+
+Step 1: height[left]=4 < height[right]=5
+        height[left]=4 ≥ leftMax=0
+        → Update leftMax=4, no water
+        → left=1
+
+Step 2: height[left]=2 < height[right]=5
+        height[left]=2 < leftMax=4
+        → Water = 4 - 2 = 2
+        → water=2, left=2
+
+Step 3: height[left]=0 < height[right]=5
+        height[left]=0 < leftMax=4
+        → Water = 4 - 0 = 4
+        → water=6, left=3
+
+Step 4: height[left]=3 < height[right]=5
+        height[left]=3 < leftMax=4
+        → Water = 4 - 3 = 1
+        → water=7, left=4
+
+Step 5: height[left]=2 < height[right]=5
+        height[left]=2 < leftMax=4
+        → Water = 4 - 2 = 2
+        → water=9, left=5
+
+left == right → stop
+
+Total water = 9 ✅
+```
+
+### Why Two Pointers Works
+
+**Key insight:** Water level at any position is determined by `min(leftMax, rightMax)`.
+
+**When height[left] < height[right]:**
+- We know rightMax ≥ height[right] > height[left]
+- So min(leftMax, rightMax) = leftMax
+- We can safely calculate water on left side
+- Move left pointer
+
+**When height[right] ≤ height[left]:**
+- We know leftMax ≥ height[left] ≥ height[right]
+- So min(leftMax, rightMax) = rightMax
+- We can safely calculate water on right side
+- Move right pointer
+
+**Visual understanding:**
+```
+[4, 2, 0, 3, 2, 5]
+ ^              ^
+ L              R
+
+Water at position 1: min(leftMax=4, rightMax≥5) - 2
+                   = min(4, ?) - 2
+
+Since height[L]=4 < height[R]=5, we know:
+- rightMax ≥ 5 > 4
+- So min(4, rightMax) = 4
+- Water = 4 - 2 = 2 ✅
+```
+
+## Common Mistakes
+
+❌ **Processing wrong side:**
+```javascript
+if (height[left] < height[right]) {
+  // Process right side  // Wrong! Should process left
+}
+```
+
+❌ **Not updating max before calculating water:**
+```javascript
+// Should check if current height updates max first
+totalWater += leftMax - height[left];  // leftMax might be stale
+```
+
+❌ **Adding water when updating max:**
+```javascript
+if (height[left] >= leftMax) {
+  leftMax = height[left];
+  totalWater += leftMax - height[left];  // Wrong! This adds 0
+}
+```
+
+❌ **Using left <= right instead of left < right:**
+```javascript
+while (left <= right)  // Should be left < right
+```
+
+❌ **Not handling empty array:**
+```javascript
+// Missing: if (height.length === 0) return 0;
+```
+
+## Interview Tips
+
+**Discussion points:**
+1. Start by explaining the core concept (water level formula)
+2. Discuss brute force approach (O(n²))
+3. Optimize to DP approach (O(n) space)
+4. Show how two pointers reduces to O(1) space
+5. Walk through example carefully
+
+**Follow-up questions:**
+- Why does two pointers work? → Explain the min(leftMax, rightMax) insight
+- What if bars have different widths? → Need to account for width in calculation
+- Can we use stack? → Yes, see Arrays & Hashing version
+- What's the trade-off between approaches? → Time vs space, readability
+
+**Key insights to mention:**
+- Water level limited by shorter wall
+- Two pointers eliminates need to store max arrays
+- Process whichever side has smaller height
+- O(n) time, O(1) space is optimal
+
+**Proof of correctness:**
+- When processing left: rightMax must be ≥ height[right] > height[left]
+- So min(leftMax, rightMax) = leftMax
+- We have all info needed to calculate water on left
+- Symmetric argument for right side
+
+**What makes this Hard:**
+- Non-obvious that greedy approach works
+- Understanding why we can calculate water on one side
+- Multiple valid solution approaches
+- Requires careful pointer management
+
+**Comparison with Container With Most Water:**
+- Both use two pointers
+- Container: Find max area (simple formula)
+- Rain Water: Calculate total trapped water (more complex)
+
+## Related Problems
+
+- **Container With Most Water** (Medium) - Similar two-pointer technique but simpler
+- **Trapping Rain Water II** (Hard) - 2D version, much more complex
+- **Pour Water** (Medium) - Variation with water falling from top
+- **Product of Array Except Self** (Medium) - Similar left/right max pattern
