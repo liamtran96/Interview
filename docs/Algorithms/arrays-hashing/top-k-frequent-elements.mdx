@@ -1,0 +1,212 @@
+---
+sidebar_position: 9
+difficulty: Medium
+tags: [arrays, hash-table, sorting, heap, amazon, meta]
+leetcode_url: https://leetcode.com/problems/top-k-frequent-elements/
+companies: [Amazon, Meta, Google, Microsoft, Apple]
+pattern: "Arrays & Hashing"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Top K Frequent Elements
+
+<AlgorithmProblem
+  title="Top K Frequent Elements"
+  difficulty="Medium"
+  description={`
+<p>Given an integer array <code>nums</code> and an integer <code>k</code>, return the <code>k</code> most frequent elements. You may return the answer in <strong>any order</strong>.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 ≤ nums.length ≤ 10<sup>5</sup></li>
+  <li>-10<sup>4</sup> ≤ nums[i] ≤ 10<sup>4</sup></li>
+  <li>k is in the range [1, number of unique elements]</li>
+  <li>It is <strong>guaranteed</strong> that the answer is <strong>unique</strong>.</li>
+</ul>
+<p><strong>Follow up:</strong> Your algorithm's time complexity must be better than O(n log n).</p>
+`}
+  examples={[
+    {
+      input: 'nums = [1,1,1,2,2,3], k = 2',
+      output: '[1,2]',
+      explanation: '1 appears 3 times, 2 appears 2 times, 3 appears 1 time. Top 2 are [1,2].'
+    },
+    {
+      input: 'nums = [1], k = 1',
+      output: '[1]'
+    }
+  ]}
+  starterCode={`function topKFrequent(nums, k) {
+  // Write your code here
+
+}`}
+  solution={`function topKFrequent(nums, k) {
+  // Bucket sort approach: O(n) time
+  const freqMap = new Map();
+
+  // Count frequencies
+  for (const num of nums) {
+    freqMap.set(num, (freqMap.get(num) || 0) + 1);
+  }
+
+  // Create buckets: index = frequency
+  const buckets = Array(nums.length + 1).fill(null).map(() => []);
+
+  for (const [num, freq] of freqMap) {
+    buckets[freq].push(num);
+  }
+
+  // Collect top k from highest frequency
+  const result = [];
+  for (let i = buckets.length - 1; i >= 0 && result.length < k; i--) {
+    result.push(...buckets[i]);
+  }
+
+  return result.slice(0, k);
+}`}
+  testCases={[
+    {
+      input: [[1,1,1,2,2,3], 2],
+      expected: [1,2],
+      description: 'Basic case with clear top k'
+    },
+    {
+      input: [[1], 1],
+      expected: [1],
+      description: 'Single element'
+    },
+    {
+      input: [[1,2], 2],
+      expected: [1,2],
+      description: 'All elements have same frequency'
+    },
+    {
+      input: [[4,4,4,3,3,2,2,2,1], 2],
+      expected: [4,2],
+      description: 'Multiple frequencies, k=2'
+    },
+    {
+      input: [[-1,-1,-1,0,0,3], 2],
+      expected: [-1,0],
+      description: 'Negative numbers'
+    }
+  ]}
+  functionName="topKFrequent"
+/>
+
+## Solution Explanation
+
+### Approach 1: Sorting (Not Optimal)
+
+**Time:** O(n log n)
+**Space:** O(n)
+
+```javascript
+function topKFrequent(nums, k) {
+  const freqMap = new Map();
+
+  for (const num of nums) {
+    freqMap.set(num, (freqMap.get(num) || 0) + 1);
+  }
+
+  return Array.from(freqMap.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, k)
+    .map(entry => entry[0]);
+}
+```
+
+**Why not optimal?** Sorting is O(n log n), violates follow-up requirement.
+
+### Approach 2: Bucket Sort (Optimal) ✅
+
+**Time:** O(n)
+**Space:** O(n)
+
+```javascript
+function topKFrequent(nums, k) {
+  const freqMap = new Map();
+
+  // Step 1: Count frequencies
+  for (const num of nums) {
+    freqMap.set(num, (freqMap.get(num) || 0) + 1);
+  }
+
+  // Step 2: Create frequency buckets
+  const buckets = Array(nums.length + 1).fill(null).map(() => []);
+
+  for (const [num, freq] of freqMap) {
+    buckets[freq].push(num);
+  }
+
+  // Step 3: Collect top k
+  const result = [];
+  for (let i = buckets.length - 1; i >= 0 && result.length < k; i--) {
+    result.push(...buckets[i]);
+  }
+
+  return result.slice(0, k);
+}
+```
+
+**How it works:**
+
+1. **Count frequencies** using hash map
+2. **Create buckets** where index = frequency
+3. **Iterate from highest frequency** to collect top k
+
+**Example walkthrough:**
+
+```
+nums = [1,1,1,2,2,3], k = 2
+
+Step 1: freqMap = {1: 3, 2: 2, 3: 1}
+
+Step 2: buckets
+  Index 0: []
+  Index 1: [3]      (3 appears 1 time)
+  Index 2: [2]      (2 appears 2 times)
+  Index 3: [1]      (1 appears 3 times)
+  ...
+
+Step 3: Iterate from i=3 downward
+  i=3: add [1], result = [1]
+  i=2: add [2], result = [1,2]
+  k=2 reached, return [1,2]
+```
+
+## Common Mistakes
+
+❌ Using sorting (violates O(n) requirement)
+```javascript
+freqMap.sort() // O(n log n)
+```
+
+✅ Use bucket sort for O(n)
+```javascript
+const buckets = Array(n + 1).fill(null).map(() => []);
+```
+
+❌ Forgetting edge case: k equals array length
+```javascript
+return result; // Might return more than k
+```
+
+✅ Slice to exactly k elements
+```javascript
+return result.slice(0, k);
+```
+
+## Interview Tips
+
+**When discussing:**
+1. Start by mentioning sorting approach (O(n log n))
+2. Note follow-up requires better complexity
+3. Suggest bucket sort for O(n) time
+4. Explain bucket index represents frequency
+5. Walk through example
+
+**Follow-up questions:**
+- What if k > unique elements? → Return all unique elements
+- Can we use a heap? → Yes, but O(n log k), not optimal for small k
+- What about negative numbers? → Hash map handles them fine
