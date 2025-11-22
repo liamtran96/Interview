@@ -1,0 +1,410 @@
+---
+sidebar_position: 15
+difficulty: Hard
+tags: [arrays, two-pointers, stack, dynamic-programming, google, amazon]
+leetcode_url: https://leetcode.com/problems/trapping-rain-water/
+companies: [Google, Amazon, Meta, Microsoft, Apple]
+pattern: "Arrays & Hashing"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Trapping Rain Water
+
+<AlgorithmProblem
+  title="Trapping Rain Water"
+  difficulty="Hard"
+  difficulty="Hard"
+  description={`
+<p>Given <code>n</code> non-negative integers representing an elevation map where the width of each bar is <code>1</code>, compute how much water it can trap after raining.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>n == height.length</li>
+  <li>1 ≤ n ≤ 2 × 10<sup>4</sup></li>
+  <li>0 ≤ height[i] ≤ 10<sup>5</sup></li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'height = [0,1,0,2,1,0,1,3,2,1,2,1]',
+      output: '6',
+      explanation: 'The elevation map is [0,1,0,2,1,0,1,3,2,1,2,1]. In this case, 6 units of rain water are being trapped.'
+    },
+    {
+      input: 'height = [4,2,0,3,2,5]',
+      output: '9',
+      explanation: 'Water trapped: 0 + 2 + 4 + 1 + 2 + 0 = 9'
+    }
+  ]}
+  starterCode={`function trap(height) {
+  // Write your code here
+
+}`}
+  solution={`function trap(height) {
+  // Two-pointer approach
+  if (height.length === 0) return 0;
+
+  let left = 0;
+  let right = height.length - 1;
+  let leftMax = 0;
+  let rightMax = 0;
+  let totalWater = 0;
+
+  while (left < right) {
+    if (height[left] < height[right]) {
+      // Process left side
+      if (height[left] >= leftMax) {
+        leftMax = height[left];
+      } else {
+        totalWater += leftMax - height[left];
+      }
+      left++;
+    } else {
+      // Process right side
+      if (height[right] >= rightMax) {
+        rightMax = height[right];
+      } else {
+        totalWater += rightMax - height[right];
+      }
+      right--;
+    }
+  }
+
+  return totalWater;
+}`}
+  testCases={[
+    {
+      input: [[0,1,0,2,1,0,1,3,2,1,2,1]],
+      expected: 6,
+      description: 'Standard case with multiple valleys'
+    },
+    {
+      input: [[4,2,0,3,2,5]],
+      expected: 9,
+      description: 'Deep valley case'
+    },
+    {
+      input: [[3,0,2,0,4]],
+      expected: 7,
+      description: 'Multiple gaps'
+    },
+    {
+      input: [[0,1,0,1,0]],
+      expected: 1,
+      description: 'Small valleys'
+    },
+    {
+      input: [[5,4,3,2,1]],
+      expected: 0,
+      description: 'Descending - no water trapped'
+    },
+    {
+      input: [[1,2,3,4,5]],
+      expected: 0,
+      description: 'Ascending - no water trapped'
+    },
+    {
+      input: [[3,3,3,3]],
+      expected: 0,
+      description: 'Flat - no water trapped'
+    }
+  ]}
+  functionName="trap"
+/>
+
+## Solution Explanation
+
+### Approach 1: Brute Force
+
+**Time:** O(n²)
+**Space:** O(1)
+
+For each position, find max height on left and right, then calculate water.
+
+```javascript
+function trap(height) {
+  let totalWater = 0;
+
+  for (let i = 0; i < height.length; i++) {
+    // Find max height on left
+    let leftMax = 0;
+    for (let j = 0; j <= i; j++) {
+      leftMax = Math.max(leftMax, height[j]);
+    }
+
+    // Find max height on right
+    let rightMax = 0;
+    for (let j = i; j < height.length; j++) {
+      rightMax = Math.max(rightMax, height[j]);
+    }
+
+    // Water at position i
+    totalWater += Math.min(leftMax, rightMax) - height[i];
+  }
+
+  return totalWater;
+}
+```
+
+**Why not optimal?** Recalculating left/right max for every position is O(n²).
+
+### Approach 2: Dynamic Programming
+
+**Time:** O(n)
+**Space:** O(n)
+
+Pre-compute left and right max arrays.
+
+```javascript
+function trap(height) {
+  if (height.length === 0) return 0;
+
+  const n = height.length;
+  const leftMax = new Array(n);
+  const rightMax = new Array(n);
+
+  // Build leftMax array
+  leftMax[0] = height[0];
+  for (let i = 1; i < n; i++) {
+    leftMax[i] = Math.max(leftMax[i - 1], height[i]);
+  }
+
+  // Build rightMax array
+  rightMax[n - 1] = height[n - 1];
+  for (let i = n - 2; i >= 0; i--) {
+    rightMax[i] = Math.max(rightMax[i + 1], height[i]);
+  }
+
+  // Calculate trapped water
+  let totalWater = 0;
+  for (let i = 0; i < n; i++) {
+    totalWater += Math.min(leftMax[i], rightMax[i]) - height[i];
+  }
+
+  return totalWater;
+}
+```
+
+**How it works:**
+1. Pre-compute max height to the left of each position
+2. Pre-compute max height to the right of each position
+3. Water at position i = min(leftMax[i], rightMax[i]) - height[i]
+
+### Approach 3: Two Pointers (Optimal) ✅
+
+**Time:** O(n)
+**Space:** O(1)
+
+```javascript
+function trap(height) {
+  if (height.length === 0) return 0;
+
+  let left = 0;
+  let right = height.length - 1;
+  let leftMax = 0;
+  let rightMax = 0;
+  let totalWater = 0;
+
+  while (left < right) {
+    if (height[left] < height[right]) {
+      // Process left side
+      if (height[left] >= leftMax) {
+        leftMax = height[left]; // Update max
+      } else {
+        totalWater += leftMax - height[left]; // Add water
+      }
+      left++;
+    } else {
+      // Process right side
+      if (height[right] >= rightMax) {
+        rightMax = height[right]; // Update max
+      } else {
+        totalWater += rightMax - height[right]; // Add water
+      }
+      right--;
+    }
+  }
+
+  return totalWater;
+}
+```
+
+**How it works:**
+
+**Key insight:** Water level at position depends on min(leftMax, rightMax). We don't need to know both - just need to process from the side with smaller max.
+
+**Example walkthrough:**
+
+```
+height = [0,1,0,2,1,0,1,3,2,1,2,1]
+
+left=0, right=11, leftMax=0, rightMax=0, water=0
+  height[0]=0 < height[11]=1
+  height[0]>=leftMax? Yes, leftMax=0
+  left=1
+
+left=1, right=11, leftMax=0, rightMax=0, water=0
+  height[1]=1 < height[11]=1? No (equal, go right)
+  height[11]>=rightMax? Yes, rightMax=1
+  right=10
+
+left=1, right=10, leftMax=0, rightMax=1, water=0
+  height[1]=1 < height[10]=2
+  height[1]>=leftMax? Yes, leftMax=1
+  left=2
+
+left=2, right=10, leftMax=1, rightMax=1, water=0
+  height[2]=0 < height[10]=2
+  height[2]<leftMax? Yes, water += 1-0 = 1
+  left=3
+
+left=3, right=10, leftMax=1, rightMax=1, water=1
+  height[3]=2 >= height[10]=2? No
+  height[10]>=rightMax? Yes, rightMax=2
+  right=9
+
+...continuing this process...
+
+Final: water = 6
+```
+
+**Why it works:**
+
+```
+At any point:
+- If height[left] < height[right]:
+  - We know rightMax ≥ height[left]
+  - So min(leftMax, rightMax) = leftMax
+  - Process left side
+
+- If height[right] < height[left]:
+  - We know leftMax ≥ height[right]
+  - So min(leftMax, rightMax) = rightMax
+  - Process right side
+```
+
+### Approach 4: Using Stack
+
+**Time:** O(n)
+**Space:** O(n)
+
+```javascript
+function trap(height) {
+  const stack = [];
+  let totalWater = 0;
+
+  for (let i = 0; i < height.length; i++) {
+    while (stack.length > 0 && height[i] > height[stack[stack.length - 1]]) {
+      const top = stack.pop();
+
+      if (stack.length === 0) break;
+
+      const distance = i - stack[stack.length - 1] - 1;
+      const boundedHeight = Math.min(height[i], height[stack[stack.length - 1]]) - height[top];
+
+      totalWater += distance * boundedHeight;
+    }
+
+    stack.push(i);
+  }
+
+  return totalWater;
+}
+```
+
+**Calculates water layer by layer (horizontally).**
+
+## Common Mistakes
+
+❌ Calculating water based only on adjacent bars
+```javascript
+// Water depends on max heights, not just neighbors
+```
+
+✅ Find max on left and right
+```javascript
+water = Math.min(leftMax, rightMax) - height[i];
+```
+
+❌ Not handling edge cases
+```javascript
+// Empty array, single element, all descending/ascending
+```
+
+✅ Check array length and handle edge cases
+```javascript
+if (height.length === 0) return 0;
+```
+
+❌ Confusing two-pointer logic
+```javascript
+// Must process side with smaller max height
+if (height[left] < height[right]) // Process left
+```
+
+✅ Process from side with smaller barrier
+```javascript
+// Smaller barrier determines which side to process
+// We can calculate water on that side without knowing other max
+```
+
+❌ Negative water calculation
+```javascript
+// If height[i] > max, water would be negative
+// Must update max first
+```
+
+✅ Update max before calculating water
+```javascript
+if (height[left] >= leftMax) {
+  leftMax = height[left];
+} else {
+  totalWater += leftMax - height[left];
+}
+```
+
+## Interview Tips
+
+**When discussing:**
+1. Draw the elevation map to visualize
+2. Explain water at position = min(leftMax, rightMax) - height
+3. Show brute force → DP → two-pointer progression
+4. Walk through two-pointer logic carefully
+5. Mention stack approach as alternative
+
+**Follow-up questions:**
+- Can you do it in O(1) space? → Yes, two-pointer approach
+- What about 2D version? → Different problem, more complex
+- How to handle floating point heights? → Same logic applies
+- Can you use recursion? → Possible but not optimal
+- What if bars have different widths? → Multiply water by width
+
+**Key insights:**
+- Water level determined by min of max heights on both sides
+- Two-pointer optimizes DP approach to O(1) space
+- Process from side with smaller max height
+- Stack approach calculates horizontally instead of vertically
+- Each position visited at most once → O(n)
+
+**Pattern recognition:**
+This combines multiple patterns:
+- Two pointers
+- Dynamic programming optimization
+- Monotonic stack (alternative approach)
+
+**Visualization tip:**
+Draw this in interview:
+```
+     █
+ █   █ █   █
+ █ █ █ █ █ █ █
+ 0 1 0 2 1 0 1 3
+     ^^^^^
+     water
+```
+
+**Approaches ranked:**
+1. Two-pointer: O(n) time, O(1) space ⭐ Best
+2. DP: O(n) time, O(n) space - Good for understanding
+3. Stack: O(n) time, O(n) space - Interesting alternative
+4. Brute force: O(n²) time - Too slow
