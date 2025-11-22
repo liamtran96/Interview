@@ -1,0 +1,197 @@
+---
+sidebar_position: 4
+difficulty: Easy
+tags: [arrays, hash-table, string, sorting, amazon, google]
+leetcode_url: https://leetcode.com/problems/group-anagrams/
+companies: [Amazon, Google, Meta, Microsoft]
+pattern: "Arrays & Hashing"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Group Anagrams
+
+<AlgorithmProblem
+  title="Group Anagrams"
+  difficulty="Easy"
+  description={`
+<p>Given an array of strings <code>strs</code>, group the anagrams together. You can return the answer in any order.</p>
+<p>An <strong>Anagram</strong> is a word or phrase formed by rearranging the letters of a different word or phrase, typically using all the original letters exactly once.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 ≤ strs.length ≤ 10<sup>4</sup></li>
+  <li>0 ≤ strs[i].length ≤ 100</li>
+  <li>strs[i] consists of lowercase English letters.</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'strs = ["eat","tea","tan","ate","nat","bat"]',
+      output: '[["bat"],["nat","tan"],["ate","eat","tea"]]',
+      explanation: 'Group words that are anagrams of each other.'
+    },
+    {
+      input: 'strs = [""]',
+      output: '[[""]]'
+    },
+    {
+      input: 'strs = ["a"]',
+      output: '[["a"]]'
+    }
+  ]}
+  starterCode={`function groupAnagrams(strs) {
+  // Write your code here
+
+}`}
+  solution={`function groupAnagrams(strs) {
+  // Hash map approach: Use sorted string as key
+  const map = new Map();
+
+  for (const str of strs) {
+    // Sort the string to use as key
+    const sorted = str.split('').sort().join('');
+
+    if (!map.has(sorted)) {
+      map.set(sorted, []);
+    }
+
+    map.get(sorted).push(str);
+  }
+
+  return Array.from(map.values());
+}`}
+  testCases={[
+    {
+      input: [["eat","tea","tan","ate","nat","bat"]],
+      expected: [["eat","tea","ate"],["tan","nat"],["bat"]],
+      description: 'Multiple anagram groups'
+    },
+    {
+      input: [[""]],
+      expected: [[""]],
+      description: 'Empty string'
+    },
+    {
+      input: [["a"]],
+      expected: [["a"]],
+      description: 'Single character'
+    },
+    {
+      input: [["abc", "bca", "cab", "xyz", "zyx", "yxz"]],
+      expected: [["abc", "bca", "cab"], ["xyz", "zyx", "yxz"]],
+      description: 'Two distinct anagram groups'
+    },
+    {
+      input: [["listen", "silent", "hello", "world"]],
+      expected: [["listen", "silent"], ["hello"], ["world"]],
+      description: 'Mixed anagrams and non-anagrams'
+    }
+  ]}
+  functionName="groupAnagrams"
+/>
+
+## Solution Explanation
+
+### Approach: Hash Map with Sorted Key
+
+**Time Complexity:** O(n × k log k) where n = number of strings, k = max length of a string
+**Space Complexity:** O(n × k)
+
+Use sorted string as hash map key to group anagrams together.
+
+```javascript
+function groupAnagrams(strs) {
+  const map = new Map();
+
+  for (const str of strs) {
+    const sorted = str.split('').sort().join('');
+
+    if (!map.has(sorted)) {
+      map.set(sorted, []);
+    }
+
+    map.get(sorted).push(str);
+  }
+
+  return Array.from(map.values());
+}
+```
+
+**How it works:**
+
+1. Create hash map to store groups
+2. For each string:
+   - Sort characters to create key
+   - Add string to corresponding group
+3. Return all groups as array
+
+**Example walkthrough:**
+
+```
+strs = ["eat", "tea", "tan"]
+
+"eat" → sorted: "aet" → map = {"aet": ["eat"]}
+"tea" → sorted: "aet" → map = {"aet": ["eat", "tea"]}
+"tan" → sorted: "ant" → map = {"aet": ["eat", "tea"], "ant": ["tan"]}
+
+Result: [["eat", "tea"], ["tan"]]
+```
+
+### Alternative: Character Count Key
+
+**Time:** O(n × k)
+**Space:** O(n × k)
+
+Instead of sorting, use character frequency as key:
+
+```javascript
+function groupAnagrams(strs) {
+  const map = new Map();
+
+  for (const str of strs) {
+    const count = new Array(26).fill(0);
+
+    for (const char of str) {
+      count[char.charCodeAt(0) - 97]++;
+    }
+
+    const key = count.join('#');
+
+    if (!map.has(key)) {
+      map.set(key, []);
+    }
+
+    map.get(key).push(str);
+  }
+
+  return Array.from(map.values());
+}
+```
+
+## Common Mistakes
+
+❌ Comparing strings directly without sorting
+```javascript
+if (str1 === str2) // Won't detect anagrams
+```
+
+✅ Sort strings to compare
+```javascript
+const sorted1 = str1.split('').sort().join('');
+const sorted2 = str2.split('').sort().join('');
+if (sorted1 === sorted2) // Correctly detects anagrams
+```
+
+## Interview Tips
+
+**When discussing:**
+1. Start with hash map + sorting approach
+2. Explain why sorting creates consistent keys
+3. Mention O(n × k log k) complexity
+4. Consider character count optimization for O(n × k)
+5. Handle edge cases: empty strings, single characters
+
+**Follow-up questions:**
+- What if strings contain Unicode? → Use character count approach
+- How to optimize for very long strings? → Character count is better
+- Space constraints? → In-place grouping difficult, hash map needed
