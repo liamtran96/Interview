@@ -1,0 +1,319 @@
+---
+sidebar_position: 4
+difficulty: Easy
+tags: [two-pointers, array, amazon, google, facebook]
+leetcode_url: https://leetcode.com/problems/move-zeroes/
+companies: [Amazon, Google, Facebook, Microsoft, Bloomberg]
+pattern: "Two Pointers"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Move Zeroes
+
+<AlgorithmProblem
+  title="Move Zeroes"
+  difficulty="Easy"
+  description={`
+<p>Given an integer array <code>nums</code>, move all <code>0</code>'s to the end of it while maintaining the relative order of the non-zero elements.</p>
+<p><strong>Note</strong> that you must do this in-place without making a copy of the array.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 ≤ nums.length ≤ 10<sup>4</sup></li>
+  <li>-2<sup>31</sup> ≤ nums[i] ≤ 2<sup>31</sup> - 1</li>
+</ul>
+<p><strong>Follow up:</strong> Could you minimize the total number of operations done?</p>
+`}
+  examples={[
+    {
+      input: 'nums = [0,1,0,3,12]',
+      output: '[1,3,12,0,0]'
+    },
+    {
+      input: 'nums = [0]',
+      output: '[0]'
+    },
+    {
+      input: 'nums = [0,0,1]',
+      output: '[1,0,0]'
+    }
+  ]}
+  starterCode={`function moveZeroes(nums) {
+  // Write your code here
+
+}`}
+  solution={`function moveZeroes(nums) {
+  // Two pointer approach: O(n) time, O(1) space
+  let left = 0; // Position for next non-zero element
+
+  // Move all non-zero elements to the front
+  for (let right = 0; right < nums.length; right++) {
+    if (nums[right] !== 0) {
+      // Swap non-zero element to left position
+      [nums[left], nums[right]] = [nums[right], nums[left]];
+      left++;
+    }
+  }
+
+  // No need to fill zeros - they're already there from swaps
+}`}
+  testCases={[
+    {
+      input: [[0, 1, 0, 3, 12]],
+      expected: [1, 3, 12, 0, 0],
+      description: 'Basic case with zeros interspersed'
+    },
+    {
+      input: [[0]],
+      expected: [0],
+      description: 'Single zero'
+    },
+    {
+      input: [[0, 0, 1]],
+      expected: [1, 0, 0],
+      description: 'Multiple zeros at start'
+    },
+    {
+      input: [[1, 2, 3]],
+      expected: [1, 2, 3],
+      description: 'No zeros'
+    },
+    {
+      input: [[0, 0, 0, 0]],
+      expected: [0, 0, 0, 0],
+      description: 'All zeros'
+    },
+    {
+      input: [[1, 0, 2, 0, 3, 0, 4]],
+      expected: [1, 2, 3, 4, 0, 0, 0],
+      description: 'Alternating zeros and non-zeros'
+    }
+  ]}
+  functionName="moveZeroes"
+/>
+
+## Solution Explanation
+
+### Approach 1: Using Extra Array (Not Optimal)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(n)
+
+Create a new array with non-zeros first:
+
+```javascript
+function moveZeroes(nums) {
+  const result = [];
+
+  // Add all non-zero elements
+  for (let num of nums) {
+    if (num !== 0) {
+      result.push(num);
+    }
+  }
+
+  // Fill remaining with zeros
+  while (result.length < nums.length) {
+    result.push(0);
+  }
+
+  // Copy back
+  for (let i = 0; i < nums.length; i++) {
+    nums[i] = result[i];
+  }
+}
+```
+
+**Why not use this?**
+- Uses O(n) extra space
+- Violates in-place requirement
+- Multiple passes through array
+
+### Approach 2: Two Passes (Suboptimal)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1)
+
+First pass: move non-zeros to front
+Second pass: fill rest with zeros
+
+```javascript
+function moveZeroes(nums) {
+  let left = 0;
+
+  // First pass: move all non-zeros to front
+  for (let right = 0; right < nums.length; right++) {
+    if (nums[right] !== 0) {
+      nums[left] = nums[right];
+      left++;
+    }
+  }
+
+  // Second pass: fill remaining positions with zeros
+  for (let i = left; i < nums.length; i++) {
+    nums[i] = 0;
+  }
+}
+```
+
+**Better, but:**
+- Two passes through array
+- More operations than necessary
+- Can be optimized to single pass
+
+### Approach 3: Two Pointers with Swap (Optimal) ✅
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1)
+
+Single pass with swapping:
+
+```javascript
+function moveZeroes(nums) {
+  let left = 0; // Position for next non-zero
+
+  for (let right = 0; right < nums.length; right++) {
+    if (nums[right] !== 0) {
+      // Swap current non-zero with position at left
+      [nums[left], nums[right]] = [nums[right], nums[left]];
+      left++;
+    }
+  }
+}
+```
+
+**How it works:**
+
+1. **Left pointer**: Tracks position for next non-zero element
+2. **Right pointer**: Explores array
+3. **When right finds non-zero**:
+   - Swap nums[right] with nums[left]
+   - Increment left
+4. **Result**: All non-zeros at front, zeros at end
+
+**Example walkthrough:**
+
+```
+nums = [0, 1, 0, 3, 12]
+
+Initial:
+[0, 1, 0, 3, 12]
+ L  R
+left=0, right=0
+
+Step 1: nums[0]=0 → skip
+ R moves to 1
+
+Step 2: nums[1]=1 ≠ 0 → swap!
+[1, 0, 0, 3, 12]
+    L  R
+Swapped: nums[0] ↔ nums[1]
+left=1, right=1
+
+Step 3: nums[2]=0 → skip
+ R moves to 3
+
+Step 4: nums[3]=3 ≠ 0 → swap!
+[1, 3, 0, 0, 12]
+       L     R
+Swapped: nums[1] ↔ nums[3]
+left=2, right=3
+
+Step 5: nums[4]=12 ≠ 0 → swap!
+[1, 3, 12, 0, 0]
+          L     R
+Swapped: nums[2] ↔ nums[4]
+left=3, right=4
+
+Final: [1, 3, 12, 0, 0] ✅
+```
+
+### Why Swapping is Optimal
+
+**Key insight:** When we swap:
+- Non-zero moves to its correct position (front)
+- Zero moves toward the end
+- We don't need a second pass to fill zeros
+
+**Invariants maintained:**
+1. All elements from 0 to left-1 are non-zero
+2. All elements from left to right-1 are zero
+3. Elements from right to end are unexplored
+
+### Edge Cases
+
+1. **All zeros**: left never moves, no swaps happen
+2. **No zeros**: We swap element with itself (left == right)
+3. **Single element**: Works correctly (loop runs once)
+
+## Common Mistakes
+
+❌ **Creating new array:**
+```javascript
+const result = []; // Violates in-place requirement
+```
+
+❌ **Overwriting without preserving:**
+```javascript
+nums[left] = nums[right]; // Loses the value at left
+```
+
+❌ **Two passes when one is enough:**
+```javascript
+// Pass 1: move non-zeros
+// Pass 2: fill zeros  // Can combine into one pass with swaps
+```
+
+❌ **Not incrementing left after swap:**
+```javascript
+if (nums[right] !== 0) {
+  [nums[left], nums[right]] = [nums[right], nums[left]];
+  // Missing: left++
+}
+```
+
+❌ **Swapping zeros:**
+```javascript
+if (nums[right] === 0) {  // Should check !== 0
+  // ...
+}
+```
+
+## Interview Tips
+
+**Discussion points:**
+1. Ask if in-place is required (it is)
+2. Explain multiple approaches (extra array → two passes → swap)
+3. Walk through swap approach with example
+4. Mention that swapping minimizes operations
+5. Discuss edge cases (all zeros, no zeros, single element)
+
+**Follow-up questions:**
+- What if we need to move zeros to the front? → Same approach, reverse logic
+- What if we need to move multiple values? → Generalize the condition
+- How do we minimize write operations? → Swap approach does this
+- Can we do this without swaps? → Yes (two passes), but more operations
+
+**Key insights to mention:**
+- In-place means O(1) extra space
+- Swap preserves both values (no data loss)
+- Single pass is more efficient than two passes
+- Fast/slow pointer pattern
+
+**Optimization notes:**
+- **Write operations**: Swap approach minimizes writes
+- **Comparisons**: Every element checked once
+- **Space**: Only two pointers used
+
+**What makes this a two-pointer problem:**
+- Left pointer: Write position for non-zeros
+- Right pointer: Read position exploring array
+- Pointers move at different speeds (fast/slow)
+- In-place modification required
+
+## Related Problems
+
+- **Remove Element** (Easy) - Similar in-place modification
+- **Remove Duplicates from Sorted Array** (Easy) - Same fast/slow pattern
+- **Sort Colors** (Medium) - Multiple partitions instead of two
+- **Partition Array** (Easy) - Partition based on pivot

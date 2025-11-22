@@ -1,0 +1,310 @@
+---
+sidebar_position: 2
+difficulty: Easy
+tags: [two-pointers, array, binary-search, amazon, microsoft, facebook]
+leetcode_url: https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/
+companies: [Amazon, Microsoft, Facebook, Adobe, Apple]
+pattern: "Two Pointers"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Two Sum II - Input Array Is Sorted
+
+<AlgorithmProblem
+  title="Two Sum II - Input Array Is Sorted"
+  difficulty="Easy"
+  description={`
+<p>Given a <strong>1-indexed</strong> array of integers <code>numbers</code> that is already <strong>sorted in non-decreasing order</strong>, find two numbers such that they add up to a specific <code>target</code> number. Let these two numbers be <code>numbers[index1]</code> and <code>numbers[index2]</code> where <code>1 ≤ index1 < index2 ≤ numbers.length</code>.</p>
+<p>Return the indices of the two numbers, <code>index1</code> and <code>index2</code>, <strong>added by one</strong> as an integer array <code>[index1, index2]</code> of length 2.</p>
+<p>The tests are generated such that there is <strong>exactly one solution</strong>. You <strong>may not</strong> use the same element twice.</p>
+<p>Your solution must use only constant extra space.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>2 ≤ numbers.length ≤ 3 × 10<sup>4</sup></li>
+  <li>-1000 ≤ numbers[i] ≤ 1000</li>
+  <li>numbers is sorted in <strong>non-decreasing order</strong></li>
+  <li>-1000 ≤ target ≤ 1000</li>
+  <li>The tests are generated such that there is <strong>exactly one solution</strong></li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'numbers = [2,7,11,15], target = 9',
+      output: '[1,2]',
+      explanation: 'The sum of 2 and 7 is 9. Therefore, index1 = 1, index2 = 2. We return [1, 2].'
+    },
+    {
+      input: 'numbers = [2,3,4], target = 6',
+      output: '[1,3]',
+      explanation: 'The sum of 2 and 4 is 6. Therefore index1 = 1, index2 = 3. We return [1, 3].'
+    },
+    {
+      input: 'numbers = [-1,0], target = -1',
+      output: '[1,2]',
+      explanation: 'The sum of -1 and 0 is -1. Therefore index1 = 1, index2 = 2. We return [1, 2].'
+    }
+  ]}
+  starterCode={`function twoSum(numbers, target) {
+  // Write your code here
+
+}`}
+  solution={`function twoSum(numbers, target) {
+  // Two pointer approach: O(n) time, O(1) space
+  let left = 0;
+  let right = numbers.length - 1;
+
+  while (left < right) {
+    const sum = numbers[left] + numbers[right];
+
+    if (sum === target) {
+      // Return 1-indexed positions
+      return [left + 1, right + 1];
+    } else if (sum < target) {
+      // Need larger sum, move left pointer right
+      left++;
+    } else {
+      // Need smaller sum, move right pointer left
+      right--;
+    }
+  }
+
+  return [];
+}`}
+  testCases={[
+    {
+      input: [[2, 7, 11, 15], 9],
+      expected: [1, 2],
+      description: 'Basic case: first two elements sum to target'
+    },
+    {
+      input: [[2, 3, 4], 6],
+      expected: [1, 3],
+      description: 'Skip middle element: first and last'
+    },
+    {
+      input: [[-1, 0], -1],
+      expected: [1, 2],
+      description: 'Negative numbers'
+    },
+    {
+      input: [[1, 2, 3, 4, 5, 6], 11],
+      expected: [5, 6],
+      description: 'Last two elements'
+    },
+    {
+      input: [[5, 25, 75], 100],
+      expected: [2, 3],
+      description: 'Large gaps between numbers'
+    },
+    {
+      input: [[1, 3, 3, 4, 5], 6],
+      expected: [2, 4],
+      description: 'Duplicate values in array'
+    }
+  ]}
+  functionName="twoSum"
+/>
+
+## Solution Explanation
+
+### Approach 1: Hash Map (Not Optimal Here)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(n)
+
+You could use the same hash map approach from Two Sum I:
+
+```javascript
+function twoSum(numbers, target) {
+  const map = new Map();
+
+  for (let i = 0; i < numbers.length; i++) {
+    const complement = target - numbers[i];
+
+    if (map.has(complement)) {
+      return [map.get(complement) + 1, i + 1]; // 1-indexed
+    }
+
+    map.set(numbers[i], i);
+  }
+
+  return [];
+}
+```
+
+**Why not use this?**
+- Uses O(n) extra space (violates constraint)
+- Doesn't take advantage of sorted array
+- Interview red flag: Not using the sorted property
+
+### Approach 2: Two Pointers (Optimal) ✅
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1)
+
+Use two pointers starting from both ends:
+
+```javascript
+function twoSum(numbers, target) {
+  let left = 0;
+  let right = numbers.length - 1;
+
+  while (left < right) {
+    const sum = numbers[left] + numbers[right];
+
+    if (sum === target) {
+      return [left + 1, right + 1]; // Convert to 1-indexed
+    } else if (sum < target) {
+      left++;  // Need larger sum
+    } else {
+      right--; // Need smaller sum
+    }
+  }
+
+  return [];
+}
+```
+
+**How it works:**
+
+1. **Start from both ends**: left = 0, right = last index
+2. **Calculate sum**: current sum = numbers[left] + numbers[right]
+3. **Three cases**:
+   - If sum == target → Found! Return indices (1-indexed)
+   - If sum < target → Move left pointer right (need larger value)
+   - If sum > target → Move right pointer left (need smaller value)
+4. **Repeat** until pointers meet
+
+**Example walkthrough:**
+
+```
+numbers = [2, 7, 11, 15], target = 9
+
+Initial: [2, 7, 11, 15]
+          ↑           ↑
+        left       right
+
+Step 1: sum = 2 + 15 = 17 > 9
+        → Move right pointer left
+
+Step 2: [2, 7, 11, 15]
+         ↑      ↑
+       left   right
+        sum = 2 + 11 = 13 > 9
+        → Move right pointer left
+
+Step 3: [2, 7, 11, 15]
+         ↑  ↑
+       left right
+        sum = 2 + 7 = 9 ✅
+        → Return [1, 2] (1-indexed)
+```
+
+### Why Two Pointers Works Here
+
+**Key insight:** The array is sorted!
+
+- When sum is too small → left pointer has smallest unused value, move it right
+- When sum is too large → right pointer has largest unused value, move it left
+- We never miss the answer because:
+  - If target pair is (i, j), we'll encounter it before pointers cross
+  - Each move eliminates impossible combinations
+
+### Approach 3: Binary Search
+
+**Time Complexity:** O(n log n)
+**Space Complexity:** O(1)
+
+For each number, binary search for its complement:
+
+```javascript
+function twoSum(numbers, target) {
+  for (let i = 0; i < numbers.length - 1; i++) {
+    const complement = target - numbers[i];
+    const j = binarySearch(numbers, complement, i + 1);
+
+    if (j !== -1) {
+      return [i + 1, j + 1];
+    }
+  }
+  return [];
+}
+
+function binarySearch(arr, target, start) {
+  let left = start;
+  let right = arr.length - 1;
+
+  while (left <= right) {
+    const mid = Math.floor((left + right) / 2);
+    if (arr[mid] === target) return mid;
+    else if (arr[mid] < target) left = mid + 1;
+    else right = mid - 1;
+  }
+
+  return -1;
+}
+```
+
+**Why not use this?**
+- Slower than two pointers: O(n log n) vs O(n)
+- More complex code
+- Two pointers is simpler and faster
+
+## Common Mistakes
+
+❌ **Forgetting 1-indexed return:**
+```javascript
+return [left, right]; // Wrong! Should be left+1, right+1
+```
+
+❌ **Moving wrong pointer:**
+```javascript
+if (sum < target) {
+  right--;  // Wrong! Should increase left
+}
+```
+
+❌ **Using hash map (violates space constraint):**
+```javascript
+const map = new Map(); // O(n) space - violates constraint
+```
+
+❌ **Not checking left < right:**
+```javascript
+while (left <= right) // May use same element twice
+```
+
+❌ **Sorting the array:**
+```javascript
+numbers.sort((a, b) => a - b); // Already sorted!
+```
+
+## Interview Tips
+
+**Discussion points:**
+1. Recognize this is Two Sum I with sorted constraint
+2. Explain how sorting enables two-pointer approach
+3. Compare to hash map: trade-off space for simplicity
+4. Mention O(1) space requirement
+5. Walk through example showing pointer movements
+
+**Follow-up questions:**
+- What if array wasn't sorted? → Use hash map or sort first
+- What if we need all pairs? → Continue after finding each pair
+- What if no solution exists? → Return empty array or [-1, -1]
+- Can we use binary search? → Yes, but two pointers is better
+- How does this relate to 3Sum? → 3Sum uses this as subroutine
+
+**Key insights to mention:**
+- Sorted array = think two pointers or binary search
+- Two pointers is optimal here: O(n) time, O(1) space
+- Moving pointers based on comparison eliminates possibilities
+- Never miss answer because we systematically narrow search space
+
+## Related Problems
+
+- **Two Sum** (Easy) - Unsorted version, uses hash map
+- **3Sum** (Medium) - Extension to three numbers
+- **4Sum** (Medium) - Extension to four numbers
+- **Two Sum Less Than K** (Easy) - Find maximum sum < K
