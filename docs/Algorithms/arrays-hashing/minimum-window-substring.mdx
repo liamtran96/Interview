@@ -1,0 +1,348 @@
+---
+sidebar_position: 12
+difficulty: Hard
+tags: [string, hash-table, sliding-window, google, amazon]
+leetcode_url: https://leetcode.com/problems/minimum-window-substring/
+companies: [Google, Amazon, Meta, Microsoft, Apple]
+pattern: "Arrays & Hashing"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Minimum Window Substring
+
+<AlgorithmProblem
+  title="Minimum Window Substring"
+  difficulty="Hard"
+  description={`
+<p>Given two strings <code>s</code> and <code>t</code> of lengths <code>m</code> and <code>n</code> respectively, return the <strong>minimum window substring</strong> of <code>s</code> such that every character in <code>t</code> (including duplicates) is included in the window. If there is no such substring, return the empty string <code>""</code>.</p>
+<p>The testcases will be generated such that the answer is <strong>unique</strong>.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>m == s.length</li>
+  <li>n == t.length</li>
+  <li>1 ≤ m, n ≤ 10<sup>5</sup></li>
+  <li>s and t consist of uppercase and lowercase English letters.</li>
+</ul>
+<p><strong>Follow up:</strong> Could you find an algorithm that runs in O(m + n) time?</p>
+`}
+  examples={[
+    {
+      input: 's = "ADOBECODEBANC", t = "ABC"',
+      output: '"BANC"',
+      explanation: 'The minimum window substring "BANC" includes \'A\', \'B\', and \'C\' from string t.'
+    },
+    {
+      input: 's = "a", t = "a"',
+      output: '"a"',
+      explanation: 'The entire string s is the minimum window.'
+    },
+    {
+      input: 's = "a", t = "aa"',
+      output: '""',
+      explanation: 'Both \'a\'s from t must be included in the window. Since the largest window of s only has one \'a\', return empty string.'
+    }
+  ]}
+  starterCode={`function minWindow(s, t) {
+  // Write your code here
+
+}`}
+  solution={`function minWindow(s, t) {
+  if (s.length < t.length) return "";
+
+  // Count characters in t
+  const need = new Map();
+  for (const char of t) {
+    need.set(char, (need.get(char) || 0) + 1);
+  }
+
+  const window = new Map();
+  let left = 0;
+  let have = 0; // Number of unique chars with desired frequency
+  const required = need.size;
+  let minLen = Infinity;
+  let minStart = 0;
+
+  for (let right = 0; right < s.length; right++) {
+    const char = s[right];
+
+    // Add character to window
+    window.set(char, (window.get(char) || 0) + 1);
+
+    // Check if we have enough of this character
+    if (need.has(char) && window.get(char) === need.get(char)) {
+      have++;
+    }
+
+    // Try to shrink window while valid
+    while (have === required) {
+      // Update result if smaller window found
+      if (right - left + 1 < minLen) {
+        minLen = right - left + 1;
+        minStart = left;
+      }
+
+      // Remove left character
+      const leftChar = s[left];
+      window.set(leftChar, window.get(leftChar) - 1);
+
+      if (need.has(leftChar) && window.get(leftChar) < need.get(leftChar)) {
+        have--;
+      }
+
+      left++;
+    }
+  }
+
+  return minLen === Infinity ? "" : s.substring(minStart, minStart + minLen);
+}`}
+  testCases={[
+    {
+      input: ["ADOBECODEBANC", "ABC"],
+      expected: "BANC",
+      description: 'Standard case'
+    },
+    {
+      input: ["a", "a"],
+      expected: "a",
+      description: 'Single character match'
+    },
+    {
+      input: ["a", "aa"],
+      expected: "",
+      description: 'Impossible to satisfy'
+    },
+    {
+      input: ["abc", "cba"],
+      expected: "abc",
+      description: 'Entire string needed'
+    },
+    {
+      input: ["aaaaaaaaaaaabbbbbcdd", "abcdd"],
+      expected: "abbbbbcdd",
+      description: 'Multiple occurrences with duplicates'
+    },
+    {
+      input: ["ab", "b"],
+      expected: "b",
+      description: 'Single character target at end'
+    }
+  ]}
+  functionName="minWindow"
+/>
+
+## Solution Explanation
+
+### Approach 1: Brute Force (Not Optimal)
+
+**Time:** O(n² × m)
+**Space:** O(m + n)
+
+```javascript
+function minWindow(s, t) {
+  // Check every substring of s
+  for (let len = t.length; len <= s.length; len++) {
+    for (let i = 0; i <= s.length - len; i++) {
+      const sub = s.substring(i, i + len);
+      if (containsAll(sub, t)) {
+        return sub;
+      }
+    }
+  }
+  return "";
+}
+
+function containsAll(s, t) {
+  const count = new Map();
+  for (const char of t) {
+    count.set(char, (count.get(char) || 0) + 1);
+  }
+  for (const char of s) {
+    if (count.has(char)) {
+      count.set(char, count.get(char) - 1);
+      if (count.get(char) === 0) count.delete(char);
+    }
+  }
+  return count.size === 0;
+}
+```
+
+**Why not optimal?** Checking every substring is too slow.
+
+### Approach 2: Sliding Window (Optimal) ✅
+
+**Time:** O(m + n) where m = s.length, n = t.length
+**Space:** O(m + n)
+
+```javascript
+function minWindow(s, t) {
+  if (s.length < t.length) return "";
+
+  // Build frequency map for t
+  const need = new Map();
+  for (const char of t) {
+    need.set(char, (need.get(char) || 0) + 1);
+  }
+
+  const window = new Map();
+  let left = 0;
+  let have = 0; // How many unique chars meet requirement
+  const required = need.size; // How many unique chars needed
+  let minLen = Infinity;
+  let minStart = 0;
+
+  for (let right = 0; right < s.length; right++) {
+    const char = s[right];
+
+    // Expand window
+    window.set(char, (window.get(char) || 0) + 1);
+
+    // Check if this char meets requirement
+    if (need.has(char) && window.get(char) === need.get(char)) {
+      have++;
+    }
+
+    // Contract window while valid
+    while (have === required) {
+      // Update result
+      if (right - left + 1 < minLen) {
+        minLen = right - left + 1;
+        minStart = left;
+      }
+
+      // Remove from left
+      const leftChar = s[left];
+      window.set(leftChar, window.get(leftChar) - 1);
+
+      if (need.has(leftChar) && window.get(leftChar) < need.get(leftChar)) {
+        have--;
+      }
+
+      left++;
+    }
+  }
+
+  return minLen === Infinity ? "" : s.substring(minStart, minStart + minLen);
+}
+```
+
+**How it works:**
+
+1. **Build `need` map** from target string `t`
+2. **Expand window** by moving `right` pointer
+3. **Track `have`**: number of unique chars meeting frequency requirement
+4. **When valid** (`have === required`), try to shrink from left
+5. **Update result** when smaller valid window found
+
+**Key insight:** Use `have` counter to track when window contains all required characters with correct frequencies.
+
+**Example walkthrough:**
+
+```
+s = "ADOBECODEBANC", t = "ABC"
+need = {A:1, B:1, C:1}, required = 3
+
+right=0, char='A': window={A:1}, have=1 (A satisfied)
+right=1, char='D': window={A:1,D:1}, have=1
+right=2, char='O': window={A:1,D:1,O:1}, have=1
+right=3, char='B': window={A:1,D:1,O:1,B:1}, have=2 (B satisfied)
+right=4, char='E': window={A:1,D:1,O:1,B:1,E:1}, have=2
+right=5, char='C': window={A:1,D:1,O:1,B:1,E:1,C:1}, have=3 ✓
+
+  Valid! Window = "ADOBEC" (length 6)
+  Try to shrink:
+    left=0, remove 'A': have=2, invalid
+
+right=6, char='O': window={D:1,O:2,B:1,E:1,C:1}, have=2
+right=7, char='D': window={D:2,O:2,B:1,E:1,C:1}, have=2
+right=8, char='E': window={D:2,O:2,B:1,E:2,C:1}, have=2
+right=9, char='B': window={D:2,O:2,B:2,E:2,C:1}, have=2
+right=10, char='A': window={D:2,O:2,B:2,E:2,C:1,A:1}, have=3 ✓
+
+  Valid! Window = "ODEBANC" (length 7)
+  Try to shrink:
+    left=1, remove 'D': window={D:1,O:2,B:2,E:2,C:1,A:1}, have=3 ✓
+    left=2, remove 'O': window={D:1,O:1,B:2,E:2,C:1,A:1}, have=3 ✓
+    left=3, remove 'B': window={D:1,O:1,B:1,E:2,C:1,A:1}, have=3 ✓
+    left=4, remove 'E': window={D:1,O:1,B:1,E:1,C:1,A:1}, have=3 ✓
+    left=5, remove 'C': have=2, invalid
+
+right=11, char='N': window={D:1,O:1,B:1,E:1,A:1,N:1}, have=2
+right=12, char='C': window={D:1,O:1,B:1,E:1,A:1,N:1,C:1}, have=3 ✓
+
+  Valid! Window = "ODEBANC" → shrink → "BANC" (length 4) ✓
+
+Result: "BANC"
+```
+
+## Common Mistakes
+
+❌ Not handling duplicates in t
+```javascript
+// t = "AAB" needs two A's!
+const need = new Set(t); // Wrong - loses count
+```
+
+✅ Use frequency map
+```javascript
+const need = new Map();
+for (const char of t) {
+  need.set(char, (need.get(char) || 0) + 1);
+}
+```
+
+❌ Comparing entire window map
+```javascript
+if (JSON.stringify(window) === JSON.stringify(need)) // Too slow!
+```
+
+✅ Use `have` counter
+```javascript
+let have = 0; // Count of satisfied unique characters
+if (need.has(char) && window.get(char) === need.get(char)) {
+  have++;
+}
+```
+
+❌ Not tracking minimum window position
+```javascript
+return s.substring(left, right); // Wrong - current window, not minimum
+```
+
+✅ Track minStart and minLen
+```javascript
+if (right - left + 1 < minLen) {
+  minLen = right - left + 1;
+  minStart = left;
+}
+```
+
+## Interview Tips
+
+**When discussing:**
+1. Explain sliding window pattern
+2. Show how `have` counter tracks validity efficiently
+3. Walk through example with window expansion/contraction
+4. Emphasize O(m + n) time complexity
+5. Discuss edge cases (t longer than s, no valid window)
+
+**Follow-up questions:**
+- What if we want all minimum windows? → Store all with same minLen
+- What about Unicode? → JavaScript Map handles it
+- Can we optimize space? → Not really, need to track frequencies
+- What if t is very long? → Early return if t.length > s.length
+- How to handle case sensitivity? → Convert both to same case first
+
+**Key insights:**
+- Sliding window with two hash maps (need and window)
+- `have` counter provides O(1) validity check
+- Each character added/removed at most once → O(m)
+- Building need map is O(n)
+- Total: O(m + n) time, O(m + n) space
+
+**Pattern recognition:**
+This is the hardest sliding window problem. Concepts used:
+- Variable-size window
+- Frequency tracking with hash maps
+- Efficient validity checking with counter
+- Minimization objective (shortest window)

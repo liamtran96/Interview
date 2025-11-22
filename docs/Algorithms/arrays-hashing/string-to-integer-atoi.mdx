@@ -1,0 +1,343 @@
+---
+sidebar_position: 13
+difficulty: Medium
+tags: [string, simulation, amazon, google]
+leetcode_url: https://leetcode.com/problems/string-to-integer-atoi/
+companies: [Amazon, Google, Meta, Microsoft, Apple]
+pattern: "Arrays & Hashing"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# String to Integer (atoi)
+
+<AlgorithmProblem
+  title="String to Integer (atoi)"
+  difficulty="Medium"
+  description={`
+<p>Implement the <code>myAtoi(string s)</code> function, which converts a string to a 32-bit signed integer (similar to C/C++'s <code>atoi</code> function).</p>
+<p>The algorithm for <code>myAtoi(string s)</code> is as follows:</p>
+<ol>
+  <li>Read in and ignore any leading whitespace.</li>
+  <li>Check if the next character (if not already at the end of the string) is <code>'-'</code> or <code>'+'</code>. Read this character in if it is either. This determines if the final result is negative or positive respectively. Assume the result is positive if neither is present.</li>
+  <li>Read in next the characters until the next non-digit character or the end of the input is reached. The rest of the string is ignored.</li>
+  <li>Convert these digits into an integer (i.e. <code>"123"</code> -> <code>123</code>, <code>"0032"</code> -> <code>32</code>). If no digits were read, then the integer is <code>0</code>. Change the sign as necessary (from step 2).</li>
+  <li>If the integer is out of the 32-bit signed integer range <code>[-2<sup>31</sup>, 2<sup>31</sup> - 1]</code>, then clamp the integer so that it remains in the range. Specifically, integers less than <code>-2<sup>31</sup></code> should be clamped to <code>-2<sup>31</sup></code>, and integers greater than <code>2<sup>31</sup> - 1</code> should be clamped to <code>2<sup>31</sup> - 1</code>.</li>
+  <li>Return the integer as the final result.</li>
+</ol>
+<p><strong>Note:</strong></p>
+<ul>
+  <li>Only the space character <code>' '</code> is considered a whitespace character.</li>
+  <li>Do not ignore any characters other than the leading whitespace or the rest of the string after the digits.</li>
+</ul>
+<h4>Constraints:</h4>
+<ul>
+  <li>0 ≤ s.length ≤ 200</li>
+  <li>s consists of English letters (lower-case and upper-case), digits (0-9), <code>' '</code>, <code>'+'</code>, <code>'-'</code>, and <code>'.'</code>.</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 's = "42"',
+      output: '42',
+      explanation: 'The underlined characters are what is read in, the caret is the current reader position. Step 1: "42" (no characters read because there is no leading whitespace) Step 2: "42" (no characters read because there is neither a \'-\' nor \'+\') Step 3: "42" ("42" is read in)'
+    },
+    {
+      input: 's = "   -42"',
+      output: '-42',
+      explanation: 'Step 1: "   -42" (leading whitespace is read and ignored) Step 2: "   -42" (\'-\' is read, so the result should be negative) Step 3: "   -42" ("42" is read in)'
+    },
+    {
+      input: 's = "4193 with words"',
+      output: '4193',
+      explanation: 'Step 3: "4193 with words" ("4193" is read in because the next character is not a digit)'
+    }
+  ]}
+  starterCode={`function myAtoi(s) {
+  // Write your code here
+
+}`}
+  solution={`function myAtoi(s) {
+  const INT_MAX = 2147483647; // 2^31 - 1
+  const INT_MIN = -2147483648; // -2^31
+
+  let i = 0;
+  const n = s.length;
+
+  // Step 1: Skip leading whitespace
+  while (i < n && s[i] === ' ') {
+    i++;
+  }
+
+  // Step 2: Check for sign
+  let sign = 1;
+  if (i < n && (s[i] === '+' || s[i] === '-')) {
+    sign = s[i] === '-' ? -1 : 1;
+    i++;
+  }
+
+  // Step 3: Read digits and build number
+  let result = 0;
+  while (i < n && s[i] >= '0' && s[i] <= '9') {
+    const digit = s[i].charCodeAt(0) - '0'.charCodeAt(0);
+
+    // Step 5: Check for overflow before multiplying
+    if (result > Math.floor(INT_MAX / 10) ||
+        (result === Math.floor(INT_MAX / 10) && digit > 7)) {
+      return sign === 1 ? INT_MAX : INT_MIN;
+    }
+
+    result = result * 10 + digit;
+    i++;
+  }
+
+  // Step 4: Apply sign
+  return result * sign;
+}`}
+  testCases={[
+    {
+      input: ["42"],
+      expected: 42,
+      description: 'Basic positive number'
+    },
+    {
+      input: ["   -42"],
+      expected: -42,
+      description: 'Leading whitespace and negative sign'
+    },
+    {
+      input: ["4193 with words"],
+      expected: 4193,
+      description: 'Stop at non-digit'
+    },
+    {
+      input: ["words and 987"],
+      expected: 0,
+      description: 'Leading non-digit characters'
+    },
+    {
+      input: ["-91283472332"],
+      expected: -2147483648,
+      description: 'Overflow to INT_MIN'
+    },
+    {
+      input: ["91283472332"],
+      expected: 2147483647,
+      description: 'Overflow to INT_MAX'
+    },
+    {
+      input: [""],
+      expected: 0,
+      description: 'Empty string'
+    },
+    {
+      input: ["   "],
+      expected: 0,
+      description: 'Only whitespace'
+    },
+    {
+      input: ["+1"],
+      expected: 1,
+      description: 'Positive sign'
+    },
+    {
+      input: ["00000-42a1234"],
+      expected: 0,
+      description: 'Leading zeros then invalid'
+    }
+  ]}
+  functionName="myAtoi"
+/>
+
+## Solution Explanation
+
+### Approach: State Machine / Sequential Processing
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1)
+
+Process string character by character following the algorithm steps.
+
+```javascript
+function myAtoi(s) {
+  const INT_MAX = 2147483647; // 2^31 - 1
+  const INT_MIN = -2147483648; // -2^31
+
+  let i = 0;
+  const n = s.length;
+
+  // Step 1: Skip whitespace
+  while (i < n && s[i] === ' ') {
+    i++;
+  }
+
+  // Step 2: Handle sign
+  let sign = 1;
+  if (i < n && (s[i] === '+' || s[i] === '-')) {
+    sign = s[i] === '-' ? -1 : 1;
+    i++;
+  }
+
+  // Step 3 & 4: Build number from digits
+  let result = 0;
+  while (i < n && s[i] >= '0' && s[i] <= '9') {
+    const digit = s[i].charCodeAt(0) - '0'.charCodeAt(0);
+
+    // Step 5: Overflow check BEFORE adding digit
+    // If result > INT_MAX/10, next multiplication will overflow
+    // If result == INT_MAX/10, check if digit > 7 (last digit of INT_MAX)
+    if (result > Math.floor(INT_MAX / 10) ||
+        (result === Math.floor(INT_MAX / 10) && digit > 7)) {
+      return sign === 1 ? INT_MAX : INT_MIN;
+    }
+
+    result = result * 10 + digit;
+    i++;
+  }
+
+  return result * sign;
+}
+```
+
+**How it works:**
+
+**Step-by-step breakdown:**
+
+1. **Skip leading spaces**: Advance pointer until non-space found
+2. **Check sign**: Read '+' or '-' if present
+3. **Read digits**: Continue while character is digit (0-9)
+4. **Build number**: `result = result * 10 + digit`
+5. **Check overflow**: Before each multiplication, ensure won't exceed INT_MAX/INT_MIN
+6. **Return**: Apply sign to result
+
+**Overflow detection:**
+
+```javascript
+// INT_MAX = 2147483647
+// INT_MIN = -2147483648
+
+// Before: result * 10 + digit
+// Check: result > INT_MAX / 10 (214748364)
+// Or:    result == 214748364 && digit > 7
+
+Example: result = 214748364, digit = 8
+  214748364 * 10 + 8 = 2147483648 > INT_MAX
+  Return INT_MAX or INT_MIN based on sign
+```
+
+**Example walkthrough:**
+
+```
+s = "   -42"
+
+i=0: s[0]=' ' → skip
+i=1: s[1]=' ' → skip
+i=2: s[2]=' ' → skip
+i=3: s[3]='-' → sign=-1, i=4
+i=4: s[4]='4' → digit=4, result=0*10+4=4, i=5
+i=5: s[5]='2' → digit=2, result=4*10+2=42, i=6
+i=6: end of string
+
+return 42 * -1 = -42
+```
+
+```
+s = "4193 with words"
+
+i=0: s[0]='4' → digit=4, result=4
+i=1: s[1]='1' → digit=1, result=41
+i=2: s[2]='9' → digit=9, result=419
+i=3: s[3]='3' → digit=3, result=4193
+i=4: s[4]=' ' → not digit, stop
+
+return 4193
+```
+
+```
+s = "91283472332" (overflow)
+
+Building: 912834723
+Next digit: 3
+Check: 912834723 > 214748364 → true
+Return INT_MAX = 2147483647
+```
+
+## Common Mistakes
+
+❌ Using parseInt or Number
+```javascript
+return parseInt(s); // Defeats purpose of problem!
+```
+
+✅ Implement algorithm manually
+```javascript
+// Process character by character
+while (i < n && s[i] >= '0' && s[i] <= '9') { ... }
+```
+
+❌ Overflow check after multiplication
+```javascript
+result = result * 10 + digit;
+if (result > INT_MAX) // Too late! Already overflowed
+```
+
+✅ Check before multiplication
+```javascript
+if (result > Math.floor(INT_MAX / 10) || ...) {
+  return sign === 1 ? INT_MAX : INT_MIN;
+}
+result = result * 10 + digit;
+```
+
+❌ Not handling all edge cases
+```javascript
+// What about "+", "-", "   ", "+-12"?
+```
+
+✅ Follow algorithm precisely
+```javascript
+// Handle whitespace, sign, digits, overflow carefully
+```
+
+❌ Continuing after non-digit
+```javascript
+// "42 abc" should return 42, not try to parse "abc"
+```
+
+✅ Stop at first non-digit
+```javascript
+while (i < n && s[i] >= '0' && s[i] <= '9') { ... }
+// Loop stops at first non-digit
+```
+
+## Interview Tips
+
+**When discussing:**
+1. Walk through the algorithm steps clearly
+2. Emphasize overflow detection strategy
+3. Show how to handle edge cases (whitespace, sign, no digits)
+4. Discuss why checking overflow before multiplication
+5. Test with examples: overflow, negative, leading spaces
+
+**Follow-up questions:**
+- What about 64-bit integers? → Adjust INT_MAX/INT_MIN constants
+- How to handle other bases (binary, hex)? → Modify digit validation and calculation
+- What if we want an error instead of clamping? → Throw exception instead of returning INT_MAX/MIN
+- Can we use regex? → Yes, but defeats learning purpose
+- What about decimal points? → Current implementation stops at '.'
+
+**Key insights:**
+- This is a simulation problem (implement spec carefully)
+- Overflow detection must happen BEFORE operation
+- State machine: whitespace → sign → digits → stop
+- Edge cases are crucial: empty, whitespace only, no digits
+- Character-by-character processing is O(n)
+
+**Common test cases to mention:**
+- Leading whitespace: "   42"
+- Negative: "-42"
+- With words: "4193 with words"
+- Words first: "words and 987"
+- Overflow: "91283472332"
+- Underflow: "-91283472332"
+- Edge: "", "   ", "+", "-", "+-12"
