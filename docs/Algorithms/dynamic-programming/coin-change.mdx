@@ -181,7 +181,7 @@ function coinChange(coins, amount) {
 // helper(4) computed once and cached
 // helper(3) computed once and cached
 // ...
-// Total: O(amount) unique states × O(n) coins = O(n × amount)
+// Total: O(amount) unique states &#215; O(n) coins = O(n &#215; amount)
 ```
 
 ### Approach 3: DP Tabulation (Optimal) ✅
@@ -314,7 +314,7 @@ const dp = new Array(amount + 1).fill(0);
 const dp = new Array(amount + 1).fill(Infinity);
 ```
 
-❌ **Forgetting to check if coin <= i:**
+❌ **Forgetting to check if coin is within bounds:**
 ```javascript
 // Wrong - negative indices!
 for (const coin of coins) {
