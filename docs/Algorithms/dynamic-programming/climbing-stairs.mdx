@@ -1,0 +1,350 @@
+---
+sidebar_position: 1
+difficulty: Easy
+tags: [dynamic-programming, math, recursion, memoization]
+leetcode_url: https://leetcode.com/problems/climbing-stairs/
+companies: [Apple, Google, Adobe, Amazon, Microsoft]
+pattern: "Dynamic Programming"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Climbing Stairs
+
+<AlgorithmProblem
+  title="Climbing Stairs"
+  difficulty="Easy"
+  description={`
+<p>You are climbing a staircase. It takes <code>n</code> steps to reach the top. Each time you can climb <code>1</code> or <code>2</code> steps. In how many distinct ways can you climb to the top?</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &le; n &le; 45</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'n = 2',
+      output: '2',
+      explanation: 'Possible ways: [1,1], [2]'
+    },
+    {
+      input: 'n = 3',
+      output: '3',
+      explanation: 'Possible ways: [1,1,1], [1,2], [2,1]'
+    },
+    {
+      input: 'n = 4',
+      output: '5',
+      explanation: 'Possible ways: [1,1,1,1], [1,1,2], [1,2,1], [2,1,1], [2,2]'
+    }
+  ]}
+  starterCode={`function climbStairs(n) {
+  // Write your code here
+
+}`}
+  solution={`function climbStairs(n) {
+  // Dynamic Programming - Tabulation: O(n) time, O(n) space
+  // Base cases
+  if (n === 1) return 1;
+  if (n === 2) return 2;
+
+  // dp[i] = number of ways to reach step i
+  const dp = [0, 1, 2];
+
+  for (let i = 3; i <= n; i++) {
+    dp[i] = dp[i - 1] + dp[i - 2];
+  }
+
+  return dp[n];
+}`}
+  testCases={[
+    {
+      input: [2],
+      expected: 2,
+      description: 'n=2: Two ways to climb'
+    },
+    {
+      input: [3],
+      expected: 3,
+      description: 'n=3: Three ways to climb'
+    },
+    {
+      input: [4],
+      expected: 5,
+      description: 'n=4: Five ways to climb'
+    },
+    {
+      input: [1],
+      expected: 1,
+      description: 'n=1: Single step (base case)'
+    },
+    {
+      input: [5],
+      expected: 8,
+      description: 'n=5: Fibonacci sequence (8 ways)'
+    },
+    {
+      input: [6],
+      expected: 13,
+      description: 'n=6: Fibonacci sequence (13 ways)'
+    }
+  ]}
+  functionName="climbStairs"
+/>
+
+## Solution Explanation
+
+### Approach 1: Recursion (Not Recommended)
+
+**Time Complexity:** O(2<sup>n</sup>)
+**Space Complexity:** O(n) recursive call stack
+
+Use recursion to explore all possibilities:
+
+```javascript
+function climbStairs(n) {
+  // Base cases
+  if (n === 1) return 1;
+  if (n === 2) return 2;
+
+  // To reach step n, come from step n-1 or n-2
+  return climbStairs(n - 1) + climbStairs(n - 2);
+}
+
+// Example: n = 4
+//                  climbStairs(4)
+//                /              \
+//        climbStairs(3)      climbStairs(2) = 2
+//        /              \
+// climbStairs(2)=2  climbStairs(1)=1  ... exponential duplication!
+```
+
+**Why avoid?** Exponential time due to overlapping subproblems.
+
+### Approach 2: Memoization (Better)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(n)
+
+Cache results of subproblems:
+
+```javascript
+function climbStairs(n) {
+  const memo = {};
+
+  function helper(n) {
+    if (n === 1) return 1;
+    if (n === 2) return 2;
+
+    if (n in memo) return memo[n];
+
+    // Each step n can be reached from n-1 or n-2
+    memo[n] = helper(n - 1) + helper(n - 2);
+    return memo[n];
+  }
+
+  return helper(n);
+}
+
+// With memoization:
+// climbStairs(4)
+// ├─ climbStairs(3) [computed]
+// │  ├─ climbStairs(2) = 2 [memoized]
+// │  └─ climbStairs(1) = 1 [memoized]
+// └─ climbStairs(2) = 2 [memoized from first call]
+// Total calls: O(n) instead of O(2^n)
+```
+
+**How memoization helps:**
+- First call to `climbStairs(2)` returns 2
+- Second call to `climbStairs(2)` returns memoized 2 (no recalculation!)
+- Converts exponential tree to linear calls
+
+### Approach 3: Dynamic Programming - Tabulation (Optimal) ✅
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(n)
+
+Build solution bottom-up:
+
+```javascript
+function climbStairs(n) {
+  // Base cases
+  if (n === 1) return 1;
+  if (n === 2) return 2;
+
+  // dp[i] = number of distinct ways to reach step i
+  const dp = [0, 1, 2];
+
+  for (let i = 3; i <= n; i++) {
+    // To reach step i: come from step i-1 (1 step) or step i-2 (2 steps)
+    dp[i] = dp[i - 1] + dp[i - 2];
+  }
+
+  return dp[n];
+}
+
+// Visualization: n = 5
+// Step 1: 1 way (only [1])
+// Step 2: 2 ways ([1,1], [2])
+// Step 3: 3 ways (ways_from_2 + ways_from_1 = 2 + 1 = 3)
+// Step 4: 5 ways (ways_from_3 + ways_from_2 = 3 + 2 = 5)
+// Step 5: 8 ways (ways_from_4 + ways_from_3 = 5 + 3 = 8)
+
+// dp array: [0, 1, 2, 3, 5, 8]
+//           [0, 1, 2, 3, 4, 5] indices
+```
+
+**Why this works:**
+- To reach step i, you must climb from step i-1 or i-2
+- Total ways to step i = ways to (i-1) + ways to (i-2)
+- Build array from bottom up, each value depends only on previous two
+
+### Approach 4: Space-Optimized DP ✅
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1)
+
+Only track last two values:
+
+```javascript
+function climbStairs(n) {
+  if (n === 1) return 1;
+  if (n === 2) return 2;
+
+  let prev2 = 1;  // Ways to reach step 1
+  let prev1 = 2;  // Ways to reach step 2
+
+  for (let i = 3; i <= n; i++) {
+    const current = prev1 + prev2;
+    prev2 = prev1;
+    prev1 = current;
+  }
+
+  return prev1;
+}
+
+// Trace: n = 5
+// i=3: current = 2 + 1 = 3, prev2 = 2, prev1 = 3
+// i=4: current = 3 + 2 = 5, prev2 = 3, prev1 = 5
+// i=5: current = 5 + 3 = 8, prev2 = 5, prev1 = 8
+// return 8
+```
+
+**Key insight:** Only need last two values, not entire array!
+
+## Comparison of Approaches
+
+| Approach | Time | Space | Best For |
+|----------|------|-------|----------|
+| Recursion | O(2<sup>n</sup>) | O(n) | Understanding the problem |
+| Memoization | O(n) | O(n) | Interview (top-down thinking) |
+| Tabulation | O(n) | O(n) | Standard DP solution |
+| Space-Optimized | O(n) | O(1) | **Best overall** |
+
+## Key DP Insights
+
+**This problem demonstrates the core DP pattern:**
+
+1. **Optimal Substructure:** Ways to step n = ways to (n-1) + ways to (n-2)
+2. **Overlapping Subproblems:** `climbStairs(3)` computed multiple times
+3. **Bottom-up building:** Start from n=1, build to target n
+4. **State representation:** `dp[i]` = ways to reach step i
+
+**DP Formula (Recurrence Relation):**
+```
+dp[i] = dp[i-1] + dp[i-2]
+Base cases: dp[1] = 1, dp[2] = 2
+```
+
+**This is actually the Fibonacci sequence!**
+- Fibonacci: F(n) = F(n-1) + F(n-2)
+- Climbing stairs: dp[n] = dp[n-1] + dp[n-2]
+
+## Common Mistakes
+
+❌ **Forgetting base cases:**
+```javascript
+// Wrong - no base cases for n=1, n=2
+const dp = [0];
+for (let i = 1; i <= n; i++) {
+  dp[i] = dp[i-1] + dp[i-2];  // Index errors!
+}
+```
+
+❌ **Using 0-indexed array incorrectly:**
+```javascript
+// Wrong - dp[0] should not represent step 0
+const dp = [];
+dp[1] = 1;
+dp[2] = 2;
+// Better: use explicit indices
+```
+
+❌ **Not recognizing Fibonacci:**
+```javascript
+// If you know this is Fibonacci, use optimized formula!
+// But memoization/DP is safer than matrix exponentiation
+```
+
+✅ **Correct approach - base cases and iteration:**
+```javascript
+function climbStairs(n) {
+  if (n === 1) return 1;
+  if (n === 2) return 2;
+
+  let prev2 = 1;
+  let prev1 = 2;
+
+  for (let i = 3; i <= n; i++) {
+    const current = prev1 + prev2;
+    prev2 = prev1;
+    prev1 = current;
+  }
+
+  return prev1;
+}
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Identify: "This is a DP problem - we can either take 1 or 2 steps"
+2. Recurrence: "Ways to step n = ways to step n-1 + ways to step n-2"
+3. Base cases: "n=1 has 1 way, n=2 has 2 ways"
+4. Optimize: "We only need last two values, so O(1) space"
+
+**Key talking points:**
+- "This is the classic introduction to DP"
+- "It demonstrates optimal substructure: solution depends on subproblems"
+- "It shows overlapping subproblems: memoization prevents recomputation"
+- "Final optimization uses only two variables"
+
+**Follow-up questions you might get:**
+
+**Q: What if you can climb 1, 2, OR 3 steps?**
+A: Change recurrence to `dp[i] = dp[i-1] + dp[i-2] + dp[i-3]`
+
+**Q: What if some steps are blocked?**
+A: Only add to dp[i] if step i is not blocked: `if (!blocked[i]) dp[i] = ...`
+
+**Q: Can you do this in O(log n) time?**
+A: Use matrix exponentiation for Fibonacci, but rarely needed in interviews
+
+**Q: What's the mathematical formula?**
+A: Related to Fibonacci numbers, but DP solution is practical for implementation
+
+## Edge Cases
+
+```javascript
+climbStairs(1) → 1      // Single step
+climbStairs(2) → 2      // Two steps
+climbStairs(3) → 3      // First non-trivial case
+climbStairs(45) → 1134903170  // Large n - watch for overflow
+```
+
+## Related Problems
+
+- **House Robber** (Medium) - Similar DP, but choose maximum instead of sum
+- **Jump Game** (Medium) - Can you reach the end?
+- **Coin Change** (Medium) - Minimum coins (different recurrence)

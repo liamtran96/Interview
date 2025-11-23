@@ -1,0 +1,383 @@
+---
+sidebar_position: 2
+difficulty: Easy
+tags: [dynamic-programming, array, recursion]
+leetcode_url: https://leetcode.com/problems/house-robber/
+companies: [Google, Amazon, Meta, Apple, Microsoft]
+pattern: "Dynamic Programming"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# House Robber
+
+<AlgorithmProblem
+  title="House Robber"
+  difficulty="Easy"
+  description={`
+<p>You are a professional robber planning to rob houses along a street. Each house has a certain amount of money stashed, represented by a non-negative integer array <code>nums</code> where <code>nums[i]</code> is the amount of money in the i<sup>th</sup> house.</p>
+<p>You cannot rob two adjacent houses. Determine the <strong>maximum amount of money</strong> you can rob without alerting the police.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &le; nums.length &le; 100</li>
+  <li>0 &le; nums[i] &le; 400</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'nums = [1,2,3,1]',
+      output: '4',
+      explanation: 'Rob houses at index 0 and 2. Total = 1 + 3 = 4'
+    },
+    {
+      input: 'nums = [2,7,9,3,1]',
+      output: '9',
+      explanation: 'Rob house at index 2. Total = 9'
+    },
+    {
+      input: 'nums = [5,3,4,11,2]',
+      output: '16',
+      explanation: 'Rob houses at index 0, 2, and 4. Total = 5 + 4 + 2 = 11. Or index 0 and 3: 5 + 11 = 16'
+    }
+  ]}
+  starterCode={`function rob(nums) {
+  // Write your code here
+
+}`}
+  solution={`function rob(nums) {
+  // DP Space-Optimized: O(n) time, O(1) space
+  if (nums.length === 1) return nums[0];
+
+  let prev2 = nums[0];      // Max money robbing up to house i-2
+  let prev1 = Math.max(nums[0], nums[1]); // Max money robbing up to house i-1
+
+  for (let i = 2; i < nums.length; i++) {
+    const current = Math.max(
+      prev1,                  // Skip current house
+      prev2 + nums[i]         // Rob current house
+    );
+    prev2 = prev1;
+    prev1 = current;
+  }
+
+  return prev1;
+}`}
+  testCases={[
+    {
+      input: [[1, 2, 3, 1]],
+      expected: 4,
+      description: 'nums=[1,2,3,1]: Rob houses 0 and 2'
+    },
+    {
+      input: [[2, 7, 9, 3, 1]],
+      expected: 9,
+      description: 'nums=[2,7,9,3,1]: Rob house 2 only'
+    },
+    {
+      input: [[5, 3, 4, 11, 2]],
+      expected: 16,
+      description: 'nums=[5,3,4,11,2]: Rob houses 0 and 3'
+    },
+    {
+      input: [[1]],
+      expected: 1,
+      description: 'Single house (base case)'
+    },
+    {
+      input: [[5, 1, 3, 9]],
+      expected: 14,
+      description: 'Rob houses 0 and 3'
+    },
+    {
+      input: [[1, 3, 1, 3, 100]],
+      expected: 103,
+      description: 'Rob houses 1 and 4'
+    }
+  ]}
+  functionName="rob"
+/>
+
+## Solution Explanation
+
+### Approach 1: Brute Force (Exponential)
+
+**Time Complexity:** O(2<sup>n</sup>)
+**Space Complexity:** O(n) recursive stack
+
+Try all combinations (rob or skip each house):
+
+```javascript
+function rob(nums) {
+  function helper(index) {
+    // Base case: no more houses
+    if (index >= nums.length) return 0;
+
+    // Option 1: Rob current house, skip next house
+    const robCurrent = nums[index] + helper(index + 2);
+
+    // Option 2: Skip current house
+    const skipCurrent = helper(index + 1);
+
+    return Math.max(robCurrent, skipCurrent);
+  }
+
+  return helper(0);
+}
+
+// Example tree: nums = [1, 2, 3]
+//                  helper(0)
+//              /              \
+//         rob(1)           skip(1)
+//       /        \        /        \
+//    rob(3)    skip(3)  rob(2)    skip(2)
+//     |          |        |         |
+//     0          0        3         2
+// Max at 0: max(1 + 2, 2) = 3
+```
+
+**Why avoid?** Exponential subproblems without memoization.
+
+### Approach 2: Memoization (Top-down)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(n)
+
+Cache decisions at each house:
+
+```javascript
+function rob(nums) {
+  const memo = {};
+
+  function helper(index) {
+    if (index >= nums.length) return 0;
+    if (index in memo) return memo[index];
+
+    // Rob current: get nums[index] + max from index+2 onwards
+    const robCurrent = nums[index] + helper(index + 2);
+
+    // Skip current: get max from index+1 onwards
+    const skipCurrent = helper(index + 1);
+
+    memo[index] = Math.max(robCurrent, skipCurrent);
+    return memo[index];
+  }
+
+  return helper(0);
+}
+
+// Trace: nums = [1, 2, 3, 1]
+// helper(0): max(1 + helper(2), helper(1))
+// helper(1): max(2 + helper(3), helper(2))
+// helper(2): max(3 + helper(4), helper(3))
+// helper(3): max(1 + helper(5), helper(4))
+// helper(4+): 0
+// With memoization, each index computed once: O(n)
+```
+
+### Approach 3: DP Tabulation (Bottom-up)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(n)
+
+Build table from house 0 to house n:
+
+```javascript
+function rob(nums) {
+  if (nums.length === 1) return nums[0];
+
+  // dp[i] = max money robbing houses 0 to i
+  const dp = [nums[0]];
+  dp[1] = Math.max(nums[0], nums[1]);
+
+  for (let i = 2; i < nums.length; i++) {
+    // At house i, either:
+    // 1. Skip house i: take max from i-1
+    // 2. Rob house i: add nums[i] to max from i-2
+    dp[i] = Math.max(
+      dp[i - 1],           // Don't rob house i
+      dp[i - 2] + nums[i]  // Rob house i
+    );
+  }
+
+  return dp[nums.length - 1];
+}
+
+// Trace: nums = [1, 2, 3, 1]
+// dp[0] = 1 (rob house 0)
+// dp[1] = max(1, 2) = 2 (rob house 1)
+// dp[2] = max(2, 1 + 3) = 4 (rob houses 0 and 2)
+// dp[3] = max(4, 2 + 1) = 4 (don't rob house 3)
+// return 4
+```
+
+**Key insight:** At each house, we decide: rob it or skip it?
+
+### Approach 4: Space-Optimized DP (Best) ✅
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1)
+
+Only track last two houses:
+
+```javascript
+function rob(nums) {
+  if (nums.length === 1) return nums[0];
+
+  let prev2 = nums[0];       // Max from houses up to i-2
+  let prev1 = Math.max(nums[0], nums[1]); // Max from houses up to i-1
+
+  for (let i = 2; i < nums.length; i++) {
+    const current = Math.max(
+      prev1,              // Skip current house
+      prev2 + nums[i]     // Rob current house
+    );
+    prev2 = prev1;
+    prev1 = current;
+  }
+
+  return prev1;
+}
+
+// Trace: nums = [1, 2, 3, 1]
+// prev2 = 1, prev1 = 2
+// i=2: current = max(2, 1 + 3) = 4, prev2 = 2, prev1 = 4
+// i=3: current = max(4, 2 + 1) = 4, prev2 = 4, prev1 = 4
+// return 4
+```
+
+## DP Recurrence Relation
+
+```
+dp[i] = max(dp[i-1], dp[i-2] + nums[i])
+
+Where:
+- dp[i-1]: max money if we skip house i
+- dp[i-2] + nums[i]: max money if we rob house i (can't rob i-1)
+
+Base cases:
+- dp[0] = nums[0] (only one house, rob it)
+- dp[1] = max(nums[0], nums[1]) (choose better house)
+```
+
+## Comparison of Approaches
+
+| Approach | Time | Space | Pros | Cons |
+|----------|------|-------|------|------|
+| Brute Force | O(2<sup>n</sup>) | O(n) | Simple | Exponential |
+| Memoization | O(n) | O(n) | Easy to understand | Extra space |
+| Tabulation | O(n) | O(n) | Standard DP | Uses array |
+| Space-Optimized | O(n) | O(1) | **Optimal** | Two variables |
+
+## Key DP Insights
+
+**This problem demonstrates:**
+
+1. **State definition:** `dp[i]` = maximum money robbing up to house i
+2. **State transition:** At each house, choose to rob or skip
+3. **Constraint handling:** Adjacent houses can't both be robbed
+4. **Space optimization:** Only need last two values
+
+**Decision at each house:**
+```
+For house i:
+├─ Rob it: get nums[i] + dp[i-2] (can't use dp[i-1])
+└─ Skip it: get dp[i-1] (keep previous max)
+Choose maximum of the two
+```
+
+## Common Mistakes
+
+❌ **Forgetting to handle adjacent constraint:**
+```javascript
+// Wrong - can rob adjacent houses!
+const dp = [nums[0]];
+for (let i = 1; i < nums.length; i++) {
+  dp[i] = dp[i - 1] + nums[i];  // Always add, ignores constraint
+}
+```
+
+❌ **Wrong recurrence relation:**
+```javascript
+// Wrong - not considering skipping current house
+dp[i] = nums[i] + dp[i - 2];  // Always must rob
+
+// Correct - choose to rob or skip
+dp[i] = Math.max(dp[i - 1], dp[i - 2] + nums[i]);
+```
+
+❌ **Incorrectly using only dp[i-2]:**
+```javascript
+// Wrong - ignoring best solution so far
+for (let i = 2; i < nums.length; i++) {
+  dp[i] = nums[i] + dp[i - 2];
+}
+
+// Correct - compare with skipping current
+for (let i = 2; i < nums.length; i++) {
+  dp[i] = Math.max(dp[i - 1], nums[i] + dp[i - 2]);
+}
+```
+
+✅ **Correct approach:**
+```javascript
+function rob(nums) {
+  if (nums.length === 1) return nums[0];
+
+  let prev2 = nums[0];
+  let prev1 = Math.max(nums[0], nums[1]);
+
+  for (let i = 2; i < nums.length; i++) {
+    const current = Math.max(prev1, prev2 + nums[i]);
+    prev2 = prev1;
+    prev1 = current;
+  }
+
+  return prev1;
+}
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Identify: "This is a constraint-based DP problem"
+2. State: "dp[i] represents max money robbing up to house i"
+3. Transition: "At each house, we choose to rob or skip"
+4. Constraint: "Can't rob two adjacent houses"
+5. Optimize: "Only need last two values for O(1) space"
+
+**Key talking points:**
+- "Similar to climbing stairs but we maximize instead of count"
+- "Key constraint: adjacent houses can't both be robbed"
+- "We need to decide at each house: rob or skip?"
+- "Only the last two houses' max matter for current decision"
+
+**Follow-up questions:**
+
+**Q: What if houses are arranged in a circle?**
+A: Can't rob both house 0 and last house. Try two cases: exclude first or exclude last.
+
+**Q: What if you can rob at most k houses?**
+A: Add another dimension: `dp[i][j]` = max with j houses robbed. O(n*k) time.
+
+**Q: What if each house has a 'cooldown' period?**
+A: Extend constraint to i-2. Recurrence becomes `dp[i] = max(dp[i-1], dp[i-2] + nums[i])`.
+
+**Q: Return which houses to rob?**
+A: Backtrack from end: if `dp[i] !== dp[i-1]`, house i was robbed.
+
+## Edge Cases
+
+```javascript
+rob([1]) → 1           // Single house
+rob([5, 3]) → 5        // Two houses, pick larger
+rob([1, 1, 3, 6]) → 7  // Rob houses 0 and 3
+rob([0]) → 0           // No money
+rob([0, 0, 0]) → 0     // All zeros
+```
+
+## Related Problems
+
+- **House Robber II** (Medium) - Houses in a circle (first/last adjacent)
+- **House Robber III** (Medium) - Houses form a tree (parent-child constraint)
+- **Climbing Stairs** (Easy) - Similar DP, different constraint
+- **Best Time to Buy and Sell Stock** (Easy) - DP for transaction decisions
