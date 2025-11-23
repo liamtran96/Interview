@@ -1,0 +1,385 @@
+---
+sidebar_position: 5
+difficulty: Medium
+tags: [graphs, dfs, bfs, union-find, amazon, google, facebook]
+leetcode_url: https://leetcode.com/problems/number-of-connected-components-in-an-undirected-graph/
+companies: [Amazon, Google, Facebook, Microsoft, Apple]
+pattern: "Graphs"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Number of Connected Components in an Undirected Graph
+
+<AlgorithmProblem
+  title="Number of Connected Components in an Undirected Graph"
+  difficulty="Medium"
+  description={`
+<p>You have a graph of <code>n</code> nodes. You are given an integer <code>n</code> and an array <code>edges</code> where each <code>edges[i] = [ai, bi]</code> indicates that there is an undirected edge between nodes <code>ai</code> and <code>bi</code> in the graph.</p>
+<p>Return <em>the number of connected components in this graph</em>.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &lt;= n &lt;= 2000</li>
+  <li>1 &lt;= edges.length &lt;= 5000</li>
+  <li>edges[i].length == 2</li>
+  <li>0 &lt;= ai, bi &lt; n</li>
+  <li>All values <code>ai</code> and <code>bi</code> are unique.</li>
+  <li>There are no self-loops or duplicate edges.</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'n = 5, edges = [[0,1],[1,2],[3,4]]',
+      output: '2',
+      explanation: 'Components: {0,1,2} and {3,4}'
+    },
+    {
+      input: 'n = 5, edges = [[0,1],[1,2],[2,3],[3,4]]',
+      output: '1',
+      explanation: 'All nodes are connected: {0,1,2,3,4}'
+    },
+    {
+      input: 'n = 3, edges = []',
+      output: '3',
+      explanation: 'No edges means 3 isolated nodes'
+    }
+  ]}
+  starterCode={`function countComponents(n, edges) {
+  // Write your code here
+  return 0;
+}`}
+  solution={`function countComponents(n, edges) {
+  // DFS approach to count connected components
+  // Time: O(n + e) where n = nodes, e = edges
+  // Space: O(n + e) for graph and visited set
+
+  // Build adjacency list
+  const graph = Array.from({ length: n }, () => []);
+  for (const [a, b] of edges) {
+    graph[a].push(b);
+    graph[b].push(a);  // Undirected graph
+  }
+
+  const visited = new Set();
+  let components = 0;
+
+  function dfs(node) {
+    visited.add(node);
+
+    for (const neighbor of graph[node]) {
+      if (!visited.has(neighbor)) {
+        dfs(neighbor);
+      }
+    }
+  }
+
+  // Count components by starting DFS from each unvisited node
+  for (let i = 0; i < n; i++) {
+    if (!visited.has(i)) {
+      components++;
+      dfs(i);
+    }
+  }
+
+  return components;
+}`}
+  testCases={[
+    {
+      input: [5, [[0, 1], [1, 2], [3, 4]]],
+      expected: 2,
+      description: 'Two separate components: {0,1,2} and {3,4}'
+    },
+    {
+      input: [5, [[0, 1], [1, 2], [2, 3], [3, 4]]],
+      expected: 1,
+      description: 'All nodes connected in one component'
+    },
+    {
+      input: [3, []],
+      expected: 3,
+      description: 'No edges, three isolated nodes'
+    },
+    {
+      input: [1, []],
+      expected: 1,
+      description: 'Single isolated node'
+    },
+    {
+      input: [4, [[0, 1], [2, 3]]],
+      expected: 2,
+      description: 'Two pairs of connected nodes'
+    },
+    {
+      input: [6, [[0, 1], [0, 2], [1, 2], [3, 4]]],
+      expected: 2,
+      description: 'One triangle component and one separate edge'
+    }
+  ]}
+  functionName="countComponents"
+/>
+
+## Solution Explanation
+
+### Approach 1: DFS (Depth-First Search) ✅
+
+**Time Complexity:** O(n + e) where n = nodes, e = edges
+**Space Complexity:** O(n + e) for graph and visited set
+
+Count each connected component by starting DFS from unvisited nodes:
+
+```javascript
+function countComponents(n, edges) {
+  // Build adjacency list for undirected graph
+  const graph = Array.from({ length: n }, () => []);
+  for (const [a, b] of edges) {
+    graph[a].push(b);
+    graph[b].push(a);
+  }
+
+  const visited = new Set();
+  let components = 0;
+
+  function dfs(node) {
+    visited.add(node);
+
+    // Visit all neighbors
+    for (const neighbor of graph[node]) {
+      if (!visited.has(neighbor)) {
+        dfs(neighbor);
+      }
+    }
+  }
+
+  // Start DFS from each unvisited node
+  for (let i = 0; i < n; i++) {
+    if (!visited.has(i)) {
+      components++;  // Found new component
+      dfs(i);  // Explore entire component
+    }
+  }
+
+  return components;
+}
+```
+
+**How it works:**
+
+```
+Graph: n=5, edges=[[0,1],[1,2],[3,4]]
+
+Adjacency List:
+0 → [1]
+1 → [0, 2]
+2 → [1]
+3 → [4]
+4 → [3]
+
+Iteration:
+i=0: Not visited → components=1, DFS(0)
+  Visit 0, check neighbor 1
+  DFS(1): Visit 1, check neighbors 0 (visited), 2
+  DFS(2): Visit 2, check neighbor 1 (visited)
+  All nodes {0,1,2} visited
+
+i=1: Visited (skip)
+i=2: Visited (skip)
+i=3: Not visited → components=2, DFS(3)
+  Visit 3, check neighbor 4
+  DFS(4): Visit 4, check neighbor 3 (visited)
+  All nodes {3,4} visited
+
+i=4: Visited (skip)
+
+Result: 2 components
+```
+
+### Approach 2: BFS (Breadth-First Search) ✅
+
+**Time Complexity:** O(n + e)
+**Space Complexity:** O(n + e) for graph and queue
+
+Use queue instead of recursion:
+
+```javascript
+function countComponents(n, edges) {
+  const graph = Array.from({ length: n }, () => []);
+  for (const [a, b] of edges) {
+    graph[a].push(b);
+    graph[b].push(a);
+  }
+
+  const visited = new Set();
+  let components = 0;
+
+  for (let i = 0; i < n; i++) {
+    if (!visited.has(i)) {
+      components++;
+
+      // BFS from node i
+      const queue = [i];
+      visited.add(i);
+
+      while (queue.length > 0) {
+        const node = queue.shift();
+
+        for (const neighbor of graph[node]) {
+          if (!visited.has(neighbor)) {
+            visited.add(neighbor);
+            queue.push(neighbor);
+          }
+        }
+      }
+    }
+  }
+
+  return components;
+}
+```
+
+### Approach 3: Union-Find (Disjoint Set Union) ✅
+
+**Time Complexity:** O(n + e × α(n)) where α is inverse Ackermann (nearly O(1))
+**Space Complexity:** O(n) for parent array
+
+Use Union-Find to merge components:
+
+```javascript
+class UnionFind {
+  constructor(n) {
+    this.parent = Array.from({ length: n }, (_, i) => i);
+    this.rank = Array(n).fill(0);
+  }
+
+  find(x) {
+    if (this.parent[x] !== x) {
+      this.parent[x] = this.find(this.parent[x]);  // Path compression
+    }
+    return this.parent[x];
+  }
+
+  union(x, y) {
+    const rootX = this.find(x);
+    const rootY = this.find(y);
+
+    if (rootX === rootY) return;
+
+    // Union by rank
+    if (this.rank[rootX] < this.rank[rootY]) {
+      this.parent[rootX] = rootY;
+    } else if (this.rank[rootX] > this.rank[rootY]) {
+      this.parent[rootY] = rootX;
+    } else {
+      this.parent[rootY] = rootX;
+      this.rank[rootX]++;
+    }
+  }
+}
+
+function countComponents(n, edges) {
+  const uf = new UnionFind(n);
+
+  // Union nodes connected by edges
+  for (const [a, b] of edges) {
+    uf.union(a, b);
+  }
+
+  // Count unique roots (components)
+  const roots = new Set();
+  for (let i = 0; i < n; i++) {
+    roots.add(uf.find(i));
+  }
+
+  return roots.size;
+}
+```
+
+### Key Concepts
+
+1. **Connected Component**: A group of nodes reachable from each other
+2. **Graph Traversal**: DFS/BFS explores one component fully
+3. **Unvisited Counter**: Each unvisited node starts a new component
+4. **Union-Find**: Optimal for dynamic connectivity problems
+
+## Common Mistakes
+
+❌ Not building undirected graph correctly:
+```javascript
+// Wrong - only adds one direction
+for (const [a, b] of edges) {
+  graph[a].push(b);  // Missing b→a for undirected!
+}
+```
+
+❌ Counting every node as separate component:
+```javascript
+// Wrong - counts nodes, not components
+return n;  // Should count connected components!
+```
+
+❌ Not marking visited during traversal:
+```javascript
+// Wrong - will process same node multiple times
+function dfs(node) {
+  // Missing: visited.add(node)
+  for (const neighbor of graph[node]) {
+    dfs(neighbor);  // Infinite loop!
+  }
+}
+```
+
+✅ Correct approach:
+```javascript
+const graph = Array.from({ length: n }, () => []);
+// Add BOTH directions for undirected graph
+for (const [a, b] of edges) {
+  graph[a].push(b);
+  graph[b].push(a);
+}
+
+const visited = new Set();
+let components = 0;
+
+for (let i = 0; i < n; i++) {
+  if (!visited.has(i)) {
+    components++;  // Found new component
+    dfs(i);  // Explore entire component
+  }
+}
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Recognize: "This is a connected components counting problem"
+2. Key insight: "Each unvisited node we encounter starts a new component"
+3. Approach: "Build adjacency list, use DFS/BFS to traverse each component"
+4. Complexity: "O(n + e) time and space for graph representation"
+
+**Key talking points:**
+- "Each connected component is a separate group of reachable nodes"
+- "DFS/BFS fully explores one component before finding the next"
+- "Mark nodes visited during traversal to avoid revisiting"
+- "Undirected graph requires adding edges in both directions"
+
+**Why DFS vs BFS vs Union-Find:**
+- **DFS**: Simplest, intuitive recursion
+- **BFS**: Avoids stack overflow, level-order traversal
+- **Union-Find**: Optimal for dynamic connectivity, merging components
+
+**What if interviewer asks:**
+- **"Can we use Union-Find?"** - Yes, and it's optimal for this
+- **"What if graph is disconnected?"** - That's the whole point of counting components
+- **"How to find nodes in largest component?"** - Track sizes during DFS
+- **"What about efficiency?"** - Union-Find with path compression is near-linear
+
+**Related LeetCode Problems:**
+- Number of Islands
+- Surrounded Regions
+- Graph Valid Tree
+- Most Stones Removed with Same Row or Column
+
+**Follow-up variations:**
+- Find all nodes in largest connected component
+- Find bridges (articulation edges)
+- Find articulation points
+- Detect cycles in undirected graph
