@@ -1,0 +1,381 @@
+---
+sidebar_position: 5
+difficulty: Medium
+tags: [string, sliding-window, hash-table, amazon, microsoft]
+leetcode_url: https://leetcode.com/problems/permutation-in-string/
+companies: [Amazon, Microsoft, Google, Facebook]
+pattern: "Sliding Window"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Permutation in String
+
+<AlgorithmProblem
+  title="Permutation in String"
+  difficulty="Medium"
+  description={`
+<p>Given two strings <code>s1</code> and <code>s2</code>, return <code>true</code> if <code>s2</code> contains a permutation of <code>s1</code>, or <code>false</code> otherwise.</p>
+<p>In other words, return <code>true</code> if one of <code>s1</code>'s permutations is a substring of <code>s2</code>.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &lt;= s1.length, s2.length &lt;= 10<sup>4</sup></li>
+  <li><code>s1</code> and <code>s2</code> consist of lowercase English letters</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 's1 = "ab", s2 = "eidbaooo"',
+      output: 'true',
+      explanation: 's2 contains one permutation of s1 ("ba").'
+    },
+    {
+      input: 's1 = "ab", s2 = "eidboaoo"',
+      output: 'false',
+      explanation: 's2 does not contain any permutation of s1.'
+    },
+    {
+      input: 's1 = "adc", s2 = "dcda"',
+      output: 'true',
+      explanation: 's2 contains the permutation "cda" of s1.'
+    }
+  ]}
+  starterCode={`function checkInclusion(s1, s2) {
+  // Write your code here
+
+}`}
+  solution={`function checkInclusion(s1, s2) {
+  // Fixed-size sliding window with frequency map: O(n) time, O(1) space
+  if (s1.length > s2.length) return false;
+
+  // Build frequency map for s1
+  const s1Map = new Map();
+  for (const char of s1) {
+    s1Map.set(char, (s1Map.get(char) || 0) + 1);
+  }
+
+  // Initialize window map for first window
+  const windowMap = new Map();
+  for (let i = 0; i < s1.length; i++) {
+    windowMap.set(s2[i], (windowMap.get(s2[i]) || 0) + 1);
+  }
+
+  // Check if first window matches
+  if (mapsEqual(s1Map, windowMap)) return true;
+
+  // Slide the window
+  for (let i = s1.length; i < s2.length; i++) {
+    // Add new character
+    const newChar = s2[i];
+    windowMap.set(newChar, (windowMap.get(newChar) || 0) + 1);
+
+    // Remove old character
+    const oldChar = s2[i - s1.length];
+    windowMap.set(oldChar, windowMap.get(oldChar) - 1);
+    if (windowMap.get(oldChar) === 0) {
+      windowMap.delete(oldChar);
+    }
+
+    // Check if window matches
+    if (mapsEqual(s1Map, windowMap)) return true;
+  }
+
+  return false;
+}
+
+function mapsEqual(map1, map2) {
+  if (map1.size !== map2.size) return false;
+  for (const [key, val] of map1) {
+    if (map2.get(key) !== val) return false;
+  }
+  return true;
+}`}
+  testCases={[
+    {
+      input: ['ab', 'eidbaooo'],
+      expected: true,
+      description: 'Permutation "ba" found: s1="ab", s2="eidbaooo"'
+    },
+    {
+      input: ['ab', 'eidboaoo'],
+      expected: false,
+      description: 'No permutation found: s1="ab", s2="eidboaoo"'
+    },
+    {
+      input: ['adc', 'dcda'],
+      expected: true,
+      description: 'Permutation "cda" found: s1="adc", s2="dcda"'
+    },
+    {
+      input: ['hello', 'ooolleoooleh'],
+      expected: false,
+      description: 'Characters present but not together'
+    },
+    {
+      input: ['abc', 'bbbca'],
+      expected: false,
+      description: 'Wrong frequencies: s1="abc", s2="bbbca"'
+    },
+    {
+      input: ['a', 'ab'],
+      expected: true,
+      description: 'Single character match: s1="a", s2="ab"'
+    }
+  ]}
+  functionName="checkInclusion"
+/>
+
+## Solution Explanation
+
+### Approach 1: Brute Force (Not Recommended)
+
+**Time Complexity:** O(n × m! × m) where n = s2.length, m = s1.length
+**Space Complexity:** O(m!)
+
+Generate all permutations of s1 and check if any exist in s2:
+
+```javascript
+function checkInclusion(s1, s2) {
+  const permutations = generatePermutations(s1);
+  for (const perm of permutations) {
+    if (s2.includes(perm)) return true;
+  }
+  return false;
+}
+
+function generatePermutations(str) {
+  // Generates m! permutations - extremely slow!
+  // Implementation omitted for brevity
+}
+```
+
+**Why not use this?**
+- Factorial time complexity is prohibitive
+- "abc" has 6 permutations, "abcdef" has 720 permutations
+- Completely impractical for interview
+
+### Approach 2: Sorting with Sliding Window
+
+**Time Complexity:** O(n × m log m)
+**Space Complexity:** O(m)
+
+Sort s1 and compare with sorted window:
+
+```javascript
+function checkInclusion(s1, s2) {
+  if (s1.length > s2.length) return false;
+
+  const sorted1 = s1.split('').sort().join('');
+
+  for (let i = 0; i <= s2.length - s1.length; i++) {
+    const window = s2.slice(i, i + s1.length);
+    const sortedWindow = window.split('').sort().join('');
+
+    if (sorted1 === sortedWindow) return true;
+  }
+
+  return false;
+}
+```
+
+**Better, but still not optimal:**
+- Sorting each window takes O(m log m)
+- Total: O(n × m log m)
+
+### Approach 3: Frequency Map with Sliding Window (Optimal) ✅
+
+**Time Complexity:** O(n + m)
+**Space Complexity:** O(1) - at most 26 letters
+
+Use frequency maps to detect anagrams in sliding window:
+
+```javascript
+function checkInclusion(s1, s2) {
+  if (s1.length > s2.length) return false;
+
+  // Build frequency map for s1
+  const s1Map = new Map();
+  for (const char of s1) {
+    s1Map.set(char, (s1Map.get(char) || 0) + 1);
+  }
+
+  // Build frequency map for first window
+  const windowMap = new Map();
+  for (let i = 0; i < s1.length; i++) {
+    windowMap.set(s2[i], (windowMap.get(s2[i]) || 0) + 1);
+  }
+
+  // Check first window
+  if (mapsEqual(s1Map, windowMap)) return true;
+
+  // Slide the window
+  for (let i = s1.length; i < s2.length; i++) {
+    // Add new character (right side)
+    const newChar = s2[i];
+    windowMap.set(newChar, (windowMap.get(newChar) || 0) + 1);
+
+    // Remove old character (left side)
+    const oldChar = s2[i - s1.length];
+    const count = windowMap.get(oldChar) - 1;
+    if (count === 0) {
+      windowMap.delete(oldChar);
+    } else {
+      windowMap.set(oldChar, count);
+    }
+
+    // Check if current window is a permutation
+    if (mapsEqual(s1Map, windowMap)) return true;
+  }
+
+  return false;
+}
+
+function mapsEqual(map1, map2) {
+  if (map1.size !== map2.size) return false;
+  for (const [key, val] of map1) {
+    if (map2.get(key) !== val) return false;
+  }
+  return true;
+}
+```
+
+**How the Sliding Window with Frequency Maps works:**
+
+```
+s1 = "ab", s2 = "eidbaooo"
+s1Map = {a: 1, b: 1}
+
+Window "ei": {e: 1, i: 1} ≠ s1Map
+Window "id": {i: 1, d: 1} ≠ s1Map
+Window "db": {d: 1, b: 1} ≠ s1Map
+Window "ba": {b: 1, a: 1} = s1Map ✅ (found!)
+
+Result: true
+```
+
+### Advanced: Optimized with Match Counter
+
+**Time Complexity:** O(n + m)
+**Space Complexity:** O(1)
+
+Avoid comparing maps by tracking matching characters:
+
+```javascript
+function checkInclusion(s1, s2) {
+  if (s1.length > s2.length) return false;
+
+  const s1Count = Array(26).fill(0);
+  const s2Count = Array(26).fill(0);
+
+  // Build frequency arrays
+  for (let i = 0; i < s1.length; i++) {
+    s1Count[s1.charCodeAt(i) - 97]++;
+    s2Count[s2.charCodeAt(i) - 97]++;
+  }
+
+  // Count initial matches
+  let matches = 0;
+  for (let i = 0; i < 26; i++) {
+    if (s1Count[i] === s2Count[i]) matches++;
+  }
+
+  // Slide the window
+  for (let i = s1.length; i < s2.length; i++) {
+    if (matches === 26) return true;
+
+    // Add new character
+    const rightIdx = s2.charCodeAt(i) - 97;
+    s2Count[rightIdx]++;
+    if (s2Count[rightIdx] === s1Count[rightIdx]) {
+      matches++;
+    } else if (s2Count[rightIdx] === s1Count[rightIdx] + 1) {
+      matches--;
+    }
+
+    // Remove old character
+    const leftIdx = s2.charCodeAt(i - s1.length) - 97;
+    s2Count[leftIdx]--;
+    if (s2Count[leftIdx] === s1Count[leftIdx]) {
+      matches++;
+    } else if (s2Count[leftIdx] === s1Count[leftIdx] - 1) {
+      matches--;
+    }
+  }
+
+  return matches === 26;
+}
+```
+
+### Key Insights
+
+1. **Permutation = Anagram**: Same characters with same frequencies
+2. **Fixed-size window**: Window size equals s1.length
+3. **Frequency comparison**: Faster than sorting each window
+4. **O(1) space**: At most 26 lowercase letters
+
+## Common Mistakes
+
+❌ Comparing sorted strings (inefficient):
+```javascript
+// Works but slow - O(n × m log m)
+if (s1.split('').sort().join('') === window.split('').sort().join(''))
+```
+
+❌ Not maintaining window size correctly:
+```javascript
+// Wrong - window grows instead of sliding
+windowMap.set(s2[i], (windowMap.get(s2[i]) || 0) + 1);
+// Missing removal!
+```
+
+❌ Forgetting to check first window:
+```javascript
+// Wrong - misses permutation in first window
+for (let i = s1.length; i < s2.length; i++) {
+  // Should check first window before loop
+}
+```
+
+✅ Correct approach - frequency maps with proper sliding:
+```javascript
+// Build s1 frequency map
+const s1Map = buildFrequencyMap(s1);
+
+// Build first window frequency map
+const windowMap = buildFrequencyMap(s2.slice(0, s1.length));
+
+// Check first window
+if (mapsEqual(s1Map, windowMap)) return true;
+
+// Slide and check each subsequent window
+for (let i = s1.length; i < s2.length; i++) {
+  addToMap(windowMap, s2[i]);
+  removeFromMap(windowMap, s2[i - s1.length]);
+  if (mapsEqual(s1Map, windowMap)) return true;
+}
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Recognize: "Permutation means same characters with same frequencies"
+2. Identify: "This is a fixed-size sliding window problem"
+3. Optimize: "We can use frequency maps instead of generating permutations"
+4. Explain: "We compare character frequencies, not sorted strings"
+5. Complexity: "O(n) time with O(1) space (at most 26 letters)"
+
+**Key talking points:**
+- "Permutations are anagrams - we need to match character frequencies"
+- "Fixed-size window of length s1 slides through s2"
+- "Frequency map comparison is O(1) since alphabet is constant size"
+- "We update the window map incrementally as we slide"
+
+**Complexity analysis:**
+- Time: O(n + m) - build s1 map O(m), slide window O(n)
+- Space: O(1) - at most 26 characters in map
+
+**Follow-up questions you might get:**
+- **What if strings have uppercase letters?** Convert to lowercase or expand map
+- **Can we optimize map comparison?** Use match counter (shown in advanced solution)
+- **What about Unicode characters?** Need larger character set, but same approach
+- **Find all permutation indices?** Similar problem - next one (Find All Anagrams)
