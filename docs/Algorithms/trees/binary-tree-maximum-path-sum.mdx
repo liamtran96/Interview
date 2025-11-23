@@ -1,0 +1,408 @@
+---
+sidebar_position: 11
+difficulty: Hard
+tags: [trees, path-sum, recursion, dynamic-programming, amazon, google]
+leetcode_url: https://leetcode.com/problems/binary-tree-maximum-path-sum/
+companies: [Amazon, Google, Microsoft, Meta, Apple]
+pattern: "Trees"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Binary Tree Maximum Path Sum
+
+<AlgorithmProblem
+  title="Binary Tree Maximum Path Sum"
+  difficulty="Hard"
+  description={`
+<p>A <strong>path</strong> in a binary tree is a sequence of nodes where each pair of adjacent nodes in the sequence has an edge connecting them. A node can only appear in the sequence <strong>at most once</strong>. Note that the path does not need to pass through the root.</p>
+<p>The <strong>path sum</strong> of a path is the sum of the node's values in the path.</p>
+<p>Given the <code>root</code> of a binary tree, return <strong>the maximum path sum</strong> of any non-empty path.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>The number of nodes in the tree is in the range [1, 3000]</li>
+  <li>-1000 ≤ Node.val ≤ 1000</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'root = [1,2,3]',
+      output: '6'
+    },
+    {
+      input: 'root = [-10,9,20,null,null,15,7]',
+      output: '42'
+    },
+    {
+      input: 'root = [-2,1]',
+      output: '1'
+    }
+  ]}
+  starterCode={`class TreeNode {
+  constructor(val = 0, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+function maxPathSum(root) {
+  // TODO: Find maximum path sum in binary tree
+  return 0;
+}`}
+  solution={`class TreeNode {
+  constructor(val = 0, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+function maxPathSum(root) {
+  let maxSum = Number.NEGATIVE_INFINITY;
+
+  // Returns max path sum starting from node going down
+  // (node value + best child path, or just node if negative)
+  function maxGain(node) {
+    if (node === null) return 0;
+
+    // Recursively get max gain from children
+    // Max with 0 because we can skip negative paths
+    const leftGain = Math.max(0, maxGain(node.left));
+    const rightGain = Math.max(0, maxGain(node.right));
+
+    // Path through this node: left + node + right
+    const pathThroughNode = leftGain + node.val + rightGain;
+
+    // Update global maximum
+    maxSum = Math.max(maxSum, pathThroughNode);
+
+    // Return max path that goes through this node to parent
+    // Can't use both children - must pick one
+    return node.val + Math.max(leftGain, rightGain);
+  }
+
+  maxGain(root);
+  return maxSum;
+}`}
+  testCases={[
+    {
+      input: [[[1, 2, 3]]],
+      expected: 6,
+      description: 'Path: 2→1→3 (sum = 6)'
+    },
+    {
+      input: [[[-10, 9, 20, null, null, 15, 7]]],
+      expected: 42,
+      description: 'Path: 15→20→7 (sum = 42)'
+    },
+    {
+      input: [[[-2, 1]]],
+      expected: 1,
+      description: 'Single node (skip negative)'
+    },
+    {
+      input: [[[1]]],
+      expected: 1,
+      description: 'Single positive node'
+    },
+    {
+      input: [[[-3]]],
+      expected: -3,
+      description: 'Single negative node (forced)'
+    },
+    {
+      input: [[[2, -1, -2, 1, 3, null, null, 4]]],
+      expected: 6,
+      description: 'Complex tree with mixed values'
+    }
+  ]}
+  functionName="maxPathSum"
+/>
+
+## Solution Explanation
+
+### Approach 1: Recursive Post-Order DFS (Only Feasible) ✅
+
+**Time Complexity:** O(n) - visit each node once
+**Space Complexity:** O(h) - recursion stack, where h is height
+
+For each node, calculate max path through it, and track global maximum:
+
+```javascript
+function maxPathSum(root) {
+  let maxSum = Number.NEGATIVE_INFINITY;
+
+  function maxGain(node) {
+    if (node === null) return 0;
+
+    // Get best downward paths from children
+    // Use Math.max(0, ...) to skip negative paths
+    const leftGain = Math.max(0, maxGain(node.left));
+    const rightGain = Math.max(0, maxGain(node.right));
+
+    // Path through this node: left + node + right
+    const pathThrough = leftGain + node.val + rightGain;
+    maxSum = Math.max(maxSum, pathThrough);
+
+    // Return path going down (can only use one child)
+    return node.val + Math.max(leftGain, rightGain);
+  }
+
+  maxGain(root);
+  return maxSum;
+}
+```
+
+**How it works:**
+
+```
+Tree:        1
+            / \
+           2   3
+
+maxGain(1):
+  maxGain(2):
+    left = 0 (null)
+    right = 0 (null)
+    pathThrough = 0 + 2 + 0 = 2
+    maxSum = max(-Inf, 2) = 2
+    return 2 + max(0, 0) = 2
+
+  maxGain(3):
+    left = 0, right = 0
+    pathThrough = 3
+    maxSum = max(2, 3) = 3
+    return 3
+
+  leftGain = 2, rightGain = 3
+  pathThrough = 2 + 1 + 3 = 6
+  maxSum = max(3, 6) = 6 ✅
+  return 1 + max(2, 3) = 4 (for parent, can't use both)
+
+Return 6
+```
+
+**Complex Example:**
+
+```
+Tree:          -10
+              /    \
+             9      20
+                   /  \
+                  15   7
+
+maxGain(9): return 9
+maxGain(15): return 15
+maxGain(7): return 7
+
+maxGain(20):
+  leftGain = 15, rightGain = 7
+  pathThrough = 15 + 20 + 7 = 42
+  maxSum = 42
+  return 20 + max(15, 7) = 35
+
+maxGain(-10):
+  leftGain = max(0, 9) = 9
+  rightGain = max(0, 35) = 35
+  pathThrough = 9 + (-10) + 35 = 34
+  return -10 + max(9, 35) = 25
+
+Answer: 42 ✅ (path 15→20→7)
+```
+
+**Key Insights:**
+
+```
+1. Each node makes two decisions:
+   a) What's the max path THROUGH me? (for global max)
+   b) What's the max path FROM me to parent? (for parent to use)
+
+2. For decision (a): Can use both children
+   pathThrough = left + node + right
+
+3. For decision (b): Can only use one child
+   pathUp = node + max(left, right)
+
+4. Can skip negative contributions using Math.max(0, gain)
+```
+
+### Approach 2: Store [maxPath, maxGain] in Tuple
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(h)
+
+Return both values instead of global variable:
+
+```javascript
+function maxPathSum(root) {
+  const [maxPath] = dfs(root);
+  return maxPath;
+}
+
+function dfs(node) {
+  if (node === null) return [Number.NEGATIVE_INFINITY, 0];
+
+  const [leftMax, leftGain] = dfs(node.left);
+  const [rightMax, rightGain] = dfs(node.right);
+
+  const leftGainUse = Math.max(0, leftGain);
+  const rightGainUse = Math.max(0, rightGain);
+
+  const pathThrough = leftGainUse + node.val + rightGainUse;
+  const newMax = Math.max(leftMax, rightMax, pathThrough);
+
+  const gainUp = node.val + Math.max(leftGainUse, rightGainUse);
+
+  return [newMax, gainUp];
+}
+```
+
+## Comparison of Approaches
+
+| Aspect | Global Max | Tuple Return |
+|--------|-----------|-------------|
+| Simplicity | Easy | Medium |
+| Memory | Uses outer variable | Returns tuple |
+| Readability | Very clear | Slightly complex |
+| **Recommendation** | **Use this** | Alternative |
+
+## Common Mistakes
+
+❌ **Forgetting to handle negative values:**
+```javascript
+function maxPathSum(root) {
+  let maxSum = 0;  // WRONG default!
+  // If all paths are negative, this returns 0 (incorrect)
+}
+```
+
+✅ **Start with NEGATIVE_INFINITY:**
+```javascript
+let maxSum = Number.NEGATIVE_INFINITY;  // Correct
+```
+
+---
+
+❌ **Using both children for upward path:**
+```javascript
+function maxGain(node) {
+  const leftGain = maxGain(node.left);
+  const rightGain = maxGain(node.right);
+
+  // WRONG: This returns path with both children
+  // But parent can't use both!
+  return node.val + leftGain + rightGain;
+}
+```
+
+✅ **Only use best child for upward path:**
+```javascript
+function maxGain(node) {
+  const leftGain = Math.max(0, maxGain(node.left));
+  const rightGain = Math.max(0, maxGain(node.right));
+
+  // Use both for this node's path
+  const pathThrough = leftGain + node.val + rightGain;
+  maxSum = Math.max(maxSum, pathThrough);
+
+  // But parent only gets one child
+  return node.val + Math.max(leftGain, rightGain);
+}
+```
+
+---
+
+❌ **Not using Math.max(0, gain) to skip negatives:**
+```javascript
+const leftGain = maxGain(node.left);
+const rightGain = maxGain(node.right);
+
+// If left/right are negative, should skip them (use 0)
+const pathThrough = leftGain + node.val + rightGain;  // Wrong!
+```
+
+✅ **Skip negative contributions:**
+```javascript
+const leftGain = Math.max(0, maxGain(node.left));
+const rightGain = Math.max(0, maxGain(node.right));
+
+// Now if child path is negative, we use 0 instead
+const pathThrough = leftGain + node.val + rightGain;  // Correct
+```
+
+---
+
+❌ **Not distinguishing between two decisions:**
+```javascript
+function maxGain(node) {
+  const left = Math.max(0, maxGain(node.left));
+  const right = Math.max(0, maxGain(node.right));
+  return left + node.val + right;  // This mixes two different purposes!
+}
+```
+
+✅ **Two separate calculations:**
+```javascript
+function maxGain(node) {
+  const leftGain = Math.max(0, maxGain(node.left));
+  const rightGain = Math.max(0, maxGain(node.right));
+
+  // Decision 1: Max path through this node (use both)
+  const pathThrough = leftGain + node.val + rightGain;
+  maxSum = Math.max(maxSum, pathThrough);
+
+  // Decision 2: Max path going up (use one)
+  return node.val + Math.max(leftGain, rightGain);
+}
+```
+
+## Interview Tips
+
+**What to mention:**
+1. **Two decisions per node:** Path through vs path going up
+2. **Skip negative paths:** Use Math.max(0, gain) for optimization
+3. **Post-order traversal:** Calculate children first
+4. **Tricky edge case:** All negative values - must pick smallest negative
+
+**Follow-up questions:**
+
+**Q: What if we need the actual path nodes, not just sum?**
+A: Track the path while updating maxSum, or reconstruct from values.
+
+**Q: Can the path be a single node?**
+A: Yes! Especially useful when all paths are negative.
+
+**Q: How do you handle negative node values?**
+A: With Math.max(0, gain) - skip negative paths.
+
+## Edge Cases
+
+```javascript
+// Single positive
+maxPathSum([1]) → 1
+
+// Single negative (forced)
+maxPathSum([-2]) → -2
+
+// Two positives
+maxPathSum([1, 2, 3]) → 6 (2→1→3)
+
+// Two negatives
+maxPathSum([-2, -1]) → -1 (just node 1)
+
+// Mixed with negative root
+maxPathSum([-10, 9, 20, null, null, 15, 7]) → 42 (15→20→7)
+
+// All negative path
+maxPathSum([-2, -1, -3]) → -1 (just root's best child)
+```
+
+## Related Problems
+
+- **Path Sum** (Easy) - Find path with target sum
+- **Path Sum II** (Medium) - Return all paths with target sum
+- **Binary Tree Maximum Path Sum** (Hard) - This problem
+- **Diameter of Binary Tree** (Easy) - Longest path count
+- **House Robber III** (Medium) - Similar DP on tree
+

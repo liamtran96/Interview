@@ -1,0 +1,502 @@
+---
+sidebar_position: 12
+difficulty: Hard
+tags: [trees, serialization, recursion, traversal, amazon, google]
+leetcode_url: https://leetcode.com/problems/serialize-and-deserialize-binary-tree/
+companies: [Amazon, Google, Microsoft, Meta, Apple]
+pattern: "Trees"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Serialize and Deserialize Binary Tree
+
+<AlgorithmProblem
+  title="Serialize and Deserialize Binary Tree"
+  difficulty="Hard"
+  description={`
+<p>Serialization is the process of converting a data structure or object into a sequence of bits so that it can be stored in a file or memory buffer, or transmitted across a network connection link to be reconstructed later in the same or another computer environment.</p>
+<p>Design an algorithm to serialize and deserialize a binary tree. There is no restriction on how your serialization/deserialization algorithm should work. You just need to ensure that a binary tree can be serialized to a string and this string can be deserialized to the original tree structure.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>The number of nodes in the tree is in the range [0, 10<sup>4</sup>]</li>
+  <li>-1000 ≤ Node.val ≤ 1000</li>
+</ul>
+<p><strong>Clarification:</strong> The input tree [1,2,3,null,null,4,5] in test case is serialized as one continuous string "1,2,3,#,#,4,5" (where # represents a null node).</p>
+`}
+  examples={[
+    {
+      input: 'root = [1,2,3,null,null,4,5]',
+      output: 'Tree is deserialized to the original tree structure'
+    },
+    {
+      input: 'root = []',
+      output: 'Empty tree'
+    },
+    {
+      input: 'root = [1,2]',
+      output: 'Partial tree'
+    }
+  ]}
+  starterCode={`class TreeNode {
+  constructor(val = 0, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+class Codec {
+  serialize(root) {
+    // TODO: Serialize tree to string
+    return '';
+  }
+
+  deserialize(data) {
+    // TODO: Deserialize string back to tree
+    return null;
+  }
+}`}
+  solution={`class TreeNode {
+  constructor(val = 0, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+class Codec {
+  serialize(root) {
+    // Use preorder traversal, '#' for null nodes
+    const result = [];
+
+    function preorder(node) {
+      if (node === null) {
+        result.push('#');  // Null marker
+        return;
+      }
+
+      result.push(node.val.toString());
+      preorder(node.left);
+      preorder(node.right);
+    }
+
+    preorder(root);
+    return result.join(',');
+  }
+
+  deserialize(data) {
+    if (!data || data === '') return null;
+
+    const nodes = data.split(',');
+    let index = 0;
+
+    function preorder() {
+      if (index &gt;= nodes.length) return null;
+
+      const val = nodes[index++];
+
+      if (val === '#') return null;
+
+      const node = new TreeNode(parseInt(val));
+      node.left = preorder();
+      node.right = preorder();
+
+      return node;
+    }
+
+    return preorder();
+  }
+}`}
+  testCases={[
+    {
+      input: [[[1, 2, 3, null, null, 4, 5]]],
+      expected: true,
+      description: 'Serialize and deserialize a tree'
+    },
+    {
+      input: [[null]],
+      expected: true,
+      description: 'Empty tree'
+    },
+    {
+      input: [[[1]]],
+      expected: true,
+      description: 'Single node'
+    },
+    {
+      input: [[[1, 2, 3]]],
+      expected: true,
+      description: 'Simple tree'
+    },
+    {
+      input: [[[1, 2, null, 3, 4]]],
+      expected: true,
+      description: 'Unbalanced tree'
+    },
+    {
+      input: [[[1, null, 2, null, 3, null, 4]]],
+      expected: true,
+      description: 'Right-skewed tree'
+    }
+  ]}
+  functionName="Codec"
+/>
+
+## Solution Explanation
+
+### Approach 1: Preorder Traversal + Recursion (Recommended) ✅
+
+**Time Complexity:** O(n) - visit each node once
+**Space Complexity:** O(n) - store all nodes
+
+Serialize using preorder, deserialize using same order:
+
+```javascript
+class Codec {
+  serialize(root) {
+    const result = [];
+
+    function preorder(node) {
+      if (node === null) {
+        result.push('#');
+        return;
+      }
+
+      result.push(node.val.toString());
+      preorder(node.left);
+      preorder(node.right);
+    }
+
+    preorder(root);
+    return result.join(',');
+  }
+
+  deserialize(data) {
+    if (!data || data === '') return null;
+
+    const nodes = data.split(',');
+    let index = 0;
+
+    function preorder() {
+      if (index &gt;= nodes.length) return null;
+
+      const val = nodes[index++];
+
+      if (val === '#') return null;
+
+      const node = new TreeNode(parseInt(val));
+      node.left = preorder();
+      node.right = preorder();
+
+      return node;
+    }
+
+    return preorder();
+  }
+}
+```
+
+**How it works:**
+
+```
+Tree:         1
+             / \
+            2   3
+               / \
+              4   5
+
+Preorder traversal: 1, 2, #, #, 3, 4, #, #, 5, #, #
+Serialized: "1,2,#,#,3,4,#,#,5,#,#"
+
+Deserialization (preorder reconstruction):
+- Read 1 → create root(1)
+  - Read 2 → create node(2)
+    - Read # → null (left child of 2)
+    - Read # → null (right child of 2)
+  - Read 3 → create node(3)
+    - Read 4 → create node(4)
+      - Read # → null (left child of 4)
+      - Read # → null (right child of 4)
+    - Read 5 → create node(5)
+      - Read # → null (left child of 5)
+      - Read # → null (right child of 5)
+
+Reconstructed tree matches original ✅
+```
+
+### Approach 2: Level-Order BFS (Alternative)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(w) - queue width
+
+Use queue for level-order serialization:
+
+```javascript
+class Codec {
+  serialize(root) {
+    if (root === null) return '';
+
+    const result = [];
+    const queue = [root];
+
+    while (queue.length &gt; 0) {
+      const node = queue.shift();
+
+      if (node === null) {
+        result.push('#');
+      } else {
+        result.push(node.val.toString());
+        queue.push(node.left);
+        queue.push(node.right);
+      }
+    }
+
+    return result.join(',');
+  }
+
+  deserialize(data) {
+    if (!data || data === '') return null;
+
+    const nodes = data.split(',');
+    const root = new TreeNode(parseInt(nodes[0]));
+    const queue = [root];
+    let index = 1;
+
+    while (queue.length &gt; 0 &amp;&amp; index &lt; nodes.length) {
+      const node = queue.shift();
+
+      // Left child
+      if (nodes[index] !== '#') {
+        node.left = new TreeNode(parseInt(nodes[index]));
+        queue.push(node.left);
+      }
+      index++;
+
+      // Right child
+      if (index &lt; nodes.length &amp;&amp; nodes[index] !== '#') {
+        node.right = new TreeNode(parseInt(nodes[index]));
+        queue.push(node.right);
+      }
+      index++;
+    }
+
+    return root;
+  }
+}
+```
+
+### Approach 3: Inorder + Preorder (Most Compact)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(n)
+
+Store both orders to uniquely reconstruct:
+
+```javascript
+class Codec {
+  serialize(root) {
+    const preorder = [];
+    const inorder = [];
+
+    function pre(node) {
+      if (node === null) return;
+      preorder.push(node.val);
+      pre(node.left);
+      pre(node.right);
+    }
+
+    function ino(node) {
+      if (node === null) return;
+      ino(node.left);
+      inorder.push(node.val);
+      ino(node.right);
+    }
+
+    pre(root);
+    ino(root);
+
+    return JSON.stringify({ preorder, inorder });
+  }
+
+  deserialize(data) {
+    if (!data) return null;
+    const { preorder, inorder } = JSON.parse(data);
+
+    const inorderMap = new Map();
+    for (let i = 0; i &lt; inorder.length; i++) {
+      inorderMap.set(inorder[i], i);
+    }
+
+    let preIdx = 0;
+
+    function build(inStart, inEnd) {
+      if (inStart &gt; inEnd) return null;
+
+      const val = preorder[preIdx++];
+      const inIdx = inorderMap.get(val);
+
+      const node = new TreeNode(val);
+      node.left = build(inStart, inIdx - 1);
+      node.right = build(inIdx + 1, inEnd);
+
+      return node;
+    }
+
+    return build(0, inorder.length - 1);
+  }
+}
+```
+
+## Comparison of Approaches
+
+| Approach | Serialize | Deserialize | Space | Best For |
+|----------|-----------|------------|-------|----------|
+| Preorder | O(n) | O(n) | O(n) | **Most elegant** |
+| Level-order | O(n) | O(n) | O(w) | Visual clarity |
+| Preorder+Inorder | O(n) | O(n) | O(n) | Uniqueness proof |
+
+## Common Mistakes
+
+❌ **Not handling null nodes:**
+```javascript
+function serialize(root) {
+  const result = [];
+  function preorder(node) {
+    if (node === null) return;  // Skips nulls!
+    result.push(node.val);
+    preorder(node.left);
+    preorder(node.right);
+  }
+  preorder(root);
+  return result.join(',');
+}
+// Can't reconstruct: "1,2,3" is ambiguous
+```
+
+✅ **Mark null nodes explicitly:**
+```javascript
+function serialize(root) {
+  const result = [];
+  function preorder(node) {
+    if (node === null) {
+      result.push('#');  // Mark nulls!
+      return;
+    }
+    result.push(node.val);
+    preorder(node.left);
+    preorder(node.right);
+  }
+  preorder(root);
+  return result.join(',');
+}
+// Now "1,2,#,#,3,#,#" uniquely identifies tree
+```
+
+---
+
+❌ **Index not advancing in deserialization:**
+```javascript
+function deserialize(data) {
+  const nodes = data.split(',');
+
+  function preorder() {
+    const val = nodes[0];  // WRONG: always reads same node!
+    // ...
+  }
+
+  return preorder();
+}
+```
+
+✅ **Use pointer to track position:**
+```javascript
+function deserialize(data) {
+  const nodes = data.split(',');
+  let index = 0;
+
+  function preorder() {
+    const val = nodes[index++];  // Advance pointer!
+    // ...
+  }
+
+  return preorder();
+}
+```
+
+---
+
+❌ **Not preserving exact tree structure:**
+```javascript
+// If level-order deserialization doesn't track nulls properly,
+// children connect to wrong parents
+```
+
+✅ **Level-order must push null children:**
+```javascript
+while (queue.length &gt; 0) {
+  const node = queue.shift();
+
+  if (node === null) {
+    result.push('#');  // Record null
+  } else {
+    result.push(node.val);
+    queue.push(node.left);   // Push even if null!
+    queue.push(node.right);  // Push even if null!
+  }
+}
+```
+
+## Interview Tips
+
+**What to mention:**
+1. **Null markers:** Must explicitly mark null nodes
+2. **Preorder intuitive:** Works naturally with recursion
+3. **Uniqueness:** Preorder + explicit nulls uniquely identifies tree
+4. **Format choices:** No restriction - can use JSON, CSV, binary, etc.
+
+**Follow-up questions:**
+
+**Q: What if nodes have duplicate values?**
+A: Still works - serialize entire structure, not just values.
+
+**Q: Can you minimize the serialized size?**
+A: Yes - use binary encoding, omit trailing nulls, etc.
+
+**Q: What if you can't use null markers?**
+A: Use preorder + inorder, or pass size info.
+
+**Q: How would you handle cyclic graphs?**
+A: Add visited set to prevent infinite loops.
+
+## Edge Cases
+
+```javascript
+// Empty tree
+serialize(null) → ""
+deserialize("") → null
+
+// Single node
+serialize([1]) → "1,#,#"
+deserialize("1,#,#") → [1]
+
+// Left-skewed
+serialize([1,2,null,3]) → "1,2,3,#,#,#,#"
+serialize([1, null, 2]) → "1,#,2,#,#"
+
+// Large tree (10⁴ nodes)
+// String length ~O(n) chars, manageable
+
+// All same values
+serialize([1,1,1,1,1]) → "1,1,#,#,1,#,#,1,#,#,1,#,#"
+deserialize(...) → Correctly rebuilt tree
+```
+
+## Related Problems
+
+- **Binary Tree Level Order Traversal** (Medium) - Serialization format
+- **Construct Binary Tree from Preorder and Inorder** (Medium) - Deserialization logic
+- **N-ary Tree Serialization** (Hard) - Multiple children
+- **Verify Preorder Serialization of a Binary Tree** (Medium) - Validate format
+- **Binary Tree Vertical Order Traversal** (Hard) - Alternative format
+
