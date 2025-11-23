@@ -1,0 +1,392 @@
+---
+sidebar_position: 7
+difficulty: Medium
+tags: [stack, string, recursion, google, amazon, facebook]
+leetcode_url: https://leetcode.com/problems/decode-string/
+companies: [Google, Amazon, Facebook, Microsoft, Apple]
+pattern: "Stack"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Decode String
+
+<AlgorithmProblem
+  title="Decode String"
+  difficulty="Medium"
+  description={`
+<p>Given an encoded string, return its decoded string.</p>
+<p>The encoding rule is: <code>k[encoded_string]</code>, where the <code>encoded_string</code> inside the square brackets is being repeated exactly <code>k</code> times. Note that <code>k</code> is guaranteed to be a positive integer.</p>
+<p>You may assume that the input string is always valid; there are no extra white spaces, square brackets are well-formed, etc. Furthermore, you may assume that the original data does not contain any digits and that digits are only for those repeat numbers, <code>k</code>. For example, there will not be input like <code>3a</code> or <code>2[4]</code>.</p>
+<p>The test cases are generated so that the length of the output will never exceed 10<sup>5</sup>.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &lt;= s.length &lt;= 30</li>
+  <li><code>s</code> consists of lowercase English letters, digits, and square brackets <code>'[]'</code>.</li>
+  <li><code>s</code> is guaranteed to be a <strong>valid</strong> input.</li>
+  <li>All the integers in <code>s</code> are in the range <code>[1, 300]</code>.</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 's = "3[a]2[bc]"',
+      output: '"aaabcbc"',
+      explanation: '3[a] → "aaa", 2[bc] → "bcbc"'
+    },
+    {
+      input: 's = "3[a2[c]]"',
+      output: '"accaccacc"',
+      explanation: '2[c] → "cc", a2[c] → "acc", 3[acc] → "accaccacc"'
+    },
+    {
+      input: 's = "2[abc]3[cd]ef"',
+      output: '"abcabccdcdcdef"',
+      explanation: '2[abc] → "abcabc", 3[cd] → "cdcdcd", then append "ef"'
+    }
+  ]}
+  starterCode={`function decodeString(s) {
+  // Write your code here
+
+}`}
+  solution={`function decodeString(s) {
+  // Stack approach: O(n) time, O(n) space
+  const stack = [];
+  let currentNum = 0;
+  let currentStr = '';
+
+  for (const char of s) {
+    if (char >= '0' && char <= '9') {
+      // Build the number (can be multiple digits)
+      currentNum = currentNum * 10 + parseInt(char);
+    } else if (char === '[') {
+      // Push current state to stack and reset
+      stack.push(currentStr);
+      stack.push(currentNum);
+      currentStr = '';
+      currentNum = 0;
+    } else if (char === ']') {
+      // Pop number and previous string
+      const num = stack.pop();
+      const prevStr = stack.pop();
+      // Repeat current string and append to previous
+      currentStr = prevStr + currentStr.repeat(num);
+    } else {
+      // Regular letter, add to current string
+      currentStr += char;
+    }
+  }
+
+  return currentStr;
+}`}
+  testCases={[
+    {
+      input: ["3[a]2[bc]"],
+      expected: "aaabcbc",
+      description: 'Simple pattern: "3[a]2[bc]" → "aaabcbc"'
+    },
+    {
+      input: ["3[a2[c]]"],
+      expected: "accaccacc",
+      description: 'Nested brackets: "3[a2[c]]" → "accaccacc"'
+    },
+    {
+      input: ["2[abc]3[cd]ef"],
+      expected: "abcabccdcdcdef",
+      description: 'Multiple patterns with suffix: "2[abc]3[cd]ef"'
+    },
+    {
+      input: ["abc3[cd]xyz"],
+      expected: "abccdcdcdxyz",
+      description: 'Pattern with prefix and suffix'
+    },
+    {
+      input: ["10[a]"],
+      expected: "aaaaaaaaaa",
+      description: 'Multi-digit number: "10[a]" → 10 a\'s'
+    },
+    {
+      input: ["2[a2[b2[c]]]"],
+      expected: "abccbccabccbcc",
+      description: 'Triple nested: "2[a2[b2[c]]]"'
+    }
+  ]}
+  functionName="decodeString"
+/>
+
+## Solution Explanation
+
+### Approach 1: Stack with State Management ✅
+
+**Time Complexity:** O(n × k) where k is max repetition count
+**Space Complexity:** O(n)
+
+Use a stack to handle nested brackets and build decoded string:
+
+```javascript
+function decodeString(s) {
+  const stack = [];
+  let currentNum = 0;
+  let currentStr = '';
+
+  for (const char of s) {
+    if (char >= '0' && char <= '9') {
+      // Build multi-digit number
+      currentNum = currentNum * 10 + parseInt(char);
+    } else if (char === '[') {
+      // Save current state and start new context
+      stack.push(currentStr);
+      stack.push(currentNum);
+      currentStr = '';
+      currentNum = 0;
+    } else if (char === ']') {
+      // Restore state and apply repetition
+      const num = stack.pop();
+      const prevStr = stack.pop();
+      currentStr = prevStr + currentStr.repeat(num);
+    } else {
+      // Regular letter
+      currentStr += char;
+    }
+  }
+
+  return currentStr;
+}
+```
+
+**How Stack Handles Nesting:**
+
+```
+Input: "3[a2[c]]"
+
+Step-by-step with stack states:
+
+char='3': digit
+  currentNum = 3
+  stack: []
+
+char='[': open bracket
+  push currentStr ('') and currentNum (3)
+  stack: ['', 3]
+  currentStr = '', currentNum = 0
+
+char='a': letter
+  currentStr = 'a'
+  stack: ['', 3]
+
+char='2': digit
+  currentNum = 2
+  stack: ['', 3]
+
+char='[': open bracket
+  push currentStr ('a') and currentNum (2)
+  stack: ['', 3, 'a', 2]
+  currentStr = '', currentNum = 0
+
+char='c': letter
+  currentStr = 'c'
+  stack: ['', 3, 'a', 2]
+
+char=']': close bracket (inner)
+  pop num=2, prevStr='a'
+  currentStr = 'a' + 'c'.repeat(2) = 'acc'
+  stack: ['', 3]
+
+char=']': close bracket (outer)
+  pop num=3, prevStr=''
+  currentStr = '' + 'acc'.repeat(3) = 'accaccacc'
+  stack: []
+
+Result: 'accaccacc' ✅
+```
+
+**Why Stack for Each Bracket Pair:**
+
+```
+Stack stores pairs: [prevStr, count, prevStr, count, ...]
+
+When we see '[':
+  1. Save current context (string we've built so far)
+  2. Save repetition count
+  3. Start fresh for inner content
+
+When we see ']':
+  1. Pop count (how many times to repeat)
+  2. Pop prevStr (string before this bracket)
+  3. Build: prevStr + currentStr.repeat(count)
+```
+
+### Approach 2: Recursion
+
+**Time Complexity:** O(n × k)
+**Space Complexity:** O(n) call stack
+
+Use recursion to handle nested structures:
+
+```javascript
+function decodeString(s) {
+  let index = 0;
+
+  function decode() {
+    let result = '';
+    let num = 0;
+
+    while (index < s.length) {
+      const char = s[index];
+
+      if (char >= '0' && char <= '9') {
+        num = num * 10 + parseInt(char);
+        index++;
+      } else if (char === '[') {
+        index++; // Skip '['
+        const nested = decode(); // Recursively decode
+        result += nested.repeat(num);
+        num = 0;
+      } else if (char === ']') {
+        index++; // Skip ']'
+        return result; // Return to previous level
+      } else {
+        result += char;
+        index++;
+      }
+    }
+
+    return result;
+  }
+
+  return decode();
+}
+```
+
+### Approach 3: Two Stacks (Alternative)
+
+**Time Complexity:** O(n × k)
+**Space Complexity:** O(n)
+
+Use separate stacks for strings and numbers:
+
+```javascript
+function decodeString(s) {
+  const strStack = [];
+  const numStack = [];
+  let currentStr = '';
+  let currentNum = 0;
+
+  for (const char of s) {
+    if (char >= '0' && char <= '9') {
+      currentNum = currentNum * 10 + parseInt(char);
+    } else if (char === '[') {
+      numStack.push(currentNum);
+      strStack.push(currentStr);
+      currentNum = 0;
+      currentStr = '';
+    } else if (char === ']') {
+      const num = numStack.pop();
+      const prevStr = strStack.pop();
+      currentStr = prevStr + currentStr.repeat(num);
+    } else {
+      currentStr += char;
+    }
+  }
+
+  return currentStr;
+}
+```
+
+### Key Insights
+
+1. **Stack stores context**: Save state before entering nested brackets
+2. **Build numbers digit by digit**: Handle multi-digit counts (10, 100, etc.)
+3. **String concatenation order**: prevStr + currentStr.repeat(count)
+4. **Nested structure**: Inner brackets resolved first (like parentheses)
+5. **State management**: Track current string and current number separately
+
+## Common Mistakes
+
+❌ Not handling multi-digit numbers:
+```javascript
+if (char >= '0' && char <= '9') {
+  currentNum = parseInt(char); // Wrong! Loses previous digits
+}
+// Should be: currentNum = currentNum * 10 + parseInt(char)
+```
+
+❌ Wrong stack push/pop order:
+```javascript
+if (char === '[') {
+  stack.push(currentNum); // Wrong order!
+  stack.push(currentStr);
+}
+// Should push string first, then number (pop in reverse order)
+```
+
+❌ Forgetting to reset state after '[':
+```javascript
+if (char === '[') {
+  stack.push(currentStr);
+  stack.push(currentNum);
+  // Missing: currentStr = '', currentNum = 0
+}
+```
+
+❌ Wrong concatenation order:
+```javascript
+if (char === ']') {
+  const num = stack.pop();
+  const prevStr = stack.pop();
+  currentStr = currentStr.repeat(num) + prevStr; // Wrong order!
+}
+// Should be: prevStr + currentStr.repeat(num)
+```
+
+✅ Correct stack approach with proper state management:
+```javascript
+for (const char of s) {
+  if (char >= '0' && char <= '9') {
+    // Build multi-digit number
+    currentNum = currentNum * 10 + parseInt(char);
+  } else if (char === '[') {
+    // Save state in correct order
+    stack.push(currentStr);
+    stack.push(currentNum);
+    // Reset for new context
+    currentStr = '';
+    currentNum = 0;
+  } else if (char === ']') {
+    // Restore in reverse order
+    const num = stack.pop();
+    const prevStr = stack.pop();
+    // Correct concatenation
+    currentStr = prevStr + currentStr.repeat(num);
+  } else {
+    currentStr += char;
+  }
+}
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Recognize it's a **nested structure problem** → think stack
+2. Identify the **state to track**: current string, current number
+3. Explain how **brackets create contexts** (nested scopes)
+4. Walk through a nested example like "3[a2[c]]"
+5. Mention handling **multi-digit numbers**
+
+**Key talking points:**
+- "This is a nested structure problem, perfect for a stack"
+- "We save context when entering brackets, restore when exiting"
+- "Stack stores pairs: previous string and repetition count"
+- "Build numbers digit by digit for multi-digit support"
+- "Process from inside out, like nested parentheses"
+
+**Pattern recognition:**
+- Nested structures (brackets, parentheses) → Stack
+- Need to remember previous state → Stack saves context
+- Process inner before outer → Stack LIFO naturally handles this
+
+**Follow-up questions you might get:**
+- **Can you do it without a stack?** Yes, recursion (uses call stack)
+- **What if input is invalid?** Add validation for brackets and format
+- **How to handle errors?** Check bracket matching, validate format
+- **Space optimization?** Stack is necessary for nested structures
+- **What about encoding?** Reverse problem - find patterns to compress

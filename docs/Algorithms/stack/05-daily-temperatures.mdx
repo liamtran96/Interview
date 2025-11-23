@@ -1,0 +1,311 @@
+---
+sidebar_position: 5
+difficulty: Medium
+tags: [stack, array, monotonic-stack, amazon, google, microsoft]
+leetcode_url: https://leetcode.com/problems/daily-temperatures/
+companies: [Amazon, Google, Microsoft, Facebook, Bloomberg]
+pattern: "Stack"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Daily Temperatures
+
+<AlgorithmProblem
+  title="Daily Temperatures"
+  difficulty="Medium"
+  description={`
+<p>Given an array of integers <code>temperatures</code> represents the daily temperatures, return an array <code>answer</code> such that <code>answer[i]</code> is the number of days you have to wait after the <code>i<sup>th</sup></code> day to get a warmer temperature. If there is no future day for which this is possible, keep <code>answer[i] == 0</code> instead.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &lt;= temperatures.length &lt;= 10<sup>5</sup></li>
+  <li>30 &lt;= temperatures[i] &lt;= 100</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'temperatures = [73,74,75,71,69,72,76,73]',
+      output: '[1,1,4,2,1,1,0,0]',
+      explanation: 'Day 0: wait 1 day (74 > 73)\nDay 1: wait 1 day (75 > 74)\nDay 2: wait 4 days (76 > 75)\nDay 3: wait 2 days (72 > 71)\nDay 4: wait 1 day (72 > 69)\nDay 5: wait 1 day (76 > 72)\nDay 6: no warmer day (0)\nDay 7: no warmer day (0)'
+    },
+    {
+      input: 'temperatures = [30,40,50,60]',
+      output: '[1,1,1,0]',
+      explanation: 'Each day gets warmer until the last day'
+    },
+    {
+      input: 'temperatures = [30,60,90]',
+      output: '[1,1,0]',
+      explanation: 'Strictly increasing temperatures'
+    }
+  ]}
+  starterCode={`function dailyTemperatures(temperatures) {
+  // Write your code here
+
+}`}
+  solution={`function dailyTemperatures(temperatures) {
+  // Monotonic stack approach: O(n) time, O(n) space
+  const n = temperatures.length;
+  const answer = new Array(n).fill(0);
+  const stack = []; // Store indices
+
+  for (let i = 0; i < n; i++) {
+    // While current temp is warmer than stack top
+    while (stack.length > 0 && temperatures[i] > temperatures[stack[stack.length - 1]]) {
+      const prevIndex = stack.pop();
+      answer[prevIndex] = i - prevIndex;
+    }
+
+    // Push current index to stack
+    stack.push(i);
+  }
+
+  return answer;
+}`}
+  testCases={[
+    {
+      input: [[73, 74, 75, 71, 69, 72, 76, 73]],
+      expected: [1, 1, 4, 2, 1, 1, 0, 0],
+      description: 'Mixed temperatures: [73,74,75,71,69,72,76,73]'
+    },
+    {
+      input: [[30, 40, 50, 60]],
+      expected: [1, 1, 1, 0],
+      description: 'Strictly increasing: [30,40,50,60]'
+    },
+    {
+      input: [[30, 60, 90]],
+      expected: [1, 1, 0],
+      description: 'Ascending: [30,60,90]'
+    },
+    {
+      input: [[100, 90, 80, 70]],
+      expected: [0, 0, 0, 0],
+      description: 'Strictly decreasing: [100,90,80,70]'
+    },
+    {
+      input: [[55, 38, 53, 81, 61, 93, 97, 32, 43, 78]],
+      expected: [3, 1, 1, 2, 1, 1, 0, 1, 1, 0],
+      description: 'Complex pattern'
+    },
+    {
+      input: [[89, 62, 70, 58, 47, 47, 46, 76, 100, 70]],
+      expected: [8, 1, 5, 4, 3, 2, 1, 1, 0, 0],
+      description: 'Multiple decreasing sequences'
+    }
+  ]}
+  functionName="dailyTemperatures"
+/>
+
+## Solution Explanation
+
+### Approach 1: Brute Force (Not Recommended)
+
+**Time Complexity:** O(n²)
+**Space Complexity:** O(1)
+
+For each day, scan forward to find next warmer day:
+
+```javascript
+function dailyTemperatures(temperatures) {
+  const n = temperatures.length;
+  const answer = new Array(n).fill(0);
+
+  for (let i = 0; i < n; i++) {
+    // Scan forward from current day
+    for (let j = i + 1; j < n; j++) {
+      if (temperatures[j] > temperatures[i]) {
+        answer[i] = j - i;
+        break; // Found warmer day
+      }
+    }
+  }
+
+  return answer;
+}
+```
+
+**Why not use this?**
+- Nested loops result in O(n²) time complexity
+- Inefficient for large arrays (up to 10⁵ elements)
+- Rechecks same temperatures multiple times
+
+### Approach 2: Monotonic Stack (Optimal) ✅
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(n)
+
+Use a monotonic decreasing stack to track indices waiting for warmer temps:
+
+```javascript
+function dailyTemperatures(temperatures) {
+  const n = temperatures.length;
+  const answer = new Array(n).fill(0);
+  const stack = []; // Store indices (monotonic decreasing by temp)
+
+  for (let i = 0; i < n; i++) {
+    // Current temp is warmer: resolve waiting days
+    while (stack.length > 0 &&
+           temperatures[i] > temperatures[stack[stack.length - 1]]) {
+      const prevIndex = stack.pop();
+      answer[prevIndex] = i - prevIndex; // Days to wait
+    }
+
+    // Add current day to stack
+    stack.push(i);
+  }
+
+  // Remaining indices have no warmer day (already 0)
+  return answer;
+}
+```
+
+**How Monotonic Stack Works:**
+
+```
+temperatures = [73, 74, 75, 71, 69, 72, 76, 73]
+
+i=0: temp=73
+  stack: [0]
+  answer: [0,0,0,0,0,0,0,0]
+
+i=1: temp=74 > 73
+  74 > stack[0] → pop 0, answer[0] = 1-0 = 1
+  stack: [1]
+  answer: [1,0,0,0,0,0,0,0]
+
+i=2: temp=75 > 74
+  75 > stack[1] → pop 1, answer[1] = 2-1 = 1
+  stack: [2]
+  answer: [1,1,0,0,0,0,0,0]
+
+i=3: temp=71 < 75
+  stack: [2, 3]
+  answer: [1,1,0,0,0,0,0,0]
+
+i=4: temp=69 < 71
+  stack: [2, 3, 4]
+  answer: [1,1,0,0,0,0,0,0]
+
+i=5: temp=72 > 69 > 71
+  72 > stack[4] → pop 4, answer[4] = 5-4 = 1
+  72 > stack[3] → pop 3, answer[3] = 5-3 = 2
+  72 < 75 → stop
+  stack: [2, 5]
+  answer: [1,1,0,2,1,0,0,0]
+
+i=6: temp=76 > 72 > 75
+  76 > stack[5] → pop 5, answer[5] = 6-5 = 1
+  76 > stack[2] → pop 2, answer[2] = 6-2 = 4
+  stack: [6]
+  answer: [1,1,4,2,1,1,0,0]
+
+i=7: temp=73 < 76
+  stack: [6, 7]
+  answer: [1,1,4,2,1,1,0,0]
+
+Final: indices 6,7 remain → no warmer day ✅
+```
+
+**Why Monotonic Stack is Perfect:**
+
+1. **Store pending problems**: Stack holds days waiting for warmer temps
+2. **Resolve when found**: Pop and calculate when we find warmer temp
+3. **One pass**: Each element pushed and popped at most once
+4. **Natural ordering**: Stack maintains decreasing temperature order
+
+### What is a Monotonic Stack?
+
+A **monotonic stack** maintains elements in sorted order (increasing or decreasing):
+
+```javascript
+// Monotonic Decreasing Stack (this problem)
+// Stack top to bottom: smaller to larger values
+[76, 73]  // 73 < 76 (decreasing from top)
+
+// When we see a larger value:
+// - Pop all smaller values (they found their answer)
+// - Push the new value
+```
+
+**Key Properties:**
+- Elements are pushed once: O(n)
+- Elements are popped once: O(n)
+- Total: O(n) time complexity
+
+### Key Insights
+
+1. **Store indices not values**: Need to calculate day difference
+2. **Monotonic decreasing**: Maintain decreasing temps in stack
+3. **Pop when warmer found**: Current temp resolves previous colder temps
+4. **One pass solution**: Each element processed exactly once
+5. **Leftover elements**: Remaining in stack have no warmer day
+
+## Common Mistakes
+
+❌ Storing temperatures instead of indices:
+```javascript
+// Wrong - can't calculate day difference
+stack.push(temperatures[i]); // Need indices!
+```
+
+❌ Not checking stack before accessing:
+```javascript
+// Wrong - stack might be empty
+while (temperatures[i] > temperatures[stack[stack.length - 1]]) {
+  // Should check stack.length > 0 first
+}
+```
+
+❌ Using monotonic increasing instead of decreasing:
+```javascript
+// Wrong - need decreasing for this problem
+while (stack.length > 0 &&
+       temperatures[i] < temperatures[stack[stack.length - 1]]) {
+  // Should be > not <
+}
+```
+
+✅ Correct monotonic stack approach:
+```javascript
+const stack = []; // Store indices
+const answer = new Array(n).fill(0);
+
+for (let i = 0; i < n; i++) {
+  // Check stack not empty AND current temp is warmer
+  while (stack.length > 0 &&
+         temperatures[i] > temperatures[stack[stack.length - 1]]) {
+    const prevIndex = stack.pop();
+    answer[prevIndex] = i - prevIndex;
+  }
+
+  stack.push(i); // Always push current index
+}
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Recognize it's a **"next greater element"** pattern
+2. Immediately think **monotonic stack**
+3. Explain why brute force is O(n²)
+4. Describe how monotonic stack achieves O(n)
+5. Walk through a complex example with stack states
+
+**Key talking points:**
+- "This is a classic monotonic stack problem"
+- "We need to find the next warmer temperature for each day"
+- "Stack stores indices of days waiting for warmer temps"
+- "When we find a warmer temp, we pop and resolve all colder days"
+- "Monotonic decreasing: stack maintains decreasing temperatures"
+
+**Pattern recognition:**
+- "Next greater/smaller element" → Monotonic stack
+- Need to look ahead for condition → Consider stack
+- O(n²) brute force → Optimize with monotonic stack
+
+**Follow-up questions you might get:**
+- **What if we want previous warmer day?** Process array backwards
+- **Next cooler temperature instead?** Change > to < in comparison
+- **Multiple queries?** Preprocess once, answer queries in O(1)
+- **What about equal temperatures?** Current logic handles it (no answer for equal)
