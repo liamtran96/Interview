@@ -1,0 +1,394 @@
+---
+sidebar_position: 2
+difficulty: Easy
+tags: [stack, design, amazon, bloomberg, microsoft]
+leetcode_url: https://leetcode.com/problems/min-stack/
+companies: [Amazon, Bloomberg, Microsoft, Google, Facebook]
+pattern: "Stack"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Min Stack
+
+<AlgorithmProblem
+  title="Min Stack"
+  difficulty="Easy"
+  description={`
+<p>Design a stack that supports push, pop, top, and retrieving the minimum element in constant time.</p>
+<p>Implement the <code>MinStack</code> class:</p>
+<ul>
+  <li><code>MinStack()</code> initializes the stack object.</li>
+  <li><code>void push(int val)</code> pushes the element <code>val</code> onto the stack.</li>
+  <li><code>void pop()</code> removes the element on the top of the stack.</li>
+  <li><code>int top()</code> gets the top element of the stack.</li>
+  <li><code>int getMin()</code> retrieves the minimum element in the stack.</li>
+</ul>
+<p>You must implement a solution with <strong>O(1)</strong> time complexity for each function.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>-2<sup>31</sup> &lt;= val &lt;= 2<sup>31</sup> - 1</li>
+  <li>Methods <code>pop</code>, <code>top</code> and <code>getMin</code> operations will always be called on <strong>non-empty</strong> stacks.</li>
+  <li>At most 3 * 10<sup>4</sup> calls will be made to <code>push</code>, <code>pop</code>, <code>top</code>, and <code>getMin</code>.</li>
+</ul>
+`}
+  examples={[
+    {
+      input: '["MinStack","push","push","push","getMin","pop","top","getMin"]\n[[],[-2],[0],[-3],[],[],[],[]]',
+      output: '[null,null,null,null,-3,null,0,-2]',
+      explanation: `MinStack minStack = new MinStack();
+minStack.push(-2);
+minStack.push(0);
+minStack.push(-3);
+minStack.getMin(); // return -3
+minStack.pop();
+minStack.top();    // return 0
+minStack.getMin(); // return -2`
+    }
+  ]}
+  starterCode={`class MinStack {
+  constructor() {
+    // Initialize your data structure here
+  }
+
+  push(val) {
+    // Push element val onto stack
+  }
+
+  pop() {
+    // Remove the element on top of the stack
+  }
+
+  top() {
+    // Get the top element
+  }
+
+  getMin() {
+    // Retrieve the minimum element in the stack
+  }
+}`}
+  solution={`class MinStack {
+  constructor() {
+    // Two stacks approach: one for values, one for minimums
+    this.stack = [];
+    this.minStack = [];
+  }
+
+  push(val) {
+    this.stack.push(val);
+
+    // Push to minStack if it's empty or val is new minimum
+    if (this.minStack.length === 0 || val <= this.minStack[this.minStack.length - 1]) {
+      this.minStack.push(val);
+    }
+  }
+
+  pop() {
+    const val = this.stack.pop();
+
+    // If popped value was the minimum, remove from minStack too
+    if (val === this.minStack[this.minStack.length - 1]) {
+      this.minStack.pop();
+    }
+  }
+
+  top() {
+    return this.stack[this.stack.length - 1];
+  }
+
+  getMin() {
+    return this.minStack[this.minStack.length - 1];
+  }
+}`}
+  testCases={[
+    {
+      input: [
+        ["MinStack", "push", "push", "push", "getMin", "pop", "top", "getMin"],
+        [[], [-2], [0], [-3], [], [], [], []]
+      ],
+      expected: [null, null, null, null, -3, null, 0, -2],
+      description: 'Basic operations with negative numbers'
+    },
+    {
+      input: [
+        ["MinStack", "push", "push", "getMin", "getMin", "push", "getMin"],
+        [[], [2], [0], [], [], [1], []]
+      ],
+      expected: [null, null, null, 0, 0, null, 0],
+      description: 'Multiple getMin calls'
+    },
+    {
+      input: [
+        ["MinStack", "push", "push", "push", "top", "pop", "getMin", "pop", "getMin", "pop", "push", "getMin"],
+        [[], [1], [2], [3], [], [], [], [], [], [], [0], []]
+      ],
+      expected: [null, null, null, null, 3, null, 1, null, 1, null, null, 0],
+      description: 'Sequential operations'
+    },
+    {
+      input: [
+        ["MinStack", "push", "push", "push", "getMin", "pop", "getMin"],
+        [[], [0], [1], [0], [], [], []]
+      ],
+      expected: [null, null, null, null, 0, null, 0],
+      description: 'Duplicate minimum values'
+    },
+    {
+      input: [
+        ["MinStack", "push", "getMin", "push", "getMin", "push", "getMin"],
+        [[], [5], [], [3], [], [7], []]
+      ],
+      expected: [null, null, 5, null, 3, null, 3],
+      description: 'Changing minimum'
+    },
+    {
+      input: [
+        ["MinStack", "push", "push", "getMin", "pop", "push", "getMin"],
+        [[], [-1], [-2], [], [], [-3], []]
+      ],
+      expected: [null, null, null, -2, null, null, -3],
+      description: 'All negative numbers'
+    }
+  ]}
+  functionName="MinStack"
+/>
+
+## Solution Explanation
+
+### Approach 1: Scanning for Minimum (Not Optimal)
+
+**Time Complexity:** push O(1), pop O(1), top O(1), getMin O(n)
+**Space Complexity:** O(n)
+
+Use a single stack and scan for minimum:
+
+```javascript
+class MinStack {
+  constructor() {
+    this.stack = [];
+  }
+
+  push(val) {
+    this.stack.push(val);
+  }
+
+  pop() {
+    this.stack.pop();
+  }
+
+  top() {
+    return this.stack[this.stack.length - 1];
+  }
+
+  getMin() {
+    // Scan entire stack - O(n)!
+    return Math.min(...this.stack);
+  }
+}
+```
+
+**Why not use this?**
+- getMin() is O(n) instead of required O(1)
+- Violates the problem constraint
+- Inefficient when getMin is called frequently
+
+### Approach 2: Two Stacks (Optimal) ✅
+
+**Time Complexity:** O(1) for all operations
+**Space Complexity:** O(n)
+
+Use two stacks: one for values, one for tracking minimums:
+
+```javascript
+class MinStack {
+  constructor() {
+    this.stack = [];      // Main stack for all values
+    this.minStack = [];   // Stack tracking minimums
+  }
+
+  push(val) {
+    this.stack.push(val);
+
+    // Push to minStack if:
+    // 1. minStack is empty, OR
+    // 2. val is less than or equal to current minimum
+    if (this.minStack.length === 0 ||
+        val <= this.minStack[this.minStack.length - 1]) {
+      this.minStack.push(val);
+    }
+  }
+
+  pop() {
+    const val = this.stack.pop();
+
+    // If we're removing the minimum, pop from minStack too
+    if (val === this.minStack[this.minStack.length - 1]) {
+      this.minStack.pop();
+    }
+  }
+
+  top() {
+    return this.stack[this.stack.length - 1];
+  }
+
+  getMin() {
+    // Top of minStack is always the current minimum
+    return this.minStack[this.minStack.length - 1];
+  }
+}
+```
+
+**How Two Stacks Work:**
+
+```
+Operation sequence: push(-2), push(0), push(-3), getMin(), pop()
+
+After push(-2):
+  stack:    [-2]
+  minStack: [-2]  // -2 is minimum
+
+After push(0):
+  stack:    [-2, 0]
+  minStack: [-2]  // 0 > -2, don't push to minStack
+
+After push(-3):
+  stack:    [-2, 0, -3]
+  minStack: [-2, -3]  // -3 is new minimum
+
+getMin():
+  return minStack.top() = -3  ✅
+
+After pop():
+  stack:    [-2, 0]
+  minStack: [-2]  // -3 was removed from both stacks
+
+getMin() now returns -2  ✅
+```
+
+**Why minStack <= instead of <:**
+
+```
+Input: push(0), push(1), push(0)
+
+With <= (correct):
+  stack:    [0, 1, 0]
+  minStack: [0, 0]  // Both 0's tracked
+
+  After pop(): minStack still has [0] ✅
+
+With < only (wrong):
+  stack:    [0, 1, 0]
+  minStack: [0]  // Second 0 not tracked
+
+  After pop(): minStack would be empty! ❌
+```
+
+### Approach 3: Single Stack with Pairs
+
+**Time Complexity:** O(1) for all operations
+**Space Complexity:** O(n)
+
+Store pairs of (value, currentMin):
+
+```javascript
+class MinStack {
+  constructor() {
+    this.stack = [];  // Store [value, currentMin] pairs
+  }
+
+  push(val) {
+    if (this.stack.length === 0) {
+      this.stack.push([val, val]);
+    } else {
+      const currentMin = this.stack[this.stack.length - 1][1];
+      this.stack.push([val, Math.min(val, currentMin)]);
+    }
+  }
+
+  pop() {
+    this.stack.pop();
+  }
+
+  top() {
+    return this.stack[this.stack.length - 1][0];
+  }
+
+  getMin() {
+    return this.stack[this.stack.length - 1][1];
+  }
+}
+```
+
+### Key Insights
+
+1. **Track minimum at each level**: As stack grows/shrinks, minimum changes
+2. **Sync two stacks**: Both stacks must stay synchronized
+3. **Handle duplicates carefully**: Use <= not < when pushing to minStack
+4. **O(1) guarantee**: All operations must be constant time
+
+## Common Mistakes
+
+❌ Using < instead of <= for duplicates:
+```javascript
+// Wrong - loses track of duplicate minimums
+if (val < this.minStack[this.minStack.length - 1]) {
+  this.minStack.push(val);
+}
+```
+
+❌ Not checking if minStack is empty:
+```javascript
+// Wrong - will crash on first push
+if (val <= this.minStack[this.minStack.length - 1]) {
+  this.minStack.push(val);
+}
+```
+
+❌ Forgetting to pop from minStack:
+```javascript
+pop() {
+  this.stack.pop();
+  // Missing: check if we need to pop from minStack too!
+}
+```
+
+✅ Correct approach handles all cases:
+```javascript
+push(val) {
+  this.stack.push(val);
+  // Check empty OR val <= current min (handles duplicates)
+  if (this.minStack.length === 0 ||
+      val <= this.minStack[this.minStack.length - 1]) {
+    this.minStack.push(val);
+  }
+}
+
+pop() {
+  const val = this.stack.pop();
+  // Sync minStack when removing minimum
+  if (val === this.minStack[this.minStack.length - 1]) {
+    this.minStack.pop();
+  }
+}
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Recognize it requires **O(1) for all operations** (key constraint)
+2. Explain why scanning for min doesn't work (O(n))
+3. Introduce the two-stack approach
+4. Walk through push/pop with minimum changing
+5. Emphasize the duplicate minimum case
+
+**Key talking points:**
+- "We need O(1) getMin, so we can't scan the stack"
+- "Solution: track minimum at each stack level using a second stack"
+- "The minStack only stores values that are minimums at their level"
+- "Important: use <= not < to handle duplicate minimums correctly"
+
+**Follow-up questions you might get:**
+- **Can you optimize space?** Yes, single stack with pairs, but same O(n) space
+- **What if we want max instead?** Same approach with maxStack
+- **How to handle both min and max?** Use two auxiliary stacks
+- **What about median?** Would need different data structure (heaps)
