@@ -265,7 +265,7 @@ After pop():
 getMin() now returns -2  ✅
 ```
 
-**Why minStack <= instead of <:**
+**Why minStack &lt;= instead of &lt;:**
 
 ```
 Input: push(0), push(1), push(0)
@@ -323,12 +323,12 @@ class MinStack {
 
 1. **Track minimum at each level**: As stack grows/shrinks, minimum changes
 2. **Sync two stacks**: Both stacks must stay synchronized
-3. **Handle duplicates carefully**: Use <= not < when pushing to minStack
+3. **Handle duplicates carefully**: Use &lt;= not &lt; when pushing to minStack
 4. **O(1) guarantee**: All operations must be constant time
 
 ## Common Mistakes
 
-❌ Using < instead of <= for duplicates:
+❌ Using &lt; instead of &lt;= for duplicates:
 ```javascript
 // Wrong - loses track of duplicate minimums
 if (val < this.minStack[this.minStack.length - 1]) {
@@ -385,7 +385,7 @@ pop() {
 - "We need O(1) getMin, so we can't scan the stack"
 - "Solution: track minimum at each stack level using a second stack"
 - "The minStack only stores values that are minimums at their level"
-- "Important: use <= not < to handle duplicate minimums correctly"
+- "Important: use &lt;= not &lt; to handle duplicate minimums correctly"
 
 **Follow-up questions you might get:**
 - **Can you optimize space?** Yes, single stack with pairs, but same O(n) space
