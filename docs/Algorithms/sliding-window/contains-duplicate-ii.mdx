@@ -1,0 +1,303 @@
+---
+sidebar_position: 2
+difficulty: Easy
+tags: [arrays, hash-table, sliding-window, google, microsoft]
+leetcode_url: https://leetcode.com/problems/contains-duplicate-ii/
+companies: [Google, Microsoft, Amazon, Facebook]
+pattern: "Sliding Window"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Contains Duplicate II
+
+<AlgorithmProblem
+  title="Contains Duplicate II"
+  difficulty="Easy"
+  description={`
+<p>Given an integer array <code>nums</code> and an integer <code>k</code>, return <code>true</code> if there are two <strong>distinct indices</strong> <code>i</code> and <code>j</code> in the array such that <code>nums[i] == nums[j]</code> and <code>abs(i - j) &lt;= k</code>.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &lt;= nums.length &lt;= 10<sup>5</sup></li>
+  <li>-10<sup>9</sup> &lt;= nums[i] &lt;= 10<sup>9</sup></li>
+  <li>0 &lt;= k &lt;= 10<sup>5</sup></li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'nums = [1,2,3,1], k = 3',
+      output: 'true',
+      explanation: 'nums[0] == nums[3] and abs(0 - 3) = 3 which is <= k'
+    },
+    {
+      input: 'nums = [1,0,1,1], k = 1',
+      output: 'true',
+      explanation: 'nums[2] == nums[3] and abs(2 - 3) = 1 which is <= k'
+    },
+    {
+      input: 'nums = [1,2,3,1,2,3], k = 2',
+      output: 'false',
+      explanation: 'No duplicate exists within distance k'
+    }
+  ]}
+  starterCode={`function containsNearbyDuplicate(nums, k) {
+  // Write your code here
+
+}`}
+  solution={`function containsNearbyDuplicate(nums, k) {
+  // Sliding window with hash set: O(n) time, O(min(n,k)) space
+  const window = new Set();
+
+  for (let i = 0; i < nums.length; i++) {
+    // If window exceeds size k, remove leftmost element
+    if (i > k) {
+      window.delete(nums[i - k - 1]);
+    }
+
+    // If current number already in window, we found a duplicate
+    if (window.has(nums[i])) {
+      return true;
+    }
+
+    // Add current number to window
+    window.add(nums[i]);
+  }
+
+  return false;
+}`}
+  testCases={[
+    {
+      input: [[1, 2, 3, 1], 3],
+      expected: true,
+      description: 'Duplicate at boundary: [1,2,3,1], k=3'
+    },
+    {
+      input: [[1, 0, 1, 1], 1],
+      expected: true,
+      description: 'Adjacent duplicates: [1,0,1,1], k=1'
+    },
+    {
+      input: [[1, 2, 3, 1, 2, 3], 2],
+      expected: false,
+      description: 'Duplicates too far: [1,2,3,1,2,3], k=2'
+    },
+    {
+      input: [[1, 2, 3, 4, 5], 3],
+      expected: false,
+      description: 'No duplicates: [1,2,3,4,5], k=3'
+    },
+    {
+      input: [[1], 1],
+      expected: false,
+      description: 'Single element: [1], k=1'
+    },
+    {
+      input: [[99, 99], 2],
+      expected: true,
+      description: 'Immediate duplicates: [99,99], k=2'
+    }
+  ]}
+  functionName="containsNearbyDuplicate"
+/>
+
+## Solution Explanation
+
+### Approach 1: Brute Force (Not Recommended)
+
+**Time Complexity:** O(n × k)
+**Space Complexity:** O(1)
+
+Check every pair of elements within distance k:
+
+```javascript
+function containsNearbyDuplicate(nums, k) {
+  for (let i = 0; i < nums.length; i++) {
+    // Check k elements ahead
+    for (let j = i + 1; j <= i + k && j < nums.length; j++) {
+      if (nums[i] === nums[j]) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+```
+
+**Why not use this?**
+- Nested loops make it inefficient
+- Checks same pairs multiple times
+- Time complexity degrades with larger k
+
+### Approach 2: Hash Map (Good, but not optimal)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(n)
+
+Store the most recent index of each number:
+
+```javascript
+function containsNearbyDuplicate(nums, k) {
+  const map = new Map();
+
+  for (let i = 0; i < nums.length; i++) {
+    if (map.has(nums[i])) {
+      const prevIndex = map.get(nums[i]);
+      if (i - prevIndex <= k) {
+        return true;
+      }
+    }
+    map.set(nums[i], i);
+  }
+
+  return false;
+}
+```
+
+**Good approach**, but uses O(n) space even when k is small.
+
+### Approach 3: Sliding Window with Set (Optimal) ✅
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(min(n, k))
+
+Maintain a sliding window of size k using a set:
+
+```javascript
+function containsNearbyDuplicate(nums, k) {
+  const window = new Set();
+
+  for (let i = 0; i < nums.length; i++) {
+    // Remove element outside the window
+    if (i > k) {
+      window.delete(nums[i - k - 1]);
+    }
+
+    // Check if current element is in window
+    if (window.has(nums[i])) {
+      return true;
+    }
+
+    // Add current element to window
+    window.add(nums[i]);
+  }
+
+  return false;
+}
+```
+
+**How the Sliding Window works:**
+
+```
+nums = [1, 2, 3, 1], k = 3
+
+i=0: num=1
+  window = {} → {1}
+
+i=1: num=2
+  window = {1} → {1, 2}
+
+i=2: num=3
+  window = {1, 2} → {1, 2, 3}
+
+i=3: num=1
+  window = {1, 2, 3}
+  1 is in window! → return true ✅
+```
+
+**Example with removal:**
+
+```
+nums = [1, 2, 3, 4, 1], k = 2
+
+i=0: num=1, window = {1}
+i=1: num=2, window = {1, 2}
+i=2: num=3, window = {1, 2, 3}
+i=3: num=4
+  i > k, remove nums[0]=1
+  window = {2, 3} → {2, 3, 4}
+i=4: num=1
+  i > k, remove nums[1]=2
+  window = {3, 4} → {3, 4, 1}
+  1 not in previous window
+  → return false
+```
+
+### Key Insights
+
+1. **Window constraint**: We only care about elements within distance k
+2. **Space optimization**: Keep window size ≤ k+1 instead of storing all elements
+3. **Early termination**: Return immediately when duplicate found
+4. **Set advantage**: O(1) lookup and deletion operations
+
+## Common Mistakes
+
+❌ Not removing elements outside the window:
+```javascript
+// Wrong - window grows indefinitely
+const window = new Set();
+for (let i = 0; i < nums.length; i++) {
+  if (window.has(nums[i])) return true;
+  window.add(nums[i]);
+}
+// This doesn't respect the distance constraint!
+```
+
+❌ Wrong window size calculation:
+```javascript
+// Wrong - off by one
+if (i >= k) {  // Should be i > k
+  window.delete(nums[i - k]);  // Should be nums[i - k - 1]
+}
+```
+
+❌ Adding before checking:
+```javascript
+// Wrong - will always find itself
+window.add(nums[i]);
+if (window.has(nums[i])) return true;  // Always true!
+```
+
+✅ Correct approach - maintain window size k:
+```javascript
+const window = new Set();
+
+for (let i = 0; i < nums.length; i++) {
+  // Remove elements outside window
+  if (i > k) {
+    window.delete(nums[i - k - 1]);
+  }
+
+  // Check for duplicate
+  if (window.has(nums[i])) {
+    return true;
+  }
+
+  // Add to window
+  window.add(nums[i]);
+}
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Clarify what "distance k" means: `abs(i - j) <= k`
+2. Recognize this as a **sliding window problem** with dynamic size
+3. Explain brute force first: "Check all pairs within distance k"
+4. Optimize: "We only need to track the last k elements"
+5. Choose Set over Map: "We only need presence, not index"
+
+**Key talking points:**
+- "This is a sliding window problem disguised as a duplicate detection problem"
+- "The window size is constrained by k, not the array size"
+- "Using a Set gives us O(1) lookups and deletions"
+- "Space complexity is O(min(n,k)) because window never exceeds k+1 elements"
+
+**Complexity analysis:**
+- Time: O(n) - single pass through array
+- Space: O(min(n,k)) - window size limited by k
+
+**Follow-up questions you might get:**
+- **What if we need to find all pairs?** Collect indices instead of returning early
+- **Can we do better than O(n)?** No, we must examine each element at least once
+- **What about Contains Duplicate III?** Different problem - needs different data structure (sorted set/tree)
+- **Why Set instead of Map?** We don't need to store indices, just check presence
