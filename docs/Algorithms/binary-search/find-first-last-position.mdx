@@ -1,0 +1,452 @@
+---
+sidebar_position: 5
+difficulty: Medium
+tags: [binary-search, arrays, facebook, google, amazon]
+leetcode_url: https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/
+companies: [Facebook, Google, Amazon, Microsoft, Apple]
+pattern: "Binary Search"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Find First and Last Position of Element in Sorted Array
+
+<AlgorithmProblem
+  title="Find First and Last Position of Element in Sorted Array"
+  difficulty="Medium"
+  description={`
+<p>Given an array of integers <code>nums</code> sorted in non-decreasing order, find the starting and ending position of a given <code>target</code> value.</p>
+<p>If <code>target</code> is not found in the array, return <code>[-1, -1]</code>.</p>
+<p>You must write an algorithm with <strong>O(log n)</strong> runtime complexity.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>0 &lt;= nums.length &lt;= 10<sup>5</sup></li>
+  <li>-10<sup>9</sup> &lt;= nums[i] &lt;= 10<sup>9</sup></li>
+  <li><code>nums</code> is a non-decreasing array.</li>
+  <li>-10<sup>9</sup> &lt;= target &lt;= 10<sup>9</sup></li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'nums = [5,7,7,8,8,10], target = 8',
+      output: '[3,4]',
+      explanation: 'Target 8 appears at indices 3 and 4'
+    },
+    {
+      input: 'nums = [5,7,7,8,8,10], target = 6',
+      output: '[-1,-1]',
+      explanation: 'Target 6 is not in the array'
+    },
+    {
+      input: 'nums = [], target = 0',
+      output: '[-1,-1]',
+      explanation: 'Empty array'
+    }
+  ]}
+  starterCode={`function searchRange(nums, target) {
+  // Write your code here
+
+}`}
+  solution={`function searchRange(nums, target) {
+  // Two binary searches: O(log n) time, O(1) space
+
+  // Helper: Find leftmost (first) position
+  function findFirst(nums, target) {
+    let left = 0;
+    let right = nums.length - 1;
+    let result = -1;
+
+    while (left <= right) {
+      const mid = Math.floor(left + (right - left) / 2);
+
+      if (nums[mid] === target) {
+        result = mid;     // Found target, but keep searching left
+        right = mid - 1;  // Continue searching in left half
+      } else if (nums[mid] < target) {
+        left = mid + 1;
+      } else {
+        right = mid - 1;
+      }
+    }
+
+    return result;
+  }
+
+  // Helper: Find rightmost (last) position
+  function findLast(nums, target) {
+    let left = 0;
+    let right = nums.length - 1;
+    let result = -1;
+
+    while (left <= right) {
+      const mid = Math.floor(left + (right - left) / 2);
+
+      if (nums[mid] === target) {
+        result = mid;    // Found target, but keep searching right
+        left = mid + 1;  // Continue searching in right half
+      } else if (nums[mid] < target) {
+        left = mid + 1;
+      } else {
+        right = mid - 1;
+      }
+    }
+
+    return result;
+  }
+
+  const first = findFirst(nums, target);
+  if (first === -1) return [-1, -1]; // Not found
+
+  const last = findLast(nums, target);
+  return [first, last];
+}`}
+  testCases={[
+    {
+      input: [[5, 7, 7, 8, 8, 10], 8],
+      expected: [3, 4],
+      description: 'Multiple occurrences: nums=[5,7,7,8,8,10], target=8'
+    },
+    {
+      input: [[5, 7, 7, 8, 8, 10], 6],
+      expected: [-1, -1],
+      description: 'Target not found: nums=[5,7,7,8,8,10], target=6'
+    },
+    {
+      input: [[], 0],
+      expected: [-1, -1],
+      description: 'Empty array: nums=[], target=0'
+    },
+    {
+      input: [[1], 1],
+      expected: [0, 0],
+      description: 'Single element match: nums=[1], target=1'
+    },
+    {
+      input: [[2, 2, 2, 2, 2], 2],
+      expected: [0, 4],
+      description: 'All same elements: nums=[2,2,2,2,2], target=2'
+    },
+    {
+      input: [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 5],
+      expected: [4, 4],
+      description: 'Single occurrence: nums=[1,2,3,4,5,6,7,8,9,10], target=5'
+    }
+  ]}
+  functionName="searchRange"
+/>
+
+## Solution Explanation
+
+### Approach 1: Linear Scan (Not Optimal)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1)
+
+Scan array to find first and last occurrence:
+
+```javascript
+function searchRange(nums, target) {
+  let first = -1;
+  let last = -1;
+
+  for (let i = 0; i < nums.length; i++) {
+    if (nums[i] === target) {
+      if (first === -1) first = i;
+      last = i;
+    }
+  }
+
+  return [first, last];
+}
+```
+
+**Why not use this?**
+- O(n) time doesn't meet O(log n) requirement
+- Doesn't utilize sorted property
+- Worst case: all elements are target → must scan entire array
+
+### Approach 2: Two Binary Searches (Optimal) ✅
+
+**Time Complexity:** O(log n)
+**Space Complexity:** O(1)
+
+Perform two separate binary searches: one for first position, one for last:
+
+```javascript
+function searchRange(nums, target) {
+  function findFirst(nums, target) {
+    let left = 0;
+    let right = nums.length - 1;
+    let result = -1;
+
+    while (left <= right) {
+      const mid = Math.floor(left + (right - left) / 2);
+
+      if (nums[mid] === target) {
+        result = mid;     // Record this position
+        right = mid - 1;  // But keep searching left!
+      } else if (nums[mid] < target) {
+        left = mid + 1;
+      } else {
+        right = mid - 1;
+      }
+    }
+
+    return result;
+  }
+
+  function findLast(nums, target) {
+    let left = 0;
+    let right = nums.length - 1;
+    let result = -1;
+
+    while (left <= right) {
+      const mid = Math.floor(left + (right - left) / 2);
+
+      if (nums[mid] === target) {
+        result = mid;    // Record this position
+        left = mid + 1;  // But keep searching right!
+      } else if (nums[mid] < target) {
+        left = mid + 1;
+      } else {
+        right = mid - 1;
+      }
+    }
+
+    return result;
+  }
+
+  const first = findFirst(nums, target);
+  if (first === -1) return [-1, -1];
+
+  const last = findLast(nums, target);
+  return [first, last];
+}
+```
+
+**How Two Binary Searches Work:**
+
+```
+nums = [5, 7, 7, 8, 8, 10], target = 8
+         0  1  2  3  4  5
+
+Finding FIRST position (leftmost 8):
+Step 1: left=0, right=5, mid=2
+  nums[2]=7 < 8, search right: left=3
+
+Step 2: left=3, right=5, mid=4
+  nums[4]=8 = 8, found at 4
+  But might be earlier! result=4, right=3
+
+Step 3: left=3, right=3, mid=3
+  nums[3]=8 = 8, found at 3
+  But might be earlier! result=3, right=2
+
+Step 4: left=3, right=2 (left > right)
+  Return result=3 ✅ (first occurrence)
+
+Finding LAST position (rightmost 8):
+Step 1: left=0, right=5, mid=2
+  nums[2]=7 < 8, search right: left=3
+
+Step 2: left=3, right=5, mid=4
+  nums[4]=8 = 8, found at 4
+  But might be later! result=4, left=5
+
+Step 3: left=5, right=5, mid=5
+  nums[5]=10 > 8, search left: right=4
+
+Step 4: left=5, right=4 (left > right)
+  Return result=4 ✅ (last occurrence)
+
+Final answer: [3, 4]
+```
+
+**Key Insight - The Critical Difference:**
+
+```
+Standard binary search (stops at first match):
+if (nums[mid] === target) {
+  return mid; // Done!
+}
+
+Finding FIRST occurrence (keep going left):
+if (nums[mid] === target) {
+  result = mid;     // Save this position
+  right = mid - 1;  // But search left for earlier one
+}
+
+Finding LAST occurrence (keep going right):
+if (nums[mid] === target) {
+  result = mid;    // Save this position
+  left = mid + 1;  // But search right for later one
+}
+```
+
+### Approach 3: One Binary Search + Linear Expand (Not Optimal)
+
+**Time Complexity:** O(n) worst case
+**Space Complexity:** O(1)
+
+Find any occurrence, then expand left and right:
+
+```javascript
+function searchRange(nums, target) {
+  // Binary search to find any occurrence
+  let left = 0;
+  let right = nums.length - 1;
+  let foundIndex = -1;
+
+  while (left <= right) {
+    const mid = Math.floor(left + (right - left) / 2);
+    if (nums[mid] === target) {
+      foundIndex = mid;
+      break;
+    } else if (nums[mid] < target) {
+      left = mid + 1;
+    } else {
+      right = mid - 1;
+    }
+  }
+
+  if (foundIndex === -1) return [-1, -1];
+
+  // Expand left to find first
+  let first = foundIndex;
+  while (first > 0 && nums[first - 1] === target) {
+    first--;
+  }
+
+  // Expand right to find last
+  let last = foundIndex;
+  while (last < nums.length - 1 && nums[last + 1] === target) {
+    last++;
+  }
+
+  return [first, last];
+}
+```
+
+**Why not use this?**
+- Worst case: all elements are target → O(n) expansion
+- Doesn't maintain O(log n) time complexity
+- Combining O(log n) + O(n) = O(n) overall
+
+### Key Insights
+
+1. **Two separate searches**: Each binary search finds a different boundary
+2. **Don't stop at first match**: Continue searching to find the exact boundary
+3. **Save and continue**: Record the match but keep searching for better position
+4. **Total time**: 2 × O(log n) = O(log n) - still logarithmic!
+5. **Lower/upper bound pattern**: This is finding lower_bound and upper_bound
+
+## Common Mistakes
+
+❌ **Stopping at first match:**
+```javascript
+if (nums[mid] === target) {
+  return mid; // Wrong! Doesn't find first/last
+}
+```
+
+❌ **Using linear expansion:**
+```javascript
+// Found at index mid
+while (first > 0 && nums[first-1] === target) first--;
+// This makes it O(n) worst case!
+```
+
+❌ **Not saving the result:**
+```javascript
+if (nums[mid] === target) {
+  right = mid - 1; // Wrong! Lost the found position
+}
+```
+
+❌ **Only doing one binary search:**
+```javascript
+// Can't find both first and last in single binary search
+// (unless you use complex logic or linear expansion)
+```
+
+✅ **Correct implementation:**
+```javascript
+function searchRange(nums, target) {
+  function findBoundary(nums, target, findFirst) {
+    let left = 0;
+    let right = nums.length - 1;
+    let result = -1;
+
+    while (left <= right) {
+      const mid = Math.floor(left + (right - left) / 2);
+
+      if (nums[mid] === target) {
+        result = mid; // Save position
+        // Continue searching for boundary
+        if (findFirst) {
+          right = mid - 1; // Search left for first
+        } else {
+          left = mid + 1;  // Search right for last
+        }
+      } else if (nums[mid] < target) {
+        left = mid + 1;
+      } else {
+        right = mid - 1;
+      }
+    }
+
+    return result;
+  }
+
+  const first = findBoundary(nums, target, true);
+  if (first === -1) return [-1, -1];
+
+  const last = findBoundary(nums, target, false);
+  return [first, last];
+}
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Recognize: "This requires finding boundaries of a range"
+2. State: "Need two binary searches - one for first, one for last position"
+3. Explain: "The key is to keep searching even after finding a match"
+4. Highlight: "When we find target, we save it but continue searching for the boundary"
+5. Complexity: "Two binary searches is still O(log n) overall"
+
+**Key talking points:**
+- "This is a lower_bound and upper_bound problem"
+- "We can't use standard binary search because it stops at first match"
+- "The trick is: when we find target, don't stop - keep searching for the boundary"
+- "For first position, we search left; for last position, we search right"
+
+**Visual explanation to give:**
+
+```
+nums = [5, 7, 7, 7, 7, 7, 8], target = 7
+         0  1  2  3  4  5  6
+
+Goal: Find [1, 5]
+
+Standard binary search might return 2, 3, or 4 (any match)
+But we need the exact boundaries: first=1, last=5
+
+Solution:
+- findFirst: Keep searching left even after finding 7
+- findLast: Keep searching right even after finding 7
+```
+
+**Follow-up questions you might get:**
+- **Can you do it in one pass?** No, need two separate searches for O(log n)
+- **What if we want to count occurrences?** `last - first + 1` after finding range
+- **How to find lower_bound (first >= target)?** Modify findFirst slightly
+- **What about upper_bound (first > target)?** Similar modification to findLast
+- **Can this work with duplicates?** Yes, that's the whole point!
+
+**Real-world applications:**
+- Database range queries
+- Finding ranges in sorted datasets
+- Log file analysis (finding all logs in time range)
+- C++ STL lower_bound and upper_bound
+- Binary search tree range queries

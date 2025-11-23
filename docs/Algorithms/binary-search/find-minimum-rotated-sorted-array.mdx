@@ -1,0 +1,424 @@
+---
+sidebar_position: 7
+difficulty: Medium
+tags: [binary-search, arrays, amazon, microsoft, google]
+leetcode_url: https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/
+companies: [Amazon, Microsoft, Google, Facebook, Apple]
+pattern: "Binary Search"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Find Minimum in Rotated Sorted Array
+
+<AlgorithmProblem
+  title="Find Minimum in Rotated Sorted Array"
+  difficulty="Medium"
+  description={`
+<p>Suppose an array of length <code>n</code> sorted in ascending order is <strong>rotated</strong> between <code>1</code> and <code>n</code> times. For example, the array <code>nums = [0,1,2,4,5,6,7]</code> might become:</p>
+<ul>
+  <li><code>[4,5,6,7,0,1,2]</code> if it was rotated <code>4</code> times.</li>
+  <li><code>[0,1,2,4,5,6,7]</code> if it was rotated <code>7</code> times.</li>
+</ul>
+<p>Notice that <strong>rotating</strong> an array <code>[a[0], a[1], a[2], ..., a[n-1]]</code> 1 time results in the array <code>[a[n-1], a[0], a[1], a[2], ..., a[n-2]]</code>.</p>
+<p>Given the sorted rotated array <code>nums</code> of <strong>unique</strong> elements, return <em>the minimum element of this array</em>.</p>
+<p>You must write an algorithm that runs in <strong>O(log n)</strong> time.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>n == nums.length</li>
+  <li>1 &lt;= n &lt;= 5000</li>
+  <li>-5000 &lt;= nums[i] &lt;= 5000</li>
+  <li>All the integers of <code>nums</code> are <strong>unique</strong>.</li>
+  <li><code>nums</code> is sorted and rotated between <code>1</code> and <code>n</code> times.</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'nums = [3,4,5,1,2]',
+      output: '1',
+      explanation: 'The original array was [1,2,3,4,5] rotated 3 times.'
+    },
+    {
+      input: 'nums = [4,5,6,7,0,1,2]',
+      output: '0',
+      explanation: 'The original array was [0,1,2,4,5,6,7] and it was rotated 4 times.'
+    },
+    {
+      input: 'nums = [11,13,15,17]',
+      output: '11',
+      explanation: 'The original array was [11,13,15,17] and it was rotated 4 times (no effective rotation).'
+    }
+  ]}
+  starterCode={`function findMin(nums) {
+  // Write your code here
+
+}`}
+  solution={`function findMin(nums) {
+  // Binary search: O(log n) time, O(1) space
+  let left = 0;
+  let right = nums.length - 1;
+
+  // If array is not rotated or single element
+  if (nums[left] < nums[right]) {
+    return nums[left];
+  }
+
+  while (left < right) {
+    const mid = Math.floor(left + (right - left) / 2);
+
+    // If mid element is greater than right element,
+    // minimum is in the right half
+    if (nums[mid] > nums[right]) {
+      left = mid + 1;
+    } else {
+      // Minimum is in the left half (including mid)
+      right = mid;
+    }
+  }
+
+  // When left === right, we found the minimum
+  return nums[left];
+}`}
+  testCases={[
+    {
+      input: [[3, 4, 5, 1, 2]],
+      expected: 1,
+      description: 'Rotated 3 times: nums=[3,4,5,1,2]'
+    },
+    {
+      input: [[4, 5, 6, 7, 0, 1, 2]],
+      expected: 0,
+      description: 'Rotated 4 times: nums=[4,5,6,7,0,1,2]'
+    },
+    {
+      input: [[11, 13, 15, 17]],
+      expected: 11,
+      description: 'No effective rotation: nums=[11,13,15,17]'
+    },
+    {
+      input: [[2, 1]],
+      expected: 1,
+      description: 'Two elements: nums=[2,1]'
+    },
+    {
+      input: [[1]],
+      expected: 1,
+      description: 'Single element: nums=[1]'
+    },
+    {
+      input: [[5, 1, 2, 3, 4]],
+      expected: 1,
+      description: 'Rotated 1 time: nums=[5,1,2,3,4]'
+    }
+  ]}
+  functionName="findMin"
+/>
+
+## Solution Explanation
+
+### Approach 1: Linear Search (Not Optimal)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1)
+
+Simply find the minimum element:
+
+```javascript
+function findMin(nums) {
+  let min = nums[0];
+  for (let i = 1; i < nums.length; i++) {
+    min = Math.min(min, nums[i]);
+  }
+  return min;
+}
+
+// Or even simpler:
+function findMin(nums) {
+  return Math.min(...nums);
+}
+```
+
+**Why not use this?**
+- O(n) time doesn't meet O(log n) requirement
+- Doesn't utilize sorted + rotated property
+- Wastes the structure of the array
+
+### Approach 2: Binary Search (Optimal) ✅
+
+**Time Complexity:** O(log n)
+**Space Complexity:** O(1)
+
+Use binary search to find the rotation point (minimum element):
+
+```javascript
+function findMin(nums) {
+  let left = 0;
+  let right = nums.length - 1;
+
+  // Early exit: if array is not rotated
+  if (nums[left] < nums[right]) {
+    return nums[left];
+  }
+
+  while (left < right) {
+    const mid = Math.floor(left + (right - left) / 2);
+
+    // Compare mid with right to determine which half has minimum
+    if (nums[mid] > nums[right]) {
+      // Minimum is in right half (after mid)
+      left = mid + 1;
+    } else {
+      // Minimum is in left half (including mid)
+      right = mid;
+    }
+  }
+
+  return nums[left];
+}
+```
+
+**How Binary Search Finds the Minimum:**
+
+```
+nums = [4, 5, 6, 7, 0, 1, 2]
+         0  1  2  3  4  5  6
+
+Step 1: left=0, right=6, mid=3
+  nums[3]=7 > nums[6]=2
+  Minimum is in right half
+  left=4
+
+Step 2: left=4, right=6, mid=5
+  nums[5]=1 < nums[6]=2
+  Minimum is in left half (including mid)
+  right=5
+
+Step 3: left=4, right=5, mid=4
+  nums[4]=0 < nums[5]=1
+  Minimum is in left half (including mid)
+  right=4
+
+Step 4: left=4, right=4
+  Loop ends, return nums[4]=0 ✅
+
+nums = [3, 4, 5, 1, 2]
+         0  1  2  3  4
+
+Step 1: left=0, right=4, mid=2
+  nums[2]=5 > nums[4]=2
+  Minimum is in right half
+  left=3
+
+Step 2: left=3, right=4, mid=3
+  nums[3]=1 < nums[4]=2
+  Minimum is in left half (including mid)
+  right=3
+
+Step 3: left=3, right=3
+  Loop ends, return nums[3]=1 ✅
+```
+
+**Key Insight - Why Compare Mid with Right:**
+
+```
+In a rotated sorted array:
+- The minimum element is at the rotation point
+- Elements before rotation point: all > nums[right]
+- Elements after rotation point: all <= nums[right]
+
+Example: [4, 5, 6, 7, 0, 1, 2]
+          >2 >2 >2 >2 <2 <2 =2
+                       ↑ minimum
+
+if (nums[mid] > nums[right]):
+  Minimum is to the right of mid
+else:
+  Minimum is at mid or to the left
+
+Why not compare with nums[left]?
+Could work but more edge cases to handle.
+Comparing with nums[right] is cleaner!
+```
+
+**Why `left < right` (not `left <= right`):**
+
+```
+Similar to "First Bad Version" problem:
+- When nums[mid] <= nums[right], we keep mid as potential answer
+- So we set right = mid (not mid - 1)
+- This means left can equal right
+- When left === right, we found the answer
+
+If we used left <= right:
+- Would need extra logic to avoid infinite loop
+- Or would miss the boundary case
+```
+
+### Approach 3: Find Rotation Count (Alternative)
+
+**Time Complexity:** O(log n)
+**Space Complexity:** O(1)
+
+Find where array was rotated:
+
+```javascript
+function findMin(nums) {
+  let left = 0;
+  let right = nums.length - 1;
+
+  while (left < right) {
+    const mid = Math.floor(left + (right - left) / 2);
+
+    // Check if mid+1 is the rotation point
+    if (nums[mid] > nums[mid + 1]) {
+      return nums[mid + 1];
+    }
+
+    // Check if mid is the rotation point
+    if (mid > 0 && nums[mid - 1] > nums[mid]) {
+      return nums[mid];
+    }
+
+    // Decide which half to search
+    if (nums[mid] > nums[right]) {
+      left = mid + 1;
+    } else {
+      right = mid - 1;
+    }
+  }
+
+  return nums[left];
+}
+```
+
+**Note:** Approach 2 is cleaner and preferred!
+
+### Key Insights
+
+1. **Minimum is at rotation point**: The only place where nums[i] > nums[i+1]
+2. **Compare with right boundary**: Elegant way to determine search direction
+3. **Include mid in search**: When mid could be minimum, set `right = mid`
+4. **Loop condition**: Use `left < right` when keeping potential answer
+5. **Early exit optimization**: Check if array is not rotated
+
+## Common Mistakes
+
+❌ **Using wrong loop condition:**
+```javascript
+while (left <= right) { // Wrong! Creates infinite loop
+  if (nums[mid] <= nums[right]) {
+    right = mid; // left can equal right
+  }
+}
+```
+
+❌ **Excluding mid when it could be minimum:**
+```javascript
+if (nums[mid] < nums[right]) {
+  right = mid - 1; // Wrong! Might skip the minimum
+}
+```
+
+❌ **Comparing with wrong element:**
+```javascript
+if (nums[mid] < nums[left]) { // Works but more complex
+  // Need extra logic
+}
+// Better: compare with nums[right]
+```
+
+❌ **Not handling non-rotated array:**
+```javascript
+// Missing optimization:
+if (nums[left] < nums[right]) {
+  return nums[left]; // Array not rotated
+}
+```
+
+✅ **Correct implementation:**
+```javascript
+function findMin(nums) {
+  let left = 0;
+  let right = nums.length - 1;
+
+  // Optimization: array not rotated
+  if (nums[left] < nums[right]) {
+    return nums[left];
+  }
+
+  while (left < right) {
+    const mid = Math.floor(left + (right - left) / 2);
+
+    if (nums[mid] > nums[right]) {
+      // Minimum in right half
+      left = mid + 1;
+    } else {
+      // Minimum in left half (including mid)
+      right = mid;
+    }
+  }
+
+  return nums[left];
+}
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Recognize: "This is finding the rotation point in a rotated sorted array"
+2. Insight: "The minimum element is where the rotation occurred"
+3. Strategy: "Use binary search by comparing mid with right boundary"
+4. Highlight: "Need to keep mid as potential answer when it could be minimum"
+5. Optimization: "Can detect if array is not rotated and return early"
+
+**Key talking points:**
+- "The minimum element is at the rotation point - the only discontinuity"
+- "By comparing nums[mid] with nums[right], we know which half has the minimum"
+- "If nums[mid] > nums[right], minimum must be to the right"
+- "If nums[mid] <= nums[right], minimum could be mid or to the left"
+
+**Visual explanation to give:**
+
+```
+Original: [0, 1, 2, 4, 5, 6, 7]
+Rotated:  [4, 5, 6, 7, 0, 1, 2]
+                    ↑ rotation point = minimum!
+
+The rotation point is the only place where:
+  nums[i-1] > nums[i]
+
+All elements before rotation point > nums[right]
+All elements after rotation point <= nums[right]
+
+This property lets us use binary search!
+```
+
+**Follow-up questions you might get:**
+- **What if there are duplicates?** Makes it harder - O(n) worst case (e.g., [1,1,1,0,1])
+- **Can you find the rotation count?** Yes, same as finding index of minimum
+- **What if array is not rotated?** Early exit: return nums[0]
+- **Can you search for a target too?** Yes, previous problem!
+- **How to find maximum?** Element just before minimum (circular)
+
+**Connection to previous problem:**
+
+```
+This problem: Find minimum in rotated array
+Previous problem: Search for target in rotated array
+
+Both use similar binary search logic:
+- Identify which half to search
+- Eliminate half the array each iteration
+- Maintain O(log n) complexity
+
+Finding minimum is actually simpler because:
+- No need to check if target is in sorted half
+- Just need to determine which side has minimum
+```
+
+**Real-world applications:**
+- Finding anomalies in circular data
+- Log rotation and analysis
+- Circular buffer management
+- Time series with wraparound
+- Cache eviction policies (circular queues)
