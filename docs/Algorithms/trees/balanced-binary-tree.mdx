@@ -1,0 +1,357 @@
+---
+sidebar_position: 5
+difficulty: Easy
+tags: [trees, balance, recursion, amazon]
+leetcode_url: https://leetcode.com/problems/balanced-binary-tree/
+companies: [Amazon, Google, Microsoft, Meta]
+pattern: "Trees"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Balanced Binary Tree
+
+<AlgorithmProblem
+  title="Balanced Binary Tree"
+  difficulty="Easy"
+  description={`
+<p>Given a binary tree, determine if it is <strong>height-balanced</strong>.</p>
+<p>A height-balanced binary tree is a binary tree in which the depth of the two subtrees of every node never differs by more than one.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>The number of nodes in the tree is in the range [0, 5000]</li>
+  <li>-10<sup>4</sup> ≤ Node.val ≤ 10<sup>4</sup></li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'root = [3,9,20,null,null,15,7]',
+      output: 'true'
+    },
+    {
+      input: 'root = [1,2,2,3,3,null,null,4,4]',
+      output: 'false'
+    },
+    {
+      input: 'root = []',
+      output: 'true'
+    }
+  ]}
+  starterCode={`class TreeNode {
+  constructor(val = 0, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+function isBalanced(root) {
+  // TODO: Check if tree is height-balanced
+  return true;
+}`}
+  solution={`class TreeNode {
+  constructor(val = 0, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+function isBalanced(root) {
+  // Helper returns [isBalanced, height]
+  const [balanced] = checkBalance(root);
+  return balanced;
+}
+
+function checkBalance(node) {
+  // Base case: empty tree is balanced with height 0
+  if (node === null) return [true, 0];
+
+  // Check left subtree
+  const [leftBalanced, leftHeight] = checkBalance(node.left);
+  if (!leftBalanced) return [false, 0];  // Early exit
+
+  // Check right subtree
+  const [rightBalanced, rightHeight] = checkBalance(node.right);
+  if (!rightBalanced) return [false, 0];  // Early exit
+
+  // Check if current node is balanced
+  const heightDiff = Math.abs(leftHeight - rightHeight);
+  const isNodeBalanced = heightDiff &lt;= 1;
+  const height = Math.max(leftHeight, rightHeight) + 1;
+
+  return [isNodeBalanced, height];
+}`}
+  testCases={[
+    {
+      input: [[[3, 9, 20, null, null, 15, 7]]],
+      expected: true,
+      description: 'Balanced tree'
+    },
+    {
+      input: [[[1, 2, 2, 3, 3, null, null, 4, 4]]],
+      expected: false,
+      description: 'Unbalanced tree (deep left side)'
+    },
+    {
+      input: [null],
+      expected: true,
+      description: 'Empty tree'
+    },
+    {
+      input: [[[1]]],
+      expected: true,
+      description: 'Single node'
+    },
+    {
+      input: [[[1, 2, 3]]],
+      expected: true,
+      description: 'Balanced tree with 3 nodes'
+    },
+    {
+      input: [[[1, 2, 3, 4]]],
+      expected: false,
+      description: 'Unbalanced tree (left skewed)'
+    }
+  ]}
+  functionName="isBalanced"
+/>
+
+## Solution Explanation
+
+### Approach 1: Bottom-Up DFS (Most Efficient) ✅
+
+**Time Complexity:** O(n) - visit each node once
+**Space Complexity:** O(h) - recursion stack, where h is height
+
+Check balance while calculating heights (post-order traversal):
+
+```javascript
+function isBalanced(root) {
+  const [balanced] = checkBalance(root);
+  return balanced;
+}
+
+function checkBalance(node) {
+  // Return [isBalanced, height]
+  if (node === null) return [true, 0];
+
+  const [leftBalanced, leftHeight] = checkBalance(node.left);
+  if (!leftBalanced) return [false, 0];  // Early exit
+
+  const [rightBalanced, rightHeight] = checkBalance(node.right);
+  if (!rightBalanced) return [false, 0];  // Early exit
+
+  const isNodeBalanced = Math.abs(leftHeight - rightHeight) &lt;= 1;
+  const height = Math.max(leftHeight, rightHeight) + 1;
+
+  return [isNodeBalanced, height];
+}
+```
+
+**How it works:**
+
+```
+Tree:
+      3
+     / \
+    9   20
+       /  \
+      15   7
+
+checkBalance(3):
+  - checkBalance(9) → [true, 1] (leaf)
+  - checkBalance(20):
+    - checkBalance(15) → [true, 1] (leaf)
+    - checkBalance(7) → [true, 1] (leaf)
+    - diff = |1 - 1| = 0 &lt;= 1 ✓
+    - return [true, 2]
+  - diff = |1 - 2| = 1 &lt;= 1 ✓
+  - return [true, 3] ✓ balanced
+```
+
+### Approach 2: Top-Down DFS (Less Efficient)
+
+**Time Complexity:** O(n²) - worst case, calculate height many times
+**Space Complexity:** O(h)
+
+Calculate height separately for each node:
+
+```javascript
+function isBalanced(root) {
+  if (root === null) return true;
+
+  const leftHeight = getHeight(root.left);
+  const rightHeight = getHeight(root.right);
+
+  if (Math.abs(leftHeight - rightHeight) &gt; 1) return false;
+
+  return isBalanced(root.left) &amp;&amp; isBalanced(root.right);
+}
+
+function getHeight(node) {
+  if (node === null) return 0;
+  return Math.max(getHeight(node.left), getHeight(node.right)) + 1;
+}
+```
+
+**Why less efficient:** Recalculates heights many times
+
+### Approach 3: Single Return Value (Simplified)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(h)
+
+Return -1 to indicate unbalanced:
+
+```javascript
+function isBalanced(root) {
+  return checkBalance(root) !== -1;
+}
+
+function checkBalance(node) {
+  if (node === null) return 0;
+
+  const leftHeight = checkBalance(node.left);
+  if (leftHeight === -1) return -1;  // Left unbalanced
+
+  const rightHeight = checkBalance(node.right);
+  if (rightHeight === -1) return -1;  // Right unbalanced
+
+  // Check if current node is balanced
+  if (Math.abs(leftHeight - rightHeight) &gt; 1) return -1;
+
+  return Math.max(leftHeight, rightHeight) + 1;
+}
+```
+
+## Comparison of Approaches
+
+| Approach | Time | Space | Best For | Simplicity |
+|----------|------|-------|----------|-----------|
+| Bottom-up (tuple) | O(n) | O(h) | **Most efficient** | Medium |
+| Bottom-up (-1 trick) | O(n) | O(h) | **Cleaner code** | Easy |
+| Top-down | O(n²) | O(h) | Teaching | Low |
+
+## Common Mistakes
+
+❌ **Not returning height in recursive calls:**
+```javascript
+function isBalanced(root) {
+  if (root === null) return true;
+  const leftHeight = root.left ? getHeight(root.left) : 0;
+  const rightHeight = root.right ? getHeight(root.right) : 0;
+  // Still O(n²) because we recalculate heights
+}
+```
+
+✅ **Calculate and return height together:**
+```javascript
+function isBalanced(root) {
+  return checkBalance(root) !== -1;  // -1 = unbalanced
+}
+
+function checkBalance(node) {
+  if (node === null) return 0;
+  // Return height, or -1 if unbalanced
+  const left = checkBalance(node.left);
+  if (left === -1) return -1;
+  const right = checkBalance(node.right);
+  if (right === -1) return -1;
+  if (Math.abs(left - right) &gt; 1) return -1;
+  return Math.max(left, right) + 1;
+}
+```
+
+---
+
+❌ **Checking balance without checking subtrees:**
+```javascript
+function isBalanced(root) {
+  if (root === null) return true;
+  // Only checking current node's balance
+  return Math.abs(getHeight(root.left) - getHeight(root.right)) &lt;= 1;
+}
+```
+
+✅ **Check current node AND recursively check subtrees:**
+```javascript
+function isBalanced(root) {
+  if (root === null) return true;
+  const left = checkBalance(root.left);
+  const right = checkBalance(root.right);
+  if (left === -1 || right === -1) return false;
+  if (Math.abs(left - right) &gt; 1) return false;
+  return true;  // All checks passed
+}
+```
+
+---
+
+❌ **Using wrong threshold:**
+```javascript
+function checkBalance(node) {
+  // ...
+  if (Math.abs(leftHeight - rightHeight) &gt;= 1) return -1;  // WRONG!
+  // Should be &gt; 1, not &gt;= 1
+}
+```
+
+✅ **Difference must be at most 1:**
+```javascript
+function checkBalance(node) {
+  // ...
+  if (Math.abs(leftHeight - rightHeight) &gt; 1) return -1;  // Correct
+  return Math.max(leftHeight, rightHeight) + 1;
+}
+```
+
+## Interview Tips
+
+**What to mention:**
+1. **Height-balanced definition:** Depth of subtrees differs by at most 1
+2. **Efficient approach:** Calculate height while checking balance
+3. **Early termination:** Return false immediately when unbalanced found
+4. **Post-order traversal:** Process children before parent
+
+**Follow-up questions:**
+
+**Q: Can you do it in one pass?**
+A: Yes! Use bottom-up approach to combine height calculation and balance check.
+
+**Q: What if we want to rebalance an unbalanced tree?**
+A: That's AVL tree rebalancing - beyond this problem.
+
+**Q: How does this compare to other balance definitions?**
+A: This is height-balanced (AVL-style). Red-black trees are looser.
+
+## Edge Cases
+
+```javascript
+// Empty tree
+isBalanced(null) → true
+
+// Single node
+isBalanced(1) → true
+
+// Two nodes, balanced
+isBalanced([1, 2]) → true
+isBalanced([1, null, 2]) → true
+
+// Skewed tree (always unbalanced if &gt; 2 levels)
+isBalanced([1, 2, null, 3]) → false
+
+// Balanced complete tree
+isBalanced([1,2,3,4,5,6,7]) → true
+
+// Large difference
+isBalanced([1,2,3,4,5,6,7,8,9,null,null,...]) → false
+```
+
+## Related Problems
+
+- **Maximum Depth of Binary Tree** - Find tree height
+- **Minimum Depth of Binary Tree** - Shortest path to leaf
+- **Same Tree** - Tree comparison
+- **Diameter of Binary Tree** - Longest path through tree
+

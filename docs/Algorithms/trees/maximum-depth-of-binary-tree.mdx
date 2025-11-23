@@ -1,0 +1,317 @@
+---
+sidebar_position: 2
+difficulty: Easy
+tags: [trees, depth, recursion, amazon, google]
+leetcode_url: https://leetcode.com/problems/maximum-depth-of-binary-tree/
+companies: [Amazon, Google, Microsoft, Meta, Apple]
+pattern: "Trees"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Maximum Depth of Binary Tree
+
+<AlgorithmProblem
+  title="Maximum Depth of Binary Tree"
+  difficulty="Easy"
+  description={`
+<p>Given the <code>root</code> of a binary tree, return its <strong>maximum depth</strong>.</p>
+<p>The maximum depth is the number of nodes along the longest path from the root node down to the farthest leaf node.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>The number of nodes in the tree is in the range [0, 10<sup>4</sup>]</li>
+  <li>-100 ≤ Node.val ≤ 100</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'root = [3,9,20,null,null,15,7]',
+      output: '3'
+    },
+    {
+      input: 'root = [2,null,3]',
+      output: '2'
+    },
+    {
+      input: 'root = []',
+      output: '0'
+    }
+  ]}
+  starterCode={`class TreeNode {
+  constructor(val = 0, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+function maxDepth(root) {
+  // TODO: Find the maximum depth of the tree
+  return 0;
+}`}
+  solution={`class TreeNode {
+  constructor(val = 0, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+function maxDepth(root) {
+  // Base case: empty tree has depth 0
+  if (root === null) return 0;
+
+  // Recursively find max depth of left and right subtrees
+  const leftDepth = maxDepth(root.left);
+  const rightDepth = maxDepth(root.right);
+
+  // Return the maximum + 1 (for current node)
+  return Math.max(leftDepth, rightDepth) + 1;
+}`}
+  testCases={[
+    {
+      input: [[[3, 9, 20, null, null, 15, 7]]],
+      expected: 3,
+      description: 'Binary tree with depth 3'
+    },
+    {
+      input: [[[2, null, 3]]],
+      expected: 2,
+      description: 'Skewed tree (only right children)'
+    },
+    {
+      input: [null],
+      expected: 0,
+      description: 'Empty tree'
+    },
+    {
+      input: [[[1]]],
+      expected: 1,
+      description: 'Single node'
+    },
+    {
+      input: [[[1, 2, 3]]],
+      expected: 2,
+      description: 'Balanced tree with depth 2'
+    },
+    {
+      input: [[[1, 2, 3, 4, 5, 6, 7]]],
+      expected: 3,
+      description: 'Perfect binary tree with depth 3'
+    }
+  ]}
+  functionName="maxDepth"
+/>
+
+## Solution Explanation
+
+### Approach 1: Recursive DFS (Post-Order Traversal) ✅
+
+**Time Complexity:** O(n) - visit each node once
+**Space Complexity:** O(h) - recursion stack, where h is height
+
+Recursively find depth of left and right subtrees, return max + 1:
+
+```javascript
+function maxDepth(root) {
+  if (root === null) return 0;
+
+  const leftDepth = maxDepth(root.left);
+  const rightDepth = maxDepth(root.right);
+
+  return Math.max(leftDepth, rightDepth) + 1;
+}
+```
+
+**How it works:**
+
+```
+Tree:
+      3
+     / \
+    9   20
+       /  \
+      15   7
+
+maxDepth(3):
+  - maxDepth(9) = 1 (leaf node)
+  - maxDepth(20):
+    - maxDepth(15) = 1 (leaf node)
+    - maxDepth(7) = 1 (leaf node)
+    - return max(1, 1) + 1 = 2
+  - return max(1, 2) + 1 = 3 ✅
+```
+
+### Approach 2: BFS (Level-Order Traversal)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(w) - queue width (max nodes in a level)
+
+Use BFS to count levels:
+
+```javascript
+function maxDepth(root) {
+  if (root === null) return 0;
+
+  const queue = [root];
+  let depth = 0;
+
+  while (queue.length > 0) {
+    depth++;
+    const levelSize = queue.length;
+
+    // Process all nodes at current level
+    for (let i = 0; i < levelSize; i++) {
+      const node = queue.shift();
+      if (node.left) queue.push(node.left);
+      if (node.right) queue.push(node.right);
+    }
+  }
+
+  return depth;
+}
+```
+
+### Approach 3: DFS with Stack (Iterative)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(h) - stack size
+
+Use stack to track (node, depth) pairs:
+
+```javascript
+function maxDepth(root) {
+  if (root === null) return 0;
+
+  const stack = [[root, 1]];  // [node, depth]
+  let maxD = 0;
+
+  while (stack.length > 0) {
+    const [node, depth] = stack.pop();
+    maxD = Math.max(maxD, depth);
+
+    if (node.left) stack.push([node.left, depth + 1]);
+    if (node.right) stack.push([node.right, depth + 1]);
+  }
+
+  return maxD;
+}
+```
+
+## Comparison of Approaches
+
+| Approach | Time | Space | Best For | Simplicity |
+|----------|------|-------|----------|-----------|
+| Recursive DFS | O(n) | O(h) | **Most interviews** | Easy |
+| BFS | O(n) | O(w) | Balanced trees | Medium |
+| Iterative DFS | O(n) | O(h) | No recursion | Medium |
+
+## Common Mistakes
+
+❌ **Forgetting base case:**
+```javascript
+function maxDepth(root) {
+  const leftDepth = maxDepth(root.left);   // ERROR: null.left!
+  const rightDepth = maxDepth(root.right);
+  return Math.max(leftDepth, rightDepth) + 1;
+}
+```
+
+✅ **Check for null first:**
+```javascript
+function maxDepth(root) {
+  if (root === null) return 0;
+  const leftDepth = maxDepth(root.left);
+  const rightDepth = maxDepth(root.right);
+  return Math.max(leftDepth, rightDepth) + 1;
+}
+```
+
+---
+
+❌ **Returning wrong value for single node:**
+```javascript
+function maxDepth(root) {
+  if (root === null) return 0;
+  // For single node: 0 + 0 + 1 = 1 ✓ (actually correct)
+  return maxDepth(root.left) + maxDepth(root.right) + 1;
+}
+```
+
+⚠️ **This works but is inefficient - doesn't use Math.max**
+
+✅ **Use Math.max for clarity:**
+```javascript
+function maxDepth(root) {
+  if (root === null) return 0;
+  return Math.max(maxDepth(root.left), maxDepth(root.right)) + 1;
+}
+```
+
+---
+
+❌ **Counting nodes instead of depth:**
+```javascript
+function maxDepth(root) {
+  if (root === null) return 0;
+  // This returns count of nodes, not depth!
+  return 1 + maxDepth(root.left) + maxDepth(root.right);
+}
+```
+
+✅ **Use max of children + 1:**
+```javascript
+function maxDepth(root) {
+  if (root === null) return 0;
+  return 1 + Math.max(maxDepth(root.left), maxDepth(root.right));
+}
+```
+
+## Interview Tips
+
+**What to mention:**
+1. **Post-order traversal:** Process children before node
+2. **Depth definition:** Number of nodes from root to leaf
+3. **Base case:** Null nodes have depth 0
+4. **Recursion strategy:** Max of left and right subtree depths + 1
+
+**Follow-up questions:**
+
+**Q: What if tree is very unbalanced?**
+A: DFS takes O(h) space where h could be O(n). BFS still takes O(w) space.
+
+**Q: Can you do it iteratively?**
+A: Yes, use BFS to count levels or DFS with explicit stack.
+
+**Q: What's minimum depth?**
+A: Minimum depth is shortest path to leaf (must have both children null or one child).
+
+## Edge Cases
+
+```javascript
+// Empty tree
+maxDepth(null) → 0
+
+// Single node
+maxDepth(1) → 1
+
+// Skewed left
+maxDepth(1 → 2 → 3) → 3
+
+// Skewed right
+maxDepth(1 ← 2 ← 3) → 3
+
+// Balanced
+maxDepth([1, 2, 3]) → 2
+
+// Complete binary tree
+maxDepth([1, 2, 3, 4, 5, 6, 7]) → 3
+```
+
+## Related Problems
+
+- **Minimum Depth of Binary Tree** - Find shortest path to leaf
+- **Balanced Binary Tree** - Check if balanced (height differ by at most 1)
+- **Average of Levels in Binary Tree** - BFS traversal
+- **Binary Tree Maximum Path Sum** - Find path with max sum
+
