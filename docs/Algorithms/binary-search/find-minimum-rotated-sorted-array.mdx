@@ -240,16 +240,16 @@ Could work but more edge cases to handle.
 Comparing with nums[right] is cleaner!
 ```
 
-**Why `left < right` (not `left <= right`):**
+**Why `left < right` (not `left &lt;= right`):**
 
 ```
 Similar to "First Bad Version" problem:
-- When nums[mid] <= nums[right], we keep mid as potential answer
+- When nums[mid] &lt;= nums[right], we keep mid as potential answer
 - So we set right = mid (not mid - 1)
 - This means left can equal right
 - When left === right, we found the answer
 
-If we used left <= right:
+If we used left &lt;= right:
 - Would need extra logic to avoid infinite loop
 - Or would miss the boundary case
 ```
@@ -305,8 +305,8 @@ function findMin(nums) {
 
 ❌ **Using wrong loop condition:**
 ```javascript
-while (left <= right) { // Wrong! Creates infinite loop
-  if (nums[mid] <= nums[right]) {
+while (left &lt;= right) { // Wrong! Creates infinite loop
+  if (nums[mid] &lt;= nums[right]) {
     right = mid; // left can equal right
   }
 }
@@ -375,7 +375,7 @@ function findMin(nums) {
 - "The minimum element is at the rotation point - the only discontinuity"
 - "By comparing nums[mid] with nums[right], we know which half has the minimum"
 - "If nums[mid] > nums[right], minimum must be to the right"
-- "If nums[mid] <= nums[right], minimum could be mid or to the left"
+- "If nums[mid] &lt;= nums[right], minimum could be mid or to the left"
 
 **Visual explanation to give:**
 
