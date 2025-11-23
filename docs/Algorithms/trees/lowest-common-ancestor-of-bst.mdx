@@ -1,0 +1,385 @@
+---
+sidebar_position: 8
+difficulty: Medium
+tags: [trees, bst, lca, ancestor, amazon, microsoft]
+leetcode_url: https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/
+companies: [Amazon, Google, Microsoft, Meta, Apple]
+pattern: "Trees"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Lowest Common Ancestor of BST
+
+<AlgorithmProblem
+  title="Lowest Common Ancestor of a Binary Search Tree"
+  difficulty="Medium"
+  description={`
+<p>Given a binary search tree (BST) of unique values and two nodes <code>p</code> and <code>q</code>, find the <strong>lowest common ancestor (LCA)</strong> of the two nodes in the BST.</p>
+<p>The lowest common ancestor between two nodes p and q is the lowest node in a tree that has both p and q as descendants. A node can be a descendant of itself.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>All Node.val are <strong>unique</strong>.</li>
+  <li>p ≠ q</li>
+  <li>p and q will exist in the BST.</li>
+  <li>The number of nodes in the tree is in the range [2, 10<sup>5</sup>]</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 8',
+      output: '6'
+    },
+    {
+      input: 'root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 4',
+      output: '2'
+    },
+    {
+      input: 'root = [2,1], p = 2, q = 1',
+      output: '2'
+    }
+  ]}
+  starterCode={`class TreeNode {
+  constructor(val = 0, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+function lowestCommonAncestor(root, p, q) {
+  // TODO: Find LCA of p and q in BST
+  return null;
+}`}
+  solution={`class TreeNode {
+  constructor(val = 0, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+function lowestCommonAncestor(root, p, q) {
+  // Use BST property: values in left subtree &lt; node.val &lt; right subtree
+  let current = root;
+
+  while (current !== null) {
+    if (p.val &lt; current.val &amp;&amp; q.val &lt; current.val) {
+      // Both p and q are in left subtree
+      current = current.left;
+    } else if (p.val &gt; current.val &amp;&amp; q.val &gt; current.val) {
+      // Both p and q are in right subtree
+      current = current.right;
+    } else {
+      // p and q are in different subtrees, or current is one of them
+      // current is the LCA
+      return current;
+    }
+  }
+
+  return current;
+}`}
+  testCases={[
+    {
+      input: [[[6, 2, 8, 0, 4, 7, 9, null, null, 3, 5]], { val: 2 }, { val: 8 }],
+      expected: 6,
+      description: 'LCA of 2 and 8 is 6 (root)'
+    },
+    {
+      input: [[[6, 2, 8, 0, 4, 7, 9, null, null, 3, 5]], { val: 2 }, { val: 4 }],
+      expected: 2,
+      description: 'LCA of 2 and 4 is 2 (p is ancestor of q)'
+    },
+    {
+      input: [[[2, 1]], { val: 2 }, { val: 1 }],
+      expected: 2,
+      description: 'LCA of parent and child is parent'
+    },
+    {
+      input: [[[20, 8, 22, 4, 12, 10, 14]], { val: 4 }, { val: 12 }],
+      expected: 8,
+      description: 'LCA in symmetric BST'
+    },
+    {
+      input: [[[5, 3, 7, 2, 4, 6, 8]], { val: 2 }, { val: 8 }],
+      expected: 5,
+      description: 'LCA at root with far nodes'
+    },
+    {
+      input: [[[50, 30, 70, 20, 40, 60, 80]], { val: 20 }, { val: 40 }],
+      expected: 30,
+      description: 'LCA at internal node'
+    }
+  ]}
+  functionName="lowestCommonAncestor"
+/>
+
+## Solution Explanation
+
+### Approach 1: Iterative Using BST Property (Most Efficient) ✅
+
+**Time Complexity:** O(log n) - average, O(n) worst case (skewed tree)
+**Space Complexity:** O(1) - no extra space
+
+Use BST property to navigate: if both values are less than current, go left; if both greater, go right; otherwise, found LCA:
+
+```javascript
+function lowestCommonAncestor(root, p, q) {
+  let current = root;
+
+  while (current !== null) {
+    if (p.val &lt; current.val &amp;&amp; q.val &lt; current.val) {
+      // Both in left subtree
+      current = current.left;
+    } else if (p.val &gt; current.val &amp;&amp; q.val &gt; current.val) {
+      // Both in right subtree
+      current = current.right;
+    } else {
+      // Split point: p and q diverge here, or current is one of them
+      return current;
+    }
+  }
+
+  return current;
+}
+```
+
+**How it works:**
+
+```
+BST:         6
+            / \
+           2   8
+          / \  / \
+         0  4 7   9
+           / \
+          3   5
+
+Find LCA of p=2, q=8:
+- current=6: p(2) &lt; 6, q(8) &gt; 6 → Different subtrees! Return 6 ✅
+
+Find LCA of p=2, q=4:
+- current=6: p(2) &lt; 6, q(4) &lt; 6 → Both in left, go left
+- current=2: p(2) == 2, q(4) &gt; 2 → Split point! Return 2 ✅
+```
+
+### Approach 2: Recursive Using BST Property
+
+**Time Complexity:** O(log n) average, O(n) worst
+**Space Complexity:** O(h) - recursion stack
+
+Recursively navigate using BST property:
+
+```javascript
+function lowestCommonAncestor(root, p, q) {
+  if (p.val &lt; root.val &amp;&amp; q.val &lt; root.val) {
+    // Both in left subtree
+    return lowestCommonAncestor(root.left, p, q);
+  } else if (p.val &gt; root.val &amp;&amp; q.val &gt; root.val) {
+    // Both in right subtree
+    return lowestCommonAncestor(root.right, p, q);
+  } else {
+    // Split point or at one of the nodes
+    return root;
+  }
+}
+```
+
+### Approach 3: Generic LCA (Works for any tree)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(n)
+
+Find paths to both nodes, then compare:
+
+```javascript
+function lowestCommonAncestor(root, p, q) {
+  function findPath(node, target, path) {
+    if (node === null) return false;
+
+    path.push(node);
+
+    if (node === target) return true;
+
+    if (
+      findPath(node.left, target, path) ||
+      findPath(node.right, target, path)
+    ) {
+      return true;
+    }
+
+    path.pop();
+    return false;
+  }
+
+  const pathP = [];
+  const pathQ = [];
+
+  findPath(root, p, pathP);
+  findPath(root, q, pathQ);
+
+  let lca = root;
+  for (let i = 0; i &lt; Math.min(pathP.length, pathQ.length); i++) {
+    if (pathP[i] === pathQ[i]) {
+      lca = pathP[i];
+    } else {
+      break;
+    }
+  }
+
+  return lca;
+}
+```
+
+## Comparison of Approaches
+
+| Approach | Time | Space | Best For | Simplicity |
+|----------|------|-------|----------|-----------|
+| Iterative BST | O(log n)* | O(1) | **Most efficient** | Easy |
+| Recursive BST | O(log n)* | O(h) | Clean code | Easy |
+| Generic LCA | O(n) | O(n) | Any tree | Medium |
+
+*Average O(log n), worst case O(n) for skewed tree
+
+## Common Mistakes
+
+❌ **Treating as general tree problem (not using BST property):**
+```javascript
+function lowestCommonAncestor(root, p, q) {
+  if (root === null) return null;
+  if (root === p || root === q) return root;
+  const left = lowestCommonAncestor(root.left, p, q);
+  const right = lowestCommonAncestor(root.right, p, q);
+  if (left &amp;&amp; right) return root;
+  return left || right;
+}
+// Works but O(n) - doesn't use BST property for efficiency
+```
+
+✅ **Use BST property for O(log n) solution:**
+```javascript
+function lowestCommonAncestor(root, p, q) {
+  let current = root;
+  while (current !== null) {
+    if (p.val &lt; current.val &amp;&amp; q.val &lt; current.val) {
+      current = current.left;
+    } else if (p.val &gt; current.val &amp;&amp; q.val &gt; current.val) {
+      current = current.right;
+    } else {
+      return current;
+    }
+  }
+  return current;
+}
+```
+
+---
+
+❌ **Comparing nodes instead of values:**
+```javascript
+function lowestCommonAncestor(root, p, q) {
+  let current = root;
+  while (current !== null) {
+    if (p &lt; current &amp;&amp; q &lt; current) {  // ERROR: comparing objects!
+      current = current.left;
+    } else if (p &gt; current &amp;&amp; q &gt; current) {
+      current = current.right;
+    } else {
+      return current;
+    }
+  }
+  return current;
+}
+```
+
+✅ **Compare node values:**
+```javascript
+function lowestCommonAncestor(root, p, q) {
+  let current = root;
+  while (current !== null) {
+    if (p.val &lt; current.val &amp;&amp; q.val &lt; current.val) {  // Use .val
+      current = current.left;
+    } else if (p.val &gt; current.val &amp;&amp; q.val &gt; current.val) {
+      current = current.right;
+    } else {
+      return current;
+    }
+  }
+  return current;
+}
+```
+
+---
+
+❌ **Not handling case where p or q is the LCA:**
+```javascript
+// If p = 2, q = 4 in tree [6,2,8,0,4,7,9,null,null,3,5]
+// When current = 2, the condition p.val &gt; current.val is false
+// So must return current (the else case handles this)
+```
+
+✅ **The else case handles this:**
+```javascript
+// Whether current is p, q, or neither:
+// If values split (one &lt;, one &gt;), current is LCA
+if (p.val &lt; current.val &amp;&amp; q.val &lt; current.val) {
+  // Both left
+  current = current.left;
+} else if (p.val &gt; current.val &amp;&amp; q.val &gt; current.val) {
+  // Both right
+  current = current.right;
+} else {
+  // Split or current is one of them
+  return current;
+}
+```
+
+## Interview Tips
+
+**What to mention:**
+1. **BST property:** Enables efficient O(log n) solution
+2. **Split point:** LCA is where paths to p and q diverge
+3. **Efficiency:** Don't search entire tree like generic LCA
+4. **Edge case:** p or q can be the LCA itself
+
+**Follow-up questions:**
+
+**Q: How would you solve this for a general tree?**
+A: Need O(n) approach - find paths to both nodes and compare.
+
+**Q: What if tree is not a BST?**
+A: Use generic LCA approach - must visit all nodes.
+
+**Q: What if p or q is not in the tree?**
+A: Problem states they exist, but add validation if needed.
+
+## Edge Cases
+
+```javascript
+// p is ancestor of q
+lowestCommonAncestor([6,2,8,0,4,7,9], p=2, q=4) → 2
+
+// q is ancestor of p
+lowestCommonAncestor([6,2,8,0,4,7,9], p=4, q=2) → 2
+
+// Both at same level
+lowestCommonAncestor([6,2,8,0,4,7,9], p=0, q=4) → 2
+
+// At root
+lowestCommonAncestor([6,2,8,0,4,7,9], p=2, q=8) → 6
+
+// Small tree
+lowestCommonAncestor([2,1], p=2, q=1) → 2
+
+// Skewed tree (worst case for time complexity)
+lowestCommonAncestor([1,null,2,null,3,null,4], p=1, q=4) → 1
+```
+
+## Related Problems
+
+- **Lowest Common Ancestor of Binary Tree** (Medium) - Generic tree version
+- **Validate Binary Search Tree** (Medium) - BST validation
+- **Binary Search Tree Iterator** (Medium) - BST traversal
+- **Kth Smallest Element in BST** (Medium) - BST traversal
+- **Inorder Successor in BST** (Medium) - BST navigation
+
