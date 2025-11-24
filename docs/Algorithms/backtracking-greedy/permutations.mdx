@@ -1,0 +1,454 @@
+---
+sidebar_position: 3
+difficulty: Easy
+tags: [backtracking, array, amazon, google, microsoft]
+leetcode_url: https://leetcode.com/problems/permutations/
+companies: [Amazon, Google, Microsoft, Meta]
+pattern: "Backtracking & Greedy"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Permutations
+
+<AlgorithmProblem
+  title="Permutations"
+  difficulty="Easy"
+  description={`
+<p>Given an array <code>nums</code> of distinct integers, return <em>all the possible permutations</em>. You can return the answer in <strong>any order</strong>.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &le; nums.length &le; 6</li>
+  <li>-10 &le; nums[i] &le; 10</li>
+  <li>All the integers of <code>nums</code> are <strong>unique</strong></li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'nums = [1,2,3]',
+      output: '[[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]]'
+    },
+    {
+      input: 'nums = [0,1]',
+      output: '[[0,1],[1,0]]'
+    },
+    {
+      input: 'nums = [1]',
+      output: '[[1]]'
+    }
+  ]}
+  starterCode={`function permute(nums) {
+  // Write your code here
+
+}`}
+  solution={`function permute(nums) {
+  // Backtracking: O(n! * n) time, O(n!) space
+  const result = [];
+  const used = new Set();
+
+  function backtrack(currentPermutation) {
+    // Base case: complete permutation
+    if (currentPermutation.length === nums.length) {
+      result.push([...currentPermutation]);
+      return;
+    }
+
+    // Try each unused number
+    for (const num of nums) {
+      if (used.has(num)) continue; // Skip already used
+
+      currentPermutation.push(num); // Include
+      used.add(num);
+
+      backtrack(currentPermutation); // Explore
+
+      currentPermutation.pop(); // Exclude (backtrack)
+      used.delete(num);
+    }
+  }
+
+  backtrack([]);
+  return result;
+}`}
+  testCases={[
+    {
+      input: [[1, 2, 3]],
+      expected: [[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]],
+      description: '3! = 6 permutations'
+    },
+    {
+      input: [[0, 1]],
+      expected: [[0, 1], [1, 0]],
+      description: '2! = 2 permutations'
+    },
+    {
+      input: [[1]],
+      expected: [[1]],
+      description: 'Single element - 1 permutation'
+    },
+    {
+      input: [[1, 2]],
+      expected: [[1, 2], [2, 1]],
+      description: 'Two elements'
+    },
+    {
+      input: [[1, 2, 3, 4]],
+      expected: 24,
+      description: '4! = 24 permutations (just check count)'
+    },
+    {
+      input: [[-1, 0, 1]],
+      expected: 6,
+      description: 'Negative numbers - 3! = 6 permutations'
+    }
+  ]}
+  functionName="permute"
+/>
+
+## Solution Explanation
+
+### Approach 1: Backtracking with Set (Optimal) ✅
+
+**Time Complexity:** O(n! × n)
+**Space Complexity:** O(n!) for results
+
+Track used elements with a Set to avoid duplicates:
+
+```javascript
+function permute(nums) {
+  const result = [];
+  const used = new Set();
+
+  function backtrack(currentPermutation) {
+    // Found a complete permutation
+    if (currentPermutation.length === nums.length) {
+      result.push([...currentPermutation]);
+      return;
+    }
+
+    // Try each number as next choice
+    for (const num of nums) {
+      if (used.has(num)) continue; // Skip if already used
+
+      currentPermutation.push(num);
+      used.add(num);
+
+      backtrack(currentPermutation);
+
+      currentPermutation.pop();
+      used.delete(num);
+    }
+  }
+
+  backtrack([]);
+  return result;
+}
+```
+
+**Decision tree for [1,2,3]:**
+
+```
+                           []
+                    /       |       \
+                   1        2        3
+                 / | \    / | \    / | \
+               2   3    1   3    1   2
+              /   /    /   /    /   /
+             3   2    3   1    2   1
+            |   |    |   |    |   |
+        [1,2,3][1,3,2][2,1,3][2,3,1][3,1,2][3,2,1]
+```
+
+**Trace for [1,2,3]:**
+```
+backtrack([])
+
+  Try 1:
+    backtrack([1])
+      used = {1}
+
+      Try 2:
+        backtrack([1,2])
+          used = {1,2}
+
+          Try 3:
+            backtrack([1,2,3])
+              used = {1,2,3}
+              length === 3 → result = [[1,2,3]]
+            used = {1,2}
+
+        Try 3:
+          backtrack([1,3])
+            used = {1,3}
+
+            Try 2:
+              backtrack([1,3,2])
+                length === 3 → result = [[1,2,3],[1,3,2]]
+
+  Try 2:
+    backtrack([2])
+      Try 1:
+        backtrack([2,1])
+          Try 3:
+            backtrack([2,1,3])
+              result = [[1,2,3],[1,3,2],[2,1,3]]
+
+      Try 3:
+        backtrack([2,3])
+          Try 1:
+            backtrack([2,3,1])
+              result = [[1,2,3],[1,3,2],[2,1,3],[2,3,1]]
+
+  Try 3:
+    backtrack([3])
+      Try 1:
+        backtrack([3,1])
+          Try 2:
+            backtrack([3,1,2])
+              result = [..., [3,1,2]]
+
+      Try 2:
+        backtrack([3,2])
+          Try 1:
+            backtrack([3,2,1])
+              result = [..., [3,2,1]]
+```
+
+### Approach 2: Swap-Based Backtracking
+
+**Time Complexity:** O(n! × n)
+**Space Complexity:** O(n!)
+
+Swap elements to generate permutations:
+
+```javascript
+function permute(nums) {
+  const result = [];
+
+  function backtrack(firstIndex) {
+    // All elements are fixed - found a permutation
+    if (firstIndex === nums.length) {
+      result.push([...nums]);
+      return;
+    }
+
+    // Try each number at position firstIndex
+    for (let i = firstIndex; i < nums.length; i++) {
+      // Swap
+      [nums[firstIndex], nums[i]] = [nums[i], nums[firstIndex]];
+
+      backtrack(firstIndex + 1);
+
+      // Swap back
+      [nums[firstIndex], nums[i]] = [nums[i], nums[firstIndex]];
+    }
+  }
+
+  backtrack(0);
+  return result;
+}
+```
+
+**How it works:**
+
+```
+[1,2,3]
+
+Position 0:
+  Swap 0 with 0: [1,2,3] → pos 1
+  Swap 0 with 1: [2,1,3] → pos 1
+  Swap 0 with 2: [3,1,2] → pos 1
+
+Position 1:
+  Swap 1 with 1: [1,2,3] → pos 2 → [1,2,3] ✓
+  Swap 1 with 2: [1,3,2] → pos 2 → [1,3,2] ✓
+  Swap 1 with 1: [2,1,3] → pos 2 → [2,1,3] ✓
+  Swap 1 with 2: [2,3,1] → pos 2 → [2,3,1] ✓
+  ...
+```
+
+### Approach 3: Iterative using Stack
+
+**Time Complexity:** O(n! × n)
+**Space Complexity:** O(n! × n) for stack
+
+```javascript
+function permute(nums) {
+  const result = [];
+  const stack = [[...nums], 0];
+
+  while (stack.length > 0) {
+    const [arr, idx] = stack.pop();
+
+    if (idx === arr.length) {
+      result.push(arr);
+      continue;
+    }
+
+    for (let i = idx; i < arr.length; i++) {
+      const newArr = [...arr];
+      [newArr[idx], newArr[i]] = [newArr[i], newArr[idx]];
+      stack.push([newArr, idx + 1]);
+    }
+  }
+
+  return result;
+}
+```
+
+## Backtracking Template
+
+```javascript
+function permute(nums) {
+  // 1. Initialize result and tracking
+  const result = [];
+  const used = new Set();
+
+  // 2. Define helper function
+  function backtrack(currentPermutation) {
+    // 3. Base case: complete solution
+    if (currentPermutation.length === nums.length) {
+      result.push([...currentPermutation]);
+      return;
+    }
+
+    // 4. Try each choice
+    for (const num of nums) {
+      // Pruning: skip already used elements
+      if (used.has(num)) continue;
+
+      // Include choice
+      currentPermutation.push(num);
+      used.add(num);
+
+      // Explore further
+      backtrack(currentPermutation);
+
+      // Exclude choice (backtrack)
+      currentPermutation.pop();
+      used.delete(num);
+    }
+  }
+
+  // 5. Start recursion
+  backtrack([]);
+
+  return result;
+}
+```
+
+## Common Mistakes
+
+❌ **Forgetting to track used elements:**
+```javascript
+// Wrong: duplicates in result
+for (const num of nums) {
+  currentPermutation.push(num);
+  backtrack(currentPermutation);
+  currentPermutation.pop();
+}
+
+// Correct: use Set to track
+const used = new Set();
+for (const num of nums) {
+  if (used.has(num)) continue;
+  currentPermutation.push(num);
+  used.add(num);
+  backtrack(currentPermutation);
+  currentPermutation.pop();
+  used.delete(num);
+}
+```
+
+❌ **Not copying array when adding to result:**
+```javascript
+// Wrong: all references to same array
+result.push(currentPermutation);
+
+// Correct: independent copy
+result.push([...currentPermutation]);
+```
+
+❌ **Forgetting to backtrack (remove from used):**
+```javascript
+// Wrong: used set keeps growing
+used.add(num);
+backtrack(currentPermutation);
+// Missing: used.delete(num);
+
+// Correct: restore state
+used.add(num);
+backtrack(currentPermutation);
+used.delete(num);
+```
+
+❌ **Using wrong base case:**
+```javascript
+// Wrong: checks against nums instead of length
+if (currentPermutation === nums) // Type error!
+
+// Correct: check length
+if (currentPermutation.length === nums.length)
+```
+
+## Interview Tips
+
+**What to mention:**
+
+1. **Explain the problem:**
+   - Generate all possible orderings
+   - Each number used exactly once
+   - n! permutations for n distinct elements
+
+2. **Discuss approaches:**
+   - Backtracking with used Set (most intuitive)
+   - Swap-based backtracking (modifies in-place)
+   - Iterative (less intuitive)
+
+3. **Analyze complexity:**
+   - Time: O(n! × n) - generate n! permutations, each takes O(n)
+   - Space: O(n!) for results
+
+4. **Mention optimizations:**
+   - Early termination impossible (must generate all)
+   - Can use array instead of Set if space is critical
+
+**Follow-up questions:**
+
+**Q: What if there are duplicate elements?**
+A: Permutations II - sort first, then skip duplicates:
+```javascript
+if (i > 0 && nums[i] === nums[i-1] && !used[i-1]) continue;
+```
+
+**Q: Can you generate just the k-th permutation?**
+A: Yes, use factorial number system (Permutation Sequence problem).
+
+**Q: What about space optimization?**
+A: Use swap-based approach to avoid extra Set.
+
+## Edge Cases
+
+```javascript
+// Single element
+[1] → [[1]]
+
+// Two elements
+[1, 2] → [[1, 2], [2, 1]]
+
+// Negative numbers
+[-1, 0, 1] → 6 permutations
+
+// Large values
+[100, 200] → [[100, 200], [200, 100]]
+
+// Maximum size (6 elements)
+// 6! = 720 permutations
+```
+
+## Related Problems
+
+- **Permutations II** (Medium) - With duplicate elements
+- **Next Permutation** (Medium) - Generate next lexicographic permutation
+- **Permutation Sequence** (Hard) - Find k-th permutation
+- **Generate Parentheses** (Medium) - Similar backtracking pattern

@@ -1,0 +1,299 @@
+---
+sidebar_position: 1
+difficulty: Easy
+tags: [binary-search, arrays, facebook, google, amazon]
+leetcode_url: https://leetcode.com/problems/binary-search/
+companies: [Facebook, Google, Amazon, Microsoft, Apple]
+pattern: "Binary Search"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Binary Search
+
+<AlgorithmProblem
+  title="Binary Search"
+  difficulty="Easy"
+  description={`
+<p>Given an array of integers <code>nums</code> which is sorted in ascending order, and an integer <code>target</code>, write a function to search <code>target</code> in <code>nums</code>. If <code>target</code> exists, then return its index. Otherwise, return <code>-1</code>.</p>
+<p>You must write an algorithm with <strong>O(log n)</strong> runtime complexity.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &lt;= nums.length &lt;= 10<sup>4</sup></li>
+  <li>-10<sup>4</sup> &lt; nums[i], target &lt; 10<sup>4</sup></li>
+  <li>All the integers in <code>nums</code> are <strong>unique</strong>.</li>
+  <li><code>nums</code> is sorted in ascending order.</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'nums = [-1,0,3,5,9,12], target = 9',
+      output: '4',
+      explanation: '9 exists in nums and its index is 4'
+    },
+    {
+      input: 'nums = [-1,0,3,5,9,12], target = 2',
+      output: '-1',
+      explanation: '2 does not exist in nums so return -1'
+    },
+    {
+      input: 'nums = [5], target = 5',
+      output: '0',
+      explanation: 'Single element array with matching target'
+    }
+  ]}
+  starterCode={`function search(nums, target) {
+  // Write your code here
+
+}`}
+  solution={`function search(nums, target) {
+  // Binary search: O(log n) time, O(1) space
+  let left = 0;
+  let right = nums.length - 1;
+
+  while (left <= right) {
+    // Avoid overflow: use left + Math.floor((right - left) / 2)
+    const mid = Math.floor(left + (right - left) / 2);
+
+    if (nums[mid] === target) {
+      return mid;
+    } else if (nums[mid] < target) {
+      // Target is in right half
+      left = mid + 1;
+    } else {
+      // Target is in left half
+      right = mid - 1;
+    }
+  }
+
+  return -1; // Target not found
+}`}
+  testCases={[
+    {
+      input: [[-1, 0, 3, 5, 9, 12], 9],
+      expected: 4,
+      description: 'Target in middle-right: nums=[-1,0,3,5,9,12], target=9'
+    },
+    {
+      input: [[-1, 0, 3, 5, 9, 12], 2],
+      expected: -1,
+      description: 'Target not found: nums=[-1,0,3,5,9,12], target=2'
+    },
+    {
+      input: [[5], 5],
+      expected: 0,
+      description: 'Single element match: nums=[5], target=5'
+    },
+    {
+      input: [[1, 2, 3, 4, 5], 1],
+      expected: 0,
+      description: 'Target at start: nums=[1,2,3,4,5], target=1'
+    },
+    {
+      input: [[1, 2, 3, 4, 5], 5],
+      expected: 4,
+      description: 'Target at end: nums=[1,2,3,4,5], target=5'
+    },
+    {
+      input: [[-10, -5, 0, 3, 7, 9, 12], 7],
+      expected: 4,
+      description: 'Mixed negative/positive: nums=[-10,-5,0,3,7,9,12], target=7'
+    }
+  ]}
+  functionName="search"
+/>
+
+## Solution Explanation
+
+### Approach 1: Linear Search (Not Optimal)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1)
+
+Simply iterate through the array:
+
+```javascript
+function search(nums, target) {
+  for (let i = 0; i < nums.length; i++) {
+    if (nums[i] === target) {
+      return i;
+    }
+  }
+  return -1;
+}
+```
+
+**Why not use this?**
+- Doesn't utilize the sorted property of the array
+- O(n) time complexity doesn't meet the O(log n) requirement
+- Wastes the valuable information that the array is sorted
+
+### Approach 2: Binary Search (Optimal) ✅
+
+**Time Complexity:** O(log n)
+**Space Complexity:** O(1)
+
+Divide the search space in half at each step:
+
+```javascript
+function search(nums, target) {
+  let left = 0;
+  let right = nums.length - 1;
+
+  while (left <= right) {
+    // Calculate middle index (avoiding overflow)
+    const mid = Math.floor(left + (right - left) / 2);
+
+    if (nums[mid] === target) {
+      return mid; // Found the target
+    } else if (nums[mid] < target) {
+      // Target must be in right half
+      left = mid + 1;
+    } else {
+      // Target must be in left half
+      right = mid - 1;
+    }
+  }
+
+  return -1; // Target not found
+}
+```
+
+**How Binary Search Works:**
+
+```
+nums = [-1, 0, 3, 5, 9, 12], target = 9
+
+Step 1: left=0, right=5, mid=2
+  nums[2] = 3 < 9
+  Search right half: left=3
+
+Step 2: left=3, right=5, mid=4
+  nums[4] = 9 = 9
+  Found! Return 4 ✅
+
+Total comparisons: 2 (vs 5 for linear search)
+```
+
+**Key Binary Search Principles:**
+
+1. **Sorted Array Required**: Binary search only works on sorted arrays
+2. **Divide and Conquer**: Eliminate half the search space each iteration
+3. **Three Cases**: target found, target in left half, target in right half
+4. **Logarithmic Time**: log₂(n) steps maximum
+
+### Approach 3: Recursive Binary Search
+
+**Time Complexity:** O(log n)
+**Space Complexity:** O(log n) - recursion stack
+
+```javascript
+function search(nums, target) {
+  return binarySearchRecursive(nums, target, 0, nums.length - 1);
+}
+
+function binarySearchRecursive(nums, target, left, right) {
+  if (left > right) {
+    return -1; // Base case: not found
+  }
+
+  const mid = Math.floor(left + (right - left) / 2);
+
+  if (nums[mid] === target) {
+    return mid;
+  } else if (nums[mid] < target) {
+    return binarySearchRecursive(nums, target, mid + 1, right);
+  } else {
+    return binarySearchRecursive(nums, target, left, mid - 1);
+  }
+}
+```
+
+**Iterative vs Recursive:**
+- **Iterative** (Approach 2): Better - O(1) space, no stack overflow risk
+- **Recursive** (Approach 3): More elegant but uses O(log n) space
+
+### Key Insights
+
+1. **Logarithmic Growth**: For array of size 1,000,000, binary search needs only ~20 comparisons!
+2. **Overflow Prevention**: Use `mid = left + (right - left) / 2` instead of `(left + right) / 2`
+3. **Loop Condition**: `left <= right` (not `left < right`) to handle all cases
+4. **Update Strategy**: `left = mid + 1` and `right = mid - 1` (not `mid`)
+
+## Common Mistakes
+
+❌ **Off-by-one error with loop condition:**
+```javascript
+while (left < right) { // Wrong! Misses single element case
+  // ...
+}
+```
+
+❌ **Wrong mid calculation causing overflow:**
+```javascript
+const mid = Math.floor((left + right) / 2); // Can overflow for large values
+```
+
+❌ **Not updating left/right correctly:**
+```javascript
+if (nums[mid] < target) {
+  left = mid; // Wrong! Creates infinite loop
+}
+```
+
+❌ **Not returning mid when found:**
+```javascript
+if (nums[mid] === target) {
+  return nums[mid]; // Wrong! Should return index, not value
+}
+```
+
+✅ **Correct implementation:**
+```javascript
+function search(nums, target) {
+  let left = 0;
+  let right = nums.length - 1;
+
+  while (left <= right) { // Correct: <= handles all cases
+    const mid = Math.floor(left + (right - left) / 2); // Prevent overflow
+
+    if (nums[mid] === target) {
+      return mid; // Return index
+    } else if (nums[mid] < target) {
+      left = mid + 1; // Exclude mid
+    } else {
+      right = mid - 1; // Exclude mid
+    }
+  }
+
+  return -1;
+}
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Immediately recognize: "This is a classic binary search problem"
+2. State the requirement: "We need O(log n) time complexity"
+3. Explain the intuition: "We can eliminate half the search space each time"
+4. Highlight the sorted array requirement
+5. Walk through one complete example showing how the search space shrinks
+
+**Key talking points:**
+- "Binary search works because the array is sorted"
+- "We compare the middle element and decide which half to search"
+- "This gives us logarithmic time complexity - very efficient for large arrays"
+- "We need to be careful about off-by-one errors"
+
+**Follow-up questions you might get:**
+- **What if the array is not sorted?** Binary search won't work; need O(n) linear search
+- **Can you do this recursively?** Yes, but iterative is better (O(1) space vs O(log n))
+- **How to handle duplicates?** This problem guarantees unique elements, but binary search can be modified
+- **What about very large arrays?** Binary search scales excellently: 1B elements needs only ~30 comparisons!
+- **Overflow concerns?** Use `left + (right - left) / 2` instead of `(left + right) / 2`
+
+**Variants to mention:**
+- Finding first/last occurrence of target (when duplicates exist)
+- Finding insertion position (next problem!)
+- Finding peak element in mountain array
+- Searching in rotated sorted array

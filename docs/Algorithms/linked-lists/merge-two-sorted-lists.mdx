@@ -1,0 +1,382 @@
+---
+sidebar_position: 2
+difficulty: Easy
+tags: [linked-lists, two-pointers, merge, amazon, google]
+leetcode_url: https://leetcode.com/problems/merge-two-sorted-lists/
+companies: [Amazon, Google, Microsoft, Meta, Apple]
+pattern: "Linked Lists"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Merge Two Sorted Lists
+
+<AlgorithmProblem
+  title="Merge Two Sorted Lists"
+  difficulty="Easy"
+  description={`
+<p>You are given the heads of two sorted linked lists <code>list1</code> and <code>list2</code>.</p>
+<p>Merge the two lists into one <strong>sorted</strong> list. The list should be made by splicing together the nodes of the two lists.</p>
+<p>Return the head of the merged linked list.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>The number of nodes in each list is in the range [0, 50]</li>
+  <li>-100 ≤ node.val ≤ 100</li>
+  <li>Both list1 and list2 are sorted in non-decreasing order</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'list1 = [1,2,4], list2 = [1,3,4]',
+      output: '[1,1,2,3,4,4]',
+      explanation: 'Merged list is created by splicing nodes from both lists'
+    },
+    {
+      input: 'list1 = [], list2 = []',
+      output: '[]',
+      explanation: 'Both lists are empty'
+    },
+    {
+      input: 'list1 = [], list2 = [0]',
+      output: '[0]',
+      explanation: 'One list is empty'
+    }
+  ]}
+  starterCode={`class ListNode {
+  constructor(val = 0, next = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+function mergeTwoLists(list1, list2) {
+  // TODO: Merge two sorted lists
+  return null;
+}`}
+  solution={`class ListNode {
+  constructor(val = 0, next = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+function mergeTwoLists(list1, list2) {
+  // Create dummy node to simplify logic
+  const dummy = new ListNode(0);
+  let curr = dummy;
+
+  // Merge while both lists have nodes
+  while (list1 !== null && list2 !== null) {
+    if (list1.val <= list2.val) {
+      curr.next = list1;
+      list1 = list1.next;
+    } else {
+      curr.next = list2;
+      list2 = list2.next;
+    }
+    curr = curr.next;
+  }
+
+  // Attach remaining nodes
+  curr.next = list1 !== null ? list1 : list2;
+
+  return dummy.next;
+}`}
+  testCases={[
+    {
+      input: [[1, 2, 4], [1, 3, 4]],
+      expected: [1, 1, 2, 3, 4, 4],
+      description: 'Merge two non-empty sorted lists'
+    },
+    {
+      input: [[], []],
+      expected: [],
+      description: 'Both lists are empty'
+    },
+    {
+      input: [[], [0]],
+      expected: [0],
+      description: 'One list is empty'
+    },
+    {
+      input: [[1, 2, 3], [4, 5, 6]],
+      expected: [1, 2, 3, 4, 5, 6],
+      description: 'No interleaving (list1 entirely smaller)'
+    },
+    {
+      input: [[4, 5, 6], [1, 2, 3]],
+      expected: [1, 2, 3, 4, 5, 6],
+      description: 'No interleaving (list2 entirely smaller)'
+    },
+    {
+      input: [[1, 3, 5, 7], [2, 4, 6, 8]],
+      expected: [1, 2, 3, 4, 5, 6, 7, 8],
+      description: 'Perfect interleaving of alternating values'
+    }
+  ]}
+  functionName="mergeTwoLists"
+/>
+
+## Solution Explanation
+
+### Approach 1: Two Pointers with Dummy Node (Optimal) ✅
+
+**Time Complexity:** O(n + m) where n, m are lengths of the two lists
+**Space Complexity:** O(1) - only creating pointers, not new nodes
+
+Create a dummy node to simplify edge cases. Compare values from both lists and link the smaller one:
+
+```javascript
+function mergeTwoLists(list1, list2) {
+  // Dummy node simplifies handling of the head
+  const dummy = new ListNode(0);
+  let curr = dummy;
+
+  // Compare and merge nodes
+  while (list1 !== null && list2 !== null) {
+    if (list1.val <= list2.val) {
+      curr.next = list1;
+      list1 = list1.next;
+    } else {
+      curr.next = list2;
+      list2 = list2.next;
+    }
+    curr = curr.next;  // Move pointer forward
+  }
+
+  // Attach whichever list has remaining nodes
+  curr.next = list1 !== null ? list1 : list2;
+
+  return dummy.next;  // Skip dummy node
+}
+```
+
+**How it works:**
+
+```
+list1:  1 → 2 → 4
+list2:  1 → 3 → 4
+
+Step 1: Compare 1 ≤ 1
+  dummy → 1
+  list1 advances: 2 → 4
+
+Step 2: Compare 2 > 1
+  1 → 1
+  list2 advances: 3 → 4
+
+Step 3: Compare 2 ≤ 3
+  1 → 1 → 2
+  list1 advances: 4
+
+Step 4: Compare 4 > 3
+  1 → 1 → 2 → 3
+  list2 advances: 4
+
+Step 5: Compare 4 ≤ 4
+  1 → 1 → 2 → 3 → 4
+  list1 exhausted
+
+Step 6: Attach remaining
+  1 → 1 → 2 → 3 → 4 → 4
+
+Result: [1,1,2,3,4,4]
+```
+
+### Approach 2: Recursive
+
+**Time Complexity:** O(n + m)
+**Space Complexity:** O(n + m) - recursion stack
+
+Recursively determine which node comes next:
+
+```javascript
+function mergeTwoLists(list1, list2) {
+  // Base cases
+  if (list1 === null) return list2;
+  if (list2 === null) return list1;
+
+  // Recursive case: choose smaller and recurse
+  if (list1.val <= list2.val) {
+    list1.next = mergeTwoLists(list1.next, list2);
+    return list1;
+  } else {
+    list2.next = mergeTwoLists(list1, list2.next);
+    return list2;
+  }
+}
+```
+
+**Advantage:** Elegant and concise
+**Disadvantage:** Uses O(n + m) space for call stack
+
+### Approach 3: In-place without Dummy (More Complex)
+
+**Time Complexity:** O(n + m)
+**Space Complexity:** O(1)
+
+Handle the head separately, then merge:
+
+```javascript
+function mergeTwoLists(list1, list2) {
+  // Handle empty lists
+  if (list1 === null) return list2;
+  if (list2 === null) return list1;
+
+  // Find the starting point
+  let head;
+  if (list1.val <= list2.val) {
+    head = list1;
+    list1 = list1.next;
+  } else {
+    head = list2;
+    list2 = list2.next;
+  }
+
+  // Merge the rest
+  let curr = head;
+  while (list1 !== null && list2 !== null) {
+    if (list1.val <= list2.val) {
+      curr.next = list1;
+      list1 = list1.next;
+    } else {
+      curr.next = list2;
+      list2 = list2.next;
+    }
+    curr = curr.next;
+  }
+
+  curr.next = list1 !== null ? list1 : list2;
+  return head;
+}
+```
+
+## Comparison of Approaches
+
+| Approach | Time | Space | Simplicity | Best For |
+|----------|------|-------|-----------|----------|
+| Dummy node | O(n+m) | O(1) | Very Simple | **Recommended** |
+| Recursive | O(n+m) | O(n+m) | Elegant | Follow-up |
+| Without dummy | O(n+m) | O(1) | Complex | When dummy not allowed |
+
+## Common Mistakes
+
+❌ **Forgetting to handle empty lists:**
+```javascript
+// ERROR: What if list1 or list2 is null?
+while (list1 !== null && list2 !== null) {
+  // ...
+}
+// Result points to nothing!
+```
+
+✅ **Check and attach properly:**
+```javascript
+// After loop, one might be null
+curr.next = list1 !== null ? list1 : list2;
+```
+
+---
+
+❌ **Creating new nodes instead of reusing:**
+```javascript
+// ERROR: Extra space and wrong structure
+const newNode = new ListNode(smallerVal);  // Unnecessary!
+curr.next = newNode;
+```
+
+✅ **Reuse existing nodes:**
+```javascript
+// Correct: Just rearrange pointers
+curr.next = list1.val <= list2.val ? list1 : list2;
+```
+
+---
+
+❌ **Not advancing the correct pointer:**
+```javascript
+if (list1.val <= list2.val) {
+  curr.next = list1;
+  list2 = list2.next;  // ERROR! Should advance list1
+}
+```
+
+✅ **Always advance the pointer you used:**
+```javascript
+if (list1.val <= list2.val) {
+  curr.next = list1;
+  list1 = list1.next;  // Correct
+}
+```
+
+---
+
+❌ **Forgetting to advance curr:**
+```javascript
+if (list1.val <= list2.val) {
+  curr.next = list1;
+  list1 = list1.next;
+  // ERROR: curr is still at dummy!
+}
+```
+
+✅ **Always move curr:**
+```javascript
+if (list1.val <= list2.val) {
+  curr.next = list1;
+  list1 = list1.next;
+}
+curr = curr.next;  // Move pointer
+```
+
+## Interview Tips
+
+**What to mention:**
+1. **Dummy node:** Explain why it simplifies handling the head
+2. **Two pointers:** Compare values from both lists
+3. **Attachment:** How to handle remaining nodes
+4. **Why recursive might use more space** than iterative
+
+**Follow-up questions:**
+
+**Q: Can you do it recursively?**
+A: Yes, base cases handle null lists, recursive case picks smaller and continues.
+
+**Q: What if lists are not sorted?**
+A: First sort both lists, then merge.
+
+**Q: Can you merge k sorted lists?**
+A: Yes, use a min-heap or merge pairs repeatedly.
+
+**Q: What's the difference from merging arrays?**
+A: With linked lists, you rearrange pointers; with arrays, you'd need to copy values.
+
+## Edge Cases
+
+```javascript
+// Both empty
+mergeTwoLists(null, null) → null
+
+// One empty
+mergeTwoLists(null, [1,2,3]) → [1,2,3]
+mergeTwoLists([1,2,3], null) → [1,2,3]
+
+// Single elements
+mergeTwoLists([1], [2]) → [1,2]
+mergeTwoLists([2], [1]) → [1,2]
+
+// Duplicate values
+mergeTwoLists([1,1,1], [1,1,1]) → [1,1,1,1,1,1]
+
+// One much longer
+mergeTwoLists([1], [2,3,4,5]) → [1,2,3,4,5]
+
+// Already sorted together
+mergeTwoLists([1,3,5], [2,4,6]) → [1,2,3,4,5,6]
+```
+
+## Related Problems
+
+- **Merge k Sorted Lists** (Hard) - Merge multiple lists
+- **Merge Sorted Array** (Easy) - Same concept but with arrays
+- **Merge In-between Linked Lists** (Medium)

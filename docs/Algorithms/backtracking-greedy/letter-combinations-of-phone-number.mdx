@@ -1,0 +1,390 @@
+---
+sidebar_position: 1
+difficulty: Easy
+tags: [backtracking, string, phone-number, amazon, google, microsoft]
+leetcode_url: https://leetcode.com/problems/letter-combinations-of-a-phone-number/
+companies: [Amazon, Google, Microsoft, Meta]
+pattern: "Backtracking & Greedy"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Letter Combinations of Phone Number
+
+<AlgorithmProblem
+  title="Letter Combinations of Phone Number"
+  difficulty="Easy"
+  description={`
+<p>Given a string containing digits from <code>2-9</code> inclusive, return all possible letter combinations that the number could represent. Return the answer in <strong>any order</strong>.</p>
+<p>A mapping of digits to letters (just like on the telephone buttons) is given below. Note that 1 does not map to any letters.</p>
+<pre>
+2 &rarr; abc
+3 &rarr; def
+4 &rarr; ghi
+5 &rarr; jkl
+6 &rarr; mno
+7 &rarr; pqrs
+8 &rarr; tuv
+9 &rarr; wxyz
+</pre>
+<h4>Constraints:</h4>
+<ul>
+  <li>0 &le; digits.length &le; 4</li>
+  <li>digits[i] is a digit in the range <code>['2', '9']</code></li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'digits = "23"',
+      output: '["ad","ae","af","bd","be","bf","cd","ce","cf"]'
+    },
+    {
+      input: 'digits = ""',
+      output: '[]'
+    },
+    {
+      input: 'digits = "2"',
+      output: '["a","b","c"]'
+    }
+  ]}
+  starterCode={`function letterCombinations(digits) {
+  // Write your code here
+
+}`}
+  solution={`function letterCombinations(digits) {
+  // Backtracking: O(4^n * n) time, O(4^n) space
+  if (digits.length === 0) return [];
+
+  const digitToLetters = {
+    '2': 'abc',
+    '3': 'def',
+    '4': 'ghi',
+    '5': 'jkl',
+    '6': 'mno',
+    '7': 'pqrs',
+    '8': 'tuv',
+    '9': 'wxyz'
+  };
+
+  const result = [];
+
+  function backtrack(index, currentCombination) {
+    // Base case: processed all digits
+    if (index === digits.length) {
+      result.push(currentCombination);
+      return;
+    }
+
+    // Get letters for current digit
+    const digit = digits[index];
+    const letters = digitToLetters[digit];
+
+    // Try each letter
+    for (const letter of letters) {
+      backtrack(index + 1, currentCombination + letter);
+    }
+  }
+
+  backtrack(0, '');
+  return result;
+}`}
+  testCases={[
+    {
+      input: ['"23"'],
+      expected: ['ad', 'ae', 'af', 'bd', 'be', 'bf', 'cd', 'ce', 'cf'],
+      description: 'Two digits - 3 × 3 = 9 combinations'
+    },
+    {
+      input: ['""'],
+      expected: [],
+      description: 'Empty string returns empty array'
+    },
+    {
+      input: ['"2"'],
+      expected: ['a', 'b', 'c'],
+      description: 'Single digit'
+    },
+    {
+      input: ['"234"'],
+      expected: ['adg', 'adh', 'adi', 'aeg', 'aeh', 'aei', 'afg', 'afh', 'afi', 'bdg', 'bdh', 'bdi', 'beg', 'beh', 'bei', 'bfg', 'bfh', 'bfi', 'cdg', 'cdh', 'cdi', 'ceg', 'ceh', 'cei', 'cfg', 'cfh', 'cfi'],
+      description: 'Three digits - 3 × 3 × 3 = 27 combinations'
+    },
+    {
+      input: ['"2222"'],
+      expected: ['aaaa', 'aaab', 'aaac', 'aaba', 'aabb', 'aabc', 'aaca', 'aacb', 'aacc', 'abaa', 'abab', 'abac', 'abba', 'abbb', 'abbc', 'abca', 'abcb', 'abcc', 'acaa', 'acab', 'acac', 'acba', 'acbb', 'acbc', 'acca', 'accb', 'accc', 'baaa', 'baab', 'baac', 'baba', 'babb', 'babc', 'baca', 'bacb', 'bacc', 'bbaa', 'bbab', 'bbac', 'bbba', 'bbbb', 'bbbc', 'bbca', 'bbcb', 'bbcc', 'bcaa', 'bcab', 'bcac', 'bcba', 'bcbb', 'bcbc', 'bcca', 'bccb', 'bccc', 'caaa', 'caab', 'caac', 'caba', 'cabb', 'cabc', 'caca', 'cacb', 'cacc', 'cbaa', 'cbab', 'cbac', 'cbba', 'cbbb', 'cbbc', 'cbca', 'cbcb', 'cbcc', 'ccaa', 'ccab', 'ccac', 'ccba', 'ccbb', 'ccbc', 'ccca', 'cccb', 'cccc'],
+      description: 'Four same digits - all combinations'
+    }
+  ]}
+  functionName="letterCombinations"
+/>
+
+## Solution Explanation
+
+### Approach 1: Backtracking (Optimal) ✅
+
+**Time Complexity:** O(4^n × n) where n is the length of digits
+**Space Complexity:** O(4^n) for the result
+
+Build combinations by exploring each letter at every position:
+
+```javascript
+function letterCombinations(digits) {
+  if (digits.length === 0) return [];
+
+  const digitToLetters = {
+    '2': 'abc', '3': 'def', '4': 'ghi', '5': 'jkl',
+    '6': 'mno', '7': 'pqrs', '8': 'tuv', '9': 'wxyz'
+  };
+
+  const result = [];
+
+  function backtrack(index, currentCombination) {
+    if (index === digits.length) {
+      result.push(currentCombination);
+      return;
+    }
+
+    const digit = digits[index];
+    const letters = digitToLetters[digit];
+
+    for (const letter of letters) {
+      backtrack(index + 1, currentCombination + letter);
+    }
+  }
+
+  backtrack(0, '');
+  return result;
+}
+```
+
+**How the backtracking works:**
+
+```
+digits = "23"
+
+                           ""
+                    /       |        \
+                   a        b        c
+                 / | \    / | \    / | \
+                d  e  f  d  e  f  d  e  f
+               (leaf nodes are results)
+```
+
+**Trace for digits = "23":**
+```
+Call backtrack(0, "")
+  ├─ letter = 'a': backtrack(1, "a")
+  │  ├─ letter = 'd': backtrack(2, "ad") → result = ["ad"]
+  │  ├─ letter = 'e': backtrack(2, "ae") → result = ["ad", "ae"]
+  │  └─ letter = 'f': backtrack(2, "af") → result = ["ad", "ae", "af"]
+  ├─ letter = 'b': backtrack(1, "b")
+  │  ├─ letter = 'd': backtrack(2, "bd") → result = [..., "bd"]
+  │  ├─ letter = 'e': backtrack(2, "be") → result = [..., "be"]
+  │  └─ letter = 'f': backtrack(2, "bf") → result = [..., "bf"]
+  └─ letter = 'c': backtrack(1, "c")
+     ├─ letter = 'd': backtrack(2, "cd") → result = [..., "cd"]
+     ├─ letter = 'e': backtrack(2, "ce") → result = [..., "ce"]
+     └─ letter = 'f': backtrack(2, "cf") → result = [..., "cf"]
+```
+
+### Approach 2: Iterative BFS (Alternative)
+
+**Time Complexity:** O(4^n × n)
+**Space Complexity:** O(4^n)
+
+```javascript
+function letterCombinations(digits) {
+  if (digits.length === 0) return [];
+
+  const digitToLetters = {
+    '2': 'abc', '3': 'def', '4': 'ghi', '5': 'jkl',
+    '6': 'mno', '7': 'pqrs', '8': 'tuv', '9': 'wxyz'
+  };
+
+  let result = [''];
+
+  for (const digit of digits) {
+    const letters = digitToLetters[digit];
+    const newResult = [];
+
+    for (const combination of result) {
+      for (const letter of letters) {
+        newResult.push(combination + letter);
+      }
+    }
+
+    result = newResult;
+  }
+
+  return result;
+}
+```
+
+**How it works:**
+
+```
+digits = "23"
+
+Start: result = [""]
+
+Process digit '2':
+  - For "" and letters ['a','b','c']: ["a", "b", "c"]
+  - result = ["a", "b", "c"]
+
+Process digit '3':
+  - For "a" and letters ['d','e','f']: ["ad", "ae", "af"]
+  - For "b" and letters ['d','e','f']: ["bd", "be", "bf"]
+  - For "c" and letters ['d','e','f']: ["cd", "ce", "cf"]
+  - result = ["ad", "ae", "af", "bd", "be", "bf", "cd", "ce", "cf"]
+```
+
+## Backtracking Template
+
+```javascript
+function letterCombinations(digits) {
+  // 1. Initialize result and mapping
+  const result = [];
+  const digitToLetters = { /* mapping */ };
+
+  // 2. Define helper function
+  function backtrack(index, currentCombination) {
+    // 3. Base case: reached the end
+    if (index === digits.length) {
+      result.push(currentCombination);
+      return;
+    }
+
+    // 4. Get choices for current position
+    const choices = digitToLetters[digits[index]];
+
+    // 5. Try each choice (explore)
+    for (const choice of choices) {
+      backtrack(index + 1, currentCombination + choice);
+      // No need to undo (backtrack) since we're building a new string
+    }
+  }
+
+  // 6. Start recursion
+  backtrack(0, '');
+
+  return result;
+}
+```
+
+## Common Mistakes
+
+❌ **Forgetting to check empty input:**
+```javascript
+// Wrong: doesn't handle empty string
+function letterCombinations(digits) {
+  const result = [''];
+  // ...
+}
+
+// Correct: return [] for empty input
+function letterCombinations(digits) {
+  if (digits.length === 0) return [];
+  // ...
+}
+```
+
+❌ **Modifying a shared string incorrectly:**
+```javascript
+// Wrong: if using array of chars, must track state
+let current = [];
+current.push('a');
+backtrack(); // current is now ["a"], changes persist
+current.pop(); // must remember to pop!
+
+// Correct: create new string for each call
+backtrack(index + 1, currentCombination + letter);
+```
+
+❌ **Including digit '1' or '0':**
+```javascript
+// Wrong: trying to map 1 or 0
+digitToLetters['0'] = 'something';
+digitToLetters['1'] = 'something';
+
+// Correct: only 2-9 have letters
+digitToLetters = {
+  '2': 'abc', '3': 'def', // ... etc
+  '8': 'tuv', '9': 'wxyz'
+};
+```
+
+❌ **Inefficient iterative approach:**
+```javascript
+// Wrong: rebuilding result each time (works but less efficient)
+result = [];
+for (const combination of oldResult) {
+  // ...
+}
+
+// Better: reuse the result array
+result = newResult;
+```
+
+## Interview Tips
+
+**What to mention:**
+
+1. **Clarify the problem:**
+   - Empty string returns empty array
+   - 1 and 0 are not mapped
+   - Order of output doesn't matter
+
+2. **Explain the intuition:**
+   - At each digit, we have multiple letter choices
+   - We need to explore all combinations
+   - Backtracking naturally explores all paths
+
+3. **Discuss complexity:**
+   - Time: O(4^n × n) - worst case 9 has 4 letters
+   - Space: O(4^n) - for the result (unavoidable)
+
+4. **Mention alternatives:**
+   - Iterative BFS approach is also valid
+   - Both have same complexity
+
+**Follow-up questions:**
+
+**Q: What if we need to track the mapping differently?**
+A: Could use an array or Map instead of object for the digit-to-letters mapping.
+
+**Q: Can you optimize space?**
+A: No, we must store all results, so O(4^n) space is necessary. However, if we only printed results instead of storing, we could do it in O(n) extra space for recursion.
+
+**Q: What if we had more than one digit mapping to same letters?**
+A: The algorithm would still work, just with different combinations.
+
+## Edge Cases
+
+```javascript
+// Empty input
+"" → []
+
+// Single digit
+"2" → ["a", "b", "c"]
+
+// Multiple same digits
+"22" → ["aa", "ab", "ac", "ba", "bb", "bc", "ca", "cb", "cc"]
+
+// Digit with 4 letters
+"7" → ["p", "q", "r", "s"]
+"9" → ["w", "x", "y", "z"]
+
+// Maximum length
+"2222" → 3^4 = 81 combinations
+
+// Digit with 3 letters
+"2" → ["a", "b", "c"]
+"3" → ["d", "e", "f"]
+```
+
+## Related Problems
+
+- **Generate Parentheses** (Medium) - Backtracking with constraints
+- **Permutations** (Medium) - Generate all permutations
+- **Combinations** (Medium) - Generate all combinations
+- **Palindrome Partitioning** (Medium) - Backtracking with pruning

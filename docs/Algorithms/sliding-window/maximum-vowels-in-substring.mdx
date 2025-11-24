@@ -1,0 +1,330 @@
+---
+sidebar_position: 4
+difficulty: Easy
+tags: [string, sliding-window, google, amazon]
+leetcode_url: https://leetcode.com/problems/maximum-number-of-vowels-in-a-substring-of-given-length/
+companies: [Google, Amazon, Microsoft]
+pattern: "Sliding Window"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Maximum Number of Vowels in Substring
+
+<AlgorithmProblem
+  title="Maximum Number of Vowels in a Substring of Given Length"
+  difficulty="Easy"
+  difficulty_note="Listed as Medium on LeetCode, but Easy for sliding window pattern"
+  description={`
+<p>Given a string <code>s</code> and an integer <code>k</code>, return <em>the maximum number of vowel letters in any substring of</em> <code>s</code> <em>with length</em> <code>k</code>.</p>
+<p><strong>Vowel letters</strong> in English are <code>'a'</code>, <code>'e'</code>, <code>'i'</code>, <code>'o'</code>, and <code>'u'</code>.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &lt;= s.length &lt;= 10<sup>5</sup></li>
+  <li><code>s</code> consists of lowercase English letters</li>
+  <li>1 &lt;= k &lt;= s.length</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 's = "abciiidef", k = 3',
+      output: '3',
+      explanation: 'The substring "iii" contains 3 vowel letters.'
+    },
+    {
+      input: 's = "aeiou", k = 2',
+      output: '2',
+      explanation: 'Any substring of length 2 contains 2 vowels.'
+    },
+    {
+      input: 's = "leetcode", k = 3',
+      output: '2',
+      explanation: 'The substring "lee" contains 2 vowel letters (both "e").'
+    }
+  ]}
+  starterCode={`function maxVowels(s, k) {
+  // Write your code here
+
+}`}
+  solution={`function maxVowels(s, k) {
+  // Fixed-size sliding window: O(n) time, O(1) space
+  const vowels = new Set(['a', 'e', 'i', 'o', 'u']);
+
+  // Count vowels in first window
+  let vowelCount = 0;
+  for (let i = 0; i < k; i++) {
+    if (vowels.has(s[i])) {
+      vowelCount++;
+    }
+  }
+
+  let maxVowels = vowelCount;
+
+  // Slide the window
+  for (let i = k; i < s.length; i++) {
+    // Add new character (right side)
+    if (vowels.has(s[i])) {
+      vowelCount++;
+    }
+
+    // Remove old character (left side)
+    if (vowels.has(s[i - k])) {
+      vowelCount--;
+    }
+
+    maxVowels = Math.max(maxVowels, vowelCount);
+
+    // Early exit optimization
+    if (maxVowels === k) break;
+  }
+
+  return maxVowels;
+}`}
+  testCases={[
+    {
+      input: ['abciiidef', 3],
+      expected: 3,
+      description: 'All vowels in window: "abciiidef", k=3'
+    },
+    {
+      input: ['aeiou', 2],
+      expected: 2,
+      description: 'All vowels string: "aeiou", k=2'
+    },
+    {
+      input: ['leetcode', 3],
+      expected: 2,
+      description: 'Mixed string: "leetcode", k=3'
+    },
+    {
+      input: ['rhythms', 4],
+      expected: 0,
+      description: 'No vowels: "rhythms", k=4'
+    },
+    {
+      input: ['tryhard', 4],
+      expected: 1,
+      description: 'One vowel: "tryhard", k=4'
+    },
+    {
+      input: ['weallloveyou', 7],
+      expected: 4,
+      description: 'Complex case: "weallloveyou", k=7'
+    }
+  ]}
+  functionName="maxVowels"
+/>
+
+## Solution Explanation
+
+### Approach 1: Brute Force (Not Recommended)
+
+**Time Complexity:** O(n × k)
+**Space Complexity:** O(1)
+
+Check every substring of length k and count vowels:
+
+```javascript
+function maxVowels(s, k) {
+  const vowels = new Set(['a', 'e', 'i', 'o', 'u']);
+  let maxVowels = 0;
+
+  for (let i = 0; i <= s.length - k; i++) {
+    let count = 0;
+    // Count vowels in current window
+    for (let j = i; j < i + k; j++) {
+      if (vowels.has(s[j])) {
+        count++;
+      }
+    }
+    maxVowels = Math.max(maxVowels, count);
+  }
+
+  return maxVowels;
+}
+```
+
+**Why not use this?**
+- Nested loops create O(n × k) complexity
+- Recounts vowels in overlapping portions
+- Wastes computation on already-checked characters
+
+### Approach 2: Fixed-Size Sliding Window (Optimal) ✅
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1)
+
+Use a sliding window to maintain vowel count efficiently:
+
+```javascript
+function maxVowels(s, k) {
+  const vowels = new Set(['a', 'e', 'i', 'o', 'u']);
+
+  // Step 1: Count vowels in first window
+  let vowelCount = 0;
+  for (let i = 0; i < k; i++) {
+    if (vowels.has(s[i])) {
+      vowelCount++;
+    }
+  }
+
+  let maxVowels = vowelCount;
+
+  // Step 2: Slide the window
+  for (let i = k; i < s.length; i++) {
+    // Add new character (right side of window)
+    if (vowels.has(s[i])) {
+      vowelCount++;
+    }
+
+    // Remove old character (left side of window)
+    if (vowels.has(s[i - k])) {
+      vowelCount--;
+    }
+
+    // Update maximum
+    maxVowels = Math.max(maxVowels, vowelCount);
+
+    // Early exit if all characters are vowels
+    if (maxVowels === k) break;
+  }
+
+  return maxVowels;
+}
+```
+
+**How the Sliding Window works:**
+
+```
+s = "abciiidef", k = 3
+
+Initial window "abc":
+  a=vowel, b=consonant, c=consonant
+  vowelCount = 1
+
+Slide to "bci":
+  add 'i' (vowel): count = 2
+  remove 'a' (vowel): count = 1
+
+Slide to "cii":
+  add 'i' (vowel): count = 2
+  remove 'b' (consonant): count = 2
+
+Slide to "iii":
+  add 'i' (vowel): count = 3 ✅
+  remove 'c' (consonant): count = 3
+
+Result: 3 (all vowels in window)
+```
+
+### Key Sliding Window Technique
+
+This demonstrates **fixed-size sliding window optimization**:
+
+1. **Initialize**: Count vowels in first k characters
+2. **Slide**: For each new position:
+   - Add new character (right side)
+   - Remove old character (left side)
+3. **Update**: Track maximum count
+4. **Optimize**: Each character checked only twice (add + remove)
+
+**Window maintenance:**
+```
+Window of size k=3:
+
+Position:  0 1 2 3 4 5
+String:    a b c i i i
+           [---]           window at i=0-2
+             [---]         window at i=1-3
+               [---]       window at i=2-4
+                 [---]     window at i=3-5
+
+Each slide: -1 character, +1 character
+```
+
+### Key Insights
+
+1. **Set for vowel lookup**: O(1) character checking
+2. **Maintain count**: Increment/decrement instead of recounting
+3. **Fixed window size**: Makes slide operation predictable
+4. **Early exit**: Stop when maximum possible (k vowels) found
+
+## Common Mistakes
+
+❌ Not removing the left character:
+```javascript
+// Wrong - window grows instead of sliding
+for (let i = k; i < s.length; i++) {
+  if (vowels.has(s[i])) {
+    vowelCount++;
+  }
+  // Missing: remove s[i-k]
+}
+```
+
+❌ Checking vowels inefficiently:
+```javascript
+// Slow - O(5) check for each character
+function isVowel(c) {
+  return c === 'a' || c === 'e' || c === 'i' || c === 'o' || c === 'u';
+}
+// Better: Use Set for O(1) lookup
+```
+
+❌ Wrong index for removal:
+```javascript
+// Wrong - off by one
+if (vowels.has(s[i - k + 1])) {  // Should be s[i - k]
+  vowelCount--;
+}
+```
+
+✅ Correct approach - add right, remove left:
+```javascript
+const vowels = new Set(['a', 'e', 'i', 'o', 'u']);
+
+// Initial window
+let vowelCount = 0;
+for (let i = 0; i < k; i++) {
+  if (vowels.has(s[i])) vowelCount++;
+}
+
+let maxVowels = vowelCount;
+
+// Slide window
+for (let i = k; i < s.length; i++) {
+  if (vowels.has(s[i])) vowelCount++;        // Add right
+  if (vowels.has(s[i - k])) vowelCount--;    // Remove left
+  maxVowels = Math.max(maxVowels, vowelCount);
+}
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Recognize it's a **fixed-size sliding window** problem
+2. Identify optimization: "We're counting the same characters multiple times"
+3. Explain the slide operation: "Remove left, add right"
+4. Mention early exit optimization: "If we find k vowels, we can stop"
+5. Discuss data structure choice: "Set for O(1) vowel checking"
+
+**Key talking points:**
+- "This is a classic fixed-size sliding window problem"
+- "We maintain a running count instead of recounting each window"
+- "Each character is processed exactly twice - once added, once removed"
+- "Using a Set makes vowel checking O(1) instead of O(5)"
+
+**Complexity analysis:**
+- Time: O(n) - single pass through string
+- Space: O(1) - Set has constant size (5 vowels)
+
+**Follow-up questions you might get:**
+- **What if we need consonants instead?** Same approach, just invert the check
+- **What about case-insensitive?** Convert to lowercase or add uppercase to Set
+- **Variable-size window?** Different problem requiring different approach
+- **What if k > s.length?** Constraints guarantee k ≤ s.length, but could return s.length
+
+**Optimization discussion:**
+- Set lookup: O(1) vs string comparison: O(5)
+- Early exit when maxVowels === k
+- Could use boolean array indexed by char code (slightly faster than Set)

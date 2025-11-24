@@ -1,0 +1,378 @@
+---
+sidebar_position: 5
+difficulty: Medium
+tags: [two-pointers, array, sorting, amazon, facebook, microsoft]
+leetcode_url: https://leetcode.com/problems/3sum/
+companies: [Amazon, Facebook, Microsoft, Google, Adobe]
+pattern: "Two Pointers"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# 3Sum
+
+<AlgorithmProblem
+  title="3Sum"
+  difficulty="Medium"
+  description={`
+<p>Given an integer array <code>nums</code>, return all the triplets <code>[nums[i], nums[j], nums[k]]</code> such that <code>i != j</code>, <code>i != k</code>, and <code>j != k</code>, and <code>nums[i] + nums[j] + nums[k] == 0</code>.</p>
+<p>Notice that the solution set must not contain duplicate triplets.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>3 ≤ nums.length ≤ 3000</li>
+  <li>-10<sup>5</sup> ≤ nums[i] ≤ 10<sup>5</sup></li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'nums = [-1,0,1,2,-1,-4]',
+      output: '[[-1,-1,2],[-1,0,1]]',
+      explanation: 'nums[0] + nums[1] + nums[2] = (-1) + 0 + 1 = 0. nums[1] + nums[2] + nums[4] = 0 + 1 + (-1) = 0. nums[0] + nums[3] + nums[4] = (-1) + 2 + (-1) = 0. The distinct triplets are [-1,0,1] and [-1,-1,2].'
+    },
+    {
+      input: 'nums = [0,1,1]',
+      output: '[]',
+      explanation: 'The only possible triplet does not sum up to 0.'
+    },
+    {
+      input: 'nums = [0,0,0]',
+      output: '[[0,0,0]]',
+      explanation: 'The only possible triplet sums up to 0.'
+    }
+  ]}
+  starterCode={`function threeSum(nums) {
+  // Write your code here
+
+}`}
+  solution={`function threeSum(nums) {
+  const result = [];
+
+  // Sort array to enable two-pointer approach and easy duplicate skipping
+  nums.sort((a, b) => a - b);
+
+  for (let i = 0; i < nums.length - 2; i++) {
+    // Skip duplicate values for first number
+    if (i > 0 && nums[i] === nums[i - 1]) continue;
+
+    // Two pointer approach for remaining two numbers
+    let left = i + 1;
+    let right = nums.length - 1;
+
+    while (left < right) {
+      const sum = nums[i] + nums[left] + nums[right];
+
+      if (sum === 0) {
+        result.push([nums[i], nums[left], nums[right]]);
+
+        // Skip duplicates for second number
+        while (left < right && nums[left] === nums[left + 1]) left++;
+        // Skip duplicates for third number
+        while (left < right && nums[right] === nums[right - 1]) right--;
+
+        left++;
+        right--;
+      } else if (sum < 0) {
+        left++; // Need larger sum
+      } else {
+        right--; // Need smaller sum
+      }
+    }
+  }
+
+  return result;
+}`}
+  testCases={[
+    {
+      input: [[-1, 0, 1, 2, -1, -4]],
+      expected: [[-1, -1, 2], [-1, 0, 1]],
+      description: 'Basic case with multiple triplets'
+    },
+    {
+      input: [[0, 1, 1]],
+      expected: [],
+      description: 'No valid triplets'
+    },
+    {
+      input: [[0, 0, 0]],
+      expected: [[0, 0, 0]],
+      description: 'All zeros'
+    },
+    {
+      input: [[-2, 0, 1, 1, 2]],
+      expected: [[-2, 0, 2], [-2, 1, 1]],
+      description: 'Multiple solutions with duplicates'
+    },
+    {
+      input: [[1, 2, -2, -1]],
+      expected: [],
+      description: 'No triplets sum to zero'
+    },
+    {
+      input: [[-4, -1, -1, 0, 1, 2]],
+      expected: [[-1, -1, 2], [-1, 0, 1]],
+      description: 'Negative and positive numbers'
+    }
+  ]}
+  functionName="threeSum"
+/>
+
+## Solution Explanation
+
+### Approach 1: Brute Force (Not Recommended)
+
+**Time Complexity:** O(n³)
+**Space Complexity:** O(1) excluding result
+
+Check every possible triplet:
+
+```javascript
+function threeSum(nums) {
+  const result = [];
+  const seen = new Set();
+
+  for (let i = 0; i < nums.length - 2; i++) {
+    for (let j = i + 1; j < nums.length - 1; j++) {
+      for (let k = j + 1; k < nums.length; k++) {
+        if (nums[i] + nums[j] + nums[k] === 0) {
+          const triplet = [nums[i], nums[j], nums[k]].sort((a, b) => a - b);
+          const key = triplet.join(',');
+          if (!seen.has(key)) {
+            seen.add(key);
+            result.push(triplet);
+          }
+        }
+      }
+    }
+  }
+
+  return result;
+}
+```
+
+**Why not use this?**
+- O(n³) time complexity is too slow
+- Complex duplicate handling
+- Interview red flag
+
+### Approach 2: Hash Map (Suboptimal)
+
+**Time Complexity:** O(n²)
+**Space Complexity:** O(n)
+
+Use hash map for two-sum on each element:
+
+```javascript
+function threeSum(nums) {
+  const result = [];
+  const seen = new Set();
+
+  for (let i = 0; i < nums.length - 2; i++) {
+    const map = new Set();
+
+    for (let j = i + 1; j < nums.length; j++) {
+      const complement = -(nums[i] + nums[j]);
+
+      if (map.has(complement)) {
+        const triplet = [nums[i], nums[j], complement].sort((a, b) => a - b);
+        const key = triplet.join(',');
+        seen.add(key);
+      }
+
+      map.add(nums[j]);
+    }
+  }
+
+  return Array.from(seen).map(s => s.split(',').map(Number));
+}
+```
+
+**Issues:**
+- Uses extra space for hash map
+- Duplicate handling is complex
+- Two pointers is cleaner
+
+### Approach 3: Sort + Two Pointers (Optimal) ✅
+
+**Time Complexity:** O(n²)
+**Space Complexity:** O(1) excluding result
+
+Fix one number, use two pointers for the other two:
+
+```javascript
+function threeSum(nums) {
+  const result = [];
+  nums.sort((a, b) => a - b); // O(n log n)
+
+  for (let i = 0; i < nums.length - 2; i++) {
+    // Skip duplicates for first number
+    if (i > 0 && nums[i] === nums[i - 1]) continue;
+
+    let left = i + 1;
+    let right = nums.length - 1;
+
+    while (left < right) {
+      const sum = nums[i] + nums[left] + nums[right];
+
+      if (sum === 0) {
+        result.push([nums[i], nums[left], nums[right]]);
+
+        // Skip duplicates for second number
+        while (left < right && nums[left] === nums[left + 1]) left++;
+        // Skip duplicates for third number
+        while (left < right && nums[right] === nums[right - 1]) right--;
+
+        left++;
+        right--;
+      } else if (sum < 0) {
+        left++;  // Need larger sum
+      } else {
+        right--; // Need smaller sum
+      }
+    }
+  }
+
+  return result;
+}
+```
+
+**How it works:**
+
+1. **Sort array**: O(n log n)
+2. **Fix first number**: Loop through each element
+3. **Two pointers**: Find pairs that sum to -nums[i]
+4. **Skip duplicates**: Avoid duplicate triplets
+
+**Example walkthrough:**
+
+```
+nums = [-1, 0, 1, 2, -1, -4]
+
+Step 1: Sort
+nums = [-4, -1, -1, 0, 1, 2]
+
+Step 2: i=0, nums[i]=-4
+        [-4, -1, -1, 0, 1, 2]
+          i   L           R
+        sum = -4 + (-1) + 2 = -3 < 0
+        → L moves right
+
+        [-4, -1, -1, 0, 1, 2]
+          i      L        R
+        sum = -4 + (-1) + 2 = -3 < 0
+        → L moves right
+        ... No solution for i=0
+
+Step 3: i=1, nums[i]=-1
+        [-4, -1, -1, 0, 1, 2]
+              i   L        R
+        sum = -1 + (-1) + 2 = 0 ✅
+        → Add [-1, -1, 2]
+        → Skip duplicates, move both pointers
+
+        [-4, -1, -1, 0, 1, 2]
+              i      L  R
+        sum = -1 + 0 + 1 = 0 ✅
+        → Add [-1, 0, 1]
+
+Step 4: i=2, nums[i]=-1
+        Skip! (duplicate of previous i)
+
+Step 5: i=3, nums[i]=0
+        No more valid triplets
+
+Result: [[-1, -1, 2], [-1, 0, 1]]
+```
+
+### Key Insights
+
+**Why sorting helps:**
+1. Enables two-pointer technique
+2. Makes duplicate detection easy (adjacent elements)
+3. Allows early termination (if nums[i] > 0, no solution)
+
+**Duplicate handling:**
+```javascript
+// Skip duplicate first numbers
+if (i > 0 && nums[i] === nums[i - 1]) continue;
+
+// Skip duplicate second numbers
+while (left < right && nums[left] === nums[left + 1]) left++;
+
+// Skip duplicate third numbers
+while (left < right && nums[right] === nums[right - 1]) right--;
+```
+
+**Optimization: Early termination:**
+```javascript
+if (nums[i] > 0) break; // All remaining numbers positive
+```
+
+## Common Mistakes
+
+❌ **Not sorting array first:**
+```javascript
+// Two pointers don't work on unsorted array
+```
+
+❌ **Not handling duplicates:**
+```javascript
+// Results in duplicate triplets like [-1,0,1] appearing twice
+```
+
+❌ **Using wrong indices for duplicate check:**
+```javascript
+if (i > 0 && nums[i] === nums[i + 1]) // Should compare with i-1
+```
+
+❌ **Not skipping duplicates for all three numbers:**
+```javascript
+// Must skip duplicates for i, left, AND right
+```
+
+❌ **Modifying both pointers when sum == 0:**
+```javascript
+if (sum === 0) {
+  left++; // Must move BOTH pointers
+  // Missing: right--
+}
+```
+
+## Interview Tips
+
+**Discussion points:**
+1. Start with brute force, explain why it's O(n³)
+2. Mention hash map approach (O(n²) but uses space)
+3. Explain optimal sort + two pointers approach
+4. Walk through duplicate handling carefully
+5. Discuss time complexity: O(n log n) + O(n²) = O(n²)
+
+**Follow-up questions:**
+- What about 4Sum? → Add another loop, becomes O(n³)
+- Can we do better than O(n²)? → No, must check all pairs
+- What if array can't be modified? → Copy it first (still O(n) space for result)
+- How to handle k-Sum? → Recursive approach or generalized algorithm
+
+**Key insights to mention:**
+- Sorting enables two-pointer technique
+- Fix one element, solve two-sum for remaining
+- Duplicate handling is critical for correctness
+- Time dominated by two-pointer part O(n²), not sorting O(n log n)
+
+**Common variations:**
+- 3Sum Closest (find triplet closest to target)
+- 3Sum Smaller (count triplets with sum < target)
+- 4Sum (extend to four numbers)
+
+**What to emphasize:**
+- This combines sorting + two pointers
+- Duplicate handling requires checking all three positions
+- Pattern extends to k-Sum problems
+- O(n²) is optimal for this problem
+
+## Related Problems
+
+- **Two Sum** (Easy) - Foundation for this problem
+- **Two Sum II** (Easy) - Two pointers on sorted array
+- **3Sum Closest** (Medium) - Find closest sum to target
+- **4Sum** (Medium) - Extension to four numbers
+- **3Sum Smaller** (Medium) - Count triplets less than target

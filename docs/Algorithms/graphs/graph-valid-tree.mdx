@@ -1,0 +1,441 @@
+---
+sidebar_position: 6
+difficulty: Medium
+tags: [graphs, dfs, bfs, union-find, amazon, google, facebook]
+leetcode_url: https://leetcode.com/problems/graph-valid-tree/
+companies: [Amazon, Google, Facebook, Microsoft, Apple]
+pattern: "Graphs"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Graph Valid Tree
+
+<AlgorithmProblem
+  title="Graph Valid Tree"
+  difficulty="Medium"
+  description={`
+<p>You have a graph of <code>n</code> nodes labeled from <code>0</code> to <code>n - 1</code>. You are given an integer <code>n</code> and a list of <code>edges</code> where each <code>edges[i] = [ai, bi]</code> indicates that there is an undirected edge between nodes <code>ai</code> and <code>bi</code> in the graph.</p>
+<p>Return <code>true</code> if the edges of the given graph make it a valid tree, or <code>false</code> otherwise.</p>
+<p><strong>A valid tree must satisfy two conditions:</strong></p>
+<ul>
+  <li>The graph is connected (all nodes reachable from any node)</li>
+  <li>The graph is acyclic (no cycles)</li>
+</ul>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &lt;= n &lt;= 2000</li>
+  <li>0 &lt;= edges.length &lt;= 5000</li>
+  <li>edges[i].length == 2</li>
+  <li>0 &lt;= ai, bi &lt;= n - 1</li>
+  <li>All values <code>ai</code> and <code>bi</code> are unique.</li>
+  <li>There are no self-loops or duplicate edges.</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'n = 5, edges = [[0,1],[0,2],[0,3],[1,4]]',
+      output: 'true',
+      explanation: 'This is a valid tree with root at 0.'
+    },
+    {
+      input: 'n = 5, edges = [[0,1],[1,2],[2,3],[1,3],[1,4]]',
+      output: 'false',
+      explanation: 'There is a cycle: 1-2-3-1'
+    },
+    {
+      input: 'n = 3, edges = [[0,1],[0,2]]',
+      output: 'true',
+      explanation: 'A valid tree with 2 edges for 3 nodes.'
+    }
+  ]}
+  starterCode={`function validTree(n, edges) {
+  // Write your code here
+  return true;
+}`}
+  solution={`function validTree(n, edges) {
+  // Tree properties: n nodes, n-1 edges, no cycles, connected
+  // Check: edges.length === n - 1 and no cycles
+  // Time: O(n + e), Space: O(n + e)
+
+  if (edges.length !== n - 1) {
+    return false;  // Wrong number of edges
+  }
+
+  // Build adjacency list
+  const graph = Array.from({ length: n }, () => []);
+  for (const [a, b] of edges) {
+    graph[a].push(b);
+    graph[b].push(a);
+  }
+
+  const visited = new Set();
+
+  function dfs(node, parent) {
+    visited.add(node);
+
+    for (const neighbor of graph[node]) {
+      if (neighbor === parent) continue;  // Skip edge to parent
+
+      if (visited.has(neighbor)) {
+        return false;  // Cycle detected
+      }
+
+      if (!dfs(neighbor, node)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  // Check for cycles starting from node 0
+  if (!dfs(0, -1)) {
+    return false;
+  }
+
+  // Check if all nodes are visited (connected)
+  return visited.size === n;
+}`}
+  testCases={[
+    {
+      input: [5, [[0, 1], [0, 2], [0, 3], [1, 4]]],
+      expected: true,
+      description: 'Valid tree with root at 0'
+    },
+    {
+      input: [5, [[0, 1], [1, 2], [2, 3], [1, 3], [1, 4]]],
+      expected: false,
+      description: 'Cycle: 1-2-3-1'
+    },
+    {
+      input: [3, [[0, 1], [0, 2]]],
+      expected: true,
+      description: 'Simple tree with 3 nodes'
+    },
+    {
+      input: [2, [[0, 1]]],
+      expected: true,
+      description: 'Minimal tree with 2 nodes'
+    },
+    {
+      input: [4, [[0, 1], [0, 2]]],
+      expected: false,
+      description: 'Not connected: node 3 isolated'
+    },
+    {
+      input: [1, []],
+      expected: true,
+      description: 'Single node is a valid tree'
+    }
+  ]}
+  functionName="validTree"
+/>
+
+## Solution Explanation
+
+### Approach 1: DFS with Cycle Detection ✅
+
+**Time Complexity:** O(n + e) where n = nodes, e = edges
+**Space Complexity:** O(n + e) for graph and recursion
+
+A valid tree has exactly n-1 edges, is connected, and has no cycles:
+
+```javascript
+function validTree(n, edges) {
+  // Quick check: tree must have exactly n-1 edges
+  if (edges.length !== n - 1) {
+    return false;
+  }
+
+  // Build adjacency list
+  const graph = Array.from({ length: n }, () => []);
+  for (const [a, b] of edges) {
+    graph[a].push(b);
+    graph[b].push(a);  // Undirected
+  }
+
+  const visited = new Set();
+
+  function dfs(node, parent) {
+    visited.add(node);
+
+    for (const neighbor of graph[node]) {
+      if (neighbor === parent) continue;  // Don't go back through parent
+
+      if (visited.has(neighbor)) {
+        return false;  // Back edge = cycle!
+      }
+
+      if (!dfs(neighbor, node)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  // Check for cycles from node 0
+  if (!dfs(0, -1)) {
+    return false;
+  }
+
+  // Check if fully connected (all nodes visited)
+  return visited.size === n;
+}
+```
+
+**How it works:**
+
+```
+Valid Tree Example: n=5, edges=[[0,1],[0,2],[0,3],[1,4]]
+
+     0
+    /|\
+   1 2 3
+   |
+   4
+
+Check 1: edges.length === 4 === n-1 ✓
+
+Check 2: DFS from 0
+  Visit 0 (parent=-1)
+    neighbor 1: not visited, dfs(1, 0)
+      Visit 1
+      neighbor 0: is parent, skip
+      neighbor 4: not visited, dfs(4, 1)
+        Visit 4
+        neighbor 1: is parent, skip
+        return true
+      return true
+    neighbor 2: not visited, dfs(2, 0)
+      Visit 2
+      neighbor 0: is parent, skip
+      return true
+    neighbor 3: not visited, dfs(3, 0)
+      Visit 3
+      neighbor 0: is parent, skip
+      return true
+  return true
+
+Check 3: visited.size === 5 === n ✓
+
+Result: true (valid tree!)
+
+---
+
+Invalid Tree Example: n=5, edges=[[0,1],[1,2],[2,3],[1,3],[1,4]]
+
+        0
+        |
+        1
+       /|\
+      2 3 4
+       \|
+         cycle
+
+Check 1: edges.length === 5 !== n-1 ✗
+
+Result: false (wrong number of edges!)
+
+Even without this check, DFS would find cycle:
+  dfs(1): visit neighbors [0, 2, 3, 4]
+    dfs(2): visit neighbors [1, 3]
+      dfs(3): visit neighbors [2, 1]
+        neighbor 1: already visited! → cycle detected ✗
+```
+
+### Approach 2: BFS with Cycle Detection ✅
+
+**Time Complexity:** O(n + e)
+**Space Complexity:** O(n + e)
+
+```javascript
+function validTree(n, edges) {
+  if (edges.length !== n - 1) {
+    return false;
+  }
+
+  const graph = Array.from({ length: n }, () => []);
+  for (const [a, b] of edges) {
+    graph[a].push(b);
+    graph[b].push(a);
+  }
+
+  const visited = new Set();
+  const queue = [[0, -1]];  // [node, parent]
+  visited.add(0);
+
+  while (queue.length > 0) {
+    const [node, parent] = queue.shift();
+
+    for (const neighbor of graph[node]) {
+      if (neighbor === parent) continue;
+
+      if (visited.has(neighbor)) {
+        return false;  // Cycle found
+      }
+
+      visited.add(neighbor);
+      queue.push([neighbor, node]);
+    }
+  }
+
+  return visited.size === n;
+}
+```
+
+### Approach 3: Union-Find ✅
+
+**Time Complexity:** O(n + e × α(n))
+**Space Complexity:** O(n)
+
+```javascript
+class UnionFind {
+  constructor(n) {
+    this.parent = Array.from({ length: n }, (_, i) => i);
+    this.rank = Array(n).fill(0);
+  }
+
+  find(x) {
+    if (this.parent[x] !== x) {
+      this.parent[x] = this.find(this.parent[x]);
+    }
+    return this.parent[x];
+  }
+
+  union(x, y) {
+    const rootX = this.find(x);
+    const rootY = this.find(y);
+
+    if (rootX === rootY) return false;  // Already connected (cycle!)
+
+    if (this.rank[rootX] < this.rank[rootY]) {
+      this.parent[rootX] = rootY;
+    } else if (this.rank[rootX] > this.rank[rootY]) {
+      this.parent[rootY] = rootX;
+    } else {
+      this.parent[rootY] = rootX;
+      this.rank[rootX]++;
+    }
+    return true;
+  }
+}
+
+function validTree(n, edges) {
+  if (edges.length !== n - 1) {
+    return false;
+  }
+
+  const uf = new UnionFind(n);
+
+  for (const [a, b] of edges) {
+    if (!uf.union(a, b)) {
+      return false;  // Edge connects already-connected nodes (cycle)
+    }
+  }
+
+  return true;
+}
+```
+
+### Key Concepts
+
+1. **Tree Properties**: n nodes, n-1 edges, connected, acyclic
+2. **Cycle Detection**: Back edge indicates cycle
+3. **Connectivity Check**: All nodes must be visited
+4. **Parent Tracking**: Skip parent edge to avoid false cycle detection
+5. **Union-Find**: Detects cycles while building graph
+
+## Common Mistakes
+
+❌ Not checking edge count:
+```javascript
+// Wrong - ignoring edge count condition
+function validTree(n, edges) {
+  // Missing: if (edges.length !== n - 1) return false;
+  // Can have n-1 edges but still not a tree!
+}
+```
+
+❌ Not skipping parent edge:
+```javascript
+// Wrong - sees parent as cycle
+function dfs(node, parent) {
+  for (const neighbor of graph[node]) {
+    if (visited.has(neighbor)) {
+      return false;  // Parent is visited! False cycle!
+    }
+  }
+}
+```
+
+❌ Not checking connectivity:
+```javascript
+// Wrong - missing connectivity check
+function validTree(n, edges) {
+  if (edges.length !== n - 1) return false;
+  // Missing: return visited.size === n
+}
+```
+
+✅ Correct approach:
+```javascript
+// Check three conditions:
+1. edges.length === n - 1  // Right number of edges
+2. No cycles via DFS        // Acyclic check
+3. visited.size === n       // Connected check
+
+function dfs(node, parent) {
+  visited.add(node);
+  for (const neighbor of graph[node]) {
+    if (neighbor === parent) continue;  // Skip parent edge
+    if (visited.has(neighbor)) return false;  // Cycle
+    if (!dfs(neighbor, node)) return false;
+  }
+  return true;
+}
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Recognize: "A tree is a connected acyclic graph"
+2. Key insight: "A tree with n nodes must have exactly n-1 edges"
+3. Check three conditions: right edge count, no cycles, connected
+4. Complexity: "O(n + e) time and space"
+
+**Key talking points:**
+- "Trees have n nodes and n-1 edges (fundamental property)"
+- "Must check both acyclic (no cycles) and connected (all reachable)"
+- "Parent tracking prevents falsely detecting back edge as cycle"
+- "Union-Find is elegant for cycle detection during edge processing"
+
+**Why skip parent edge:**
+```
+In undirected graph, edge 0-1 appears in both:
+- graph[0] contains 1
+- graph[1] contains 0
+
+When visiting 1 from 0, we can't mark 0 as cycle!
+```
+
+**What if interviewer asks:**
+- **"Why n-1 edges?"** - Tree is minimally connected graph
+- **"Can we have fewer edges?"** - Then disconnected
+- **"Can we have more edges?"** - Then contains cycle
+- **"Union-Find vs DFS?"** - Union-Find is cleaner conceptually
+- **"What if n=0?"** - Edge case: no nodes, no edges → true
+
+**Related LeetCode Problems:**
+- Number of Connected Components
+- Course Schedule (topological sort)
+- Number of Islands
+- Surrounded Regions
+- Minimum Spanning Tree
+
+**Follow-up variations:**
+- Find root of tree
+- Find if graph is forest
+- Minimum edges to make tree
+- Check if valid complete binary tree

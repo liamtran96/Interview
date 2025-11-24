@@ -1,0 +1,339 @@
+---
+sidebar_position: 6
+difficulty: Medium
+tags: [arrays, hash-table, matrix, amazon, apple]
+leetcode_url: https://leetcode.com/problems/valid-sudoku/
+companies: [Amazon, Apple, Google, Microsoft, Meta]
+pattern: "Arrays & Hashing"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Valid Sudoku
+
+<AlgorithmProblem
+  title="Valid Sudoku"
+  difficulty="Medium"
+  description={`
+<p>Determine if a <code>9 x 9</code> Sudoku board is valid. Only the filled cells need to be validated <strong>according to the following rules</strong>:</p>
+<ol>
+  <li>Each row must contain the digits <code>1-9</code> without repetition.</li>
+  <li>Each column must contain the digits <code>1-9</code> without repetition.</li>
+  <li>Each of the nine <code>3 x 3</code> sub-boxes of the grid must contain the digits <code>1-9</code> without repetition.</li>
+</ol>
+<p><strong>Note:</strong></p>
+<ul>
+  <li>A Sudoku board (partially filled) could be valid but is not necessarily solvable.</li>
+  <li>Only the filled cells need to be validated according to the mentioned rules.</li>
+</ul>
+<h4>Constraints:</h4>
+<ul>
+  <li>board.length == 9</li>
+  <li>board[i].length == 9</li>
+  <li>board[i][j] is a digit <code>1-9</code> or <code>'.'</code>.</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'board = [["5","3",".",".","7",".",".",".","."],["6",".",".","1","9","5",".",".","."],[".","9","8",".",".",".",".","6","."],["8",".",".",".","6",".",".",".","3"],["4",".",".","8",".","3",".",".","1"],["7",".",".",".","2",".",".",".","6"],[".","6",".",".",".",".","2","8","."],[".",".",".","4","1","9",".",".","5"],[".",".",".",".","8",".",".","7","9"]]',
+      output: 'true',
+      explanation: 'The Sudoku board is valid (each row, column, and 3x3 box has no duplicates).'
+    },
+    {
+      input: 'board = [["8","3",".",".","7",".",".",".","."],["6",".",".","1","9","5",".",".","."],[".","9","8",".",".",".",".","6","."],["8",".",".",".","6",".",".",".","3"],["4",".",".","8",".","3",".",".","1"],["7",".",".",".","2",".",".",".","6"],[".","6",".",".",".",".","2","8","."],[".",".",".","4","1","9",".",".","5"],[".",".",".",".","8",".",".","7","9"]]',
+      output: 'false',
+      explanation: 'Same as Example 1, except the first row has two 8s. Hence, it is invalid.'
+    }
+  ]}
+  starterCode={`function isValidSudoku(board) {
+  // Write your code here
+
+}`}
+  solution={`function isValidSudoku(board) {
+  // Use sets to track seen digits
+  const rows = Array(9).fill(null).map(() => new Set());
+  const cols = Array(9).fill(null).map(() => new Set());
+  const boxes = Array(9).fill(null).map(() => new Set());
+
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      const cell = board[r][c];
+
+      if (cell === '.') continue;
+
+      // Calculate box index
+      const boxIndex = Math.floor(r / 3) * 3 + Math.floor(c / 3);
+
+      // Check if digit already exists
+      if (rows[r].has(cell) || cols[c].has(cell) || boxes[boxIndex].has(cell)) {
+        return false;
+      }
+
+      // Add digit to sets
+      rows[r].add(cell);
+      cols[c].add(cell);
+      boxes[boxIndex].add(cell);
+    }
+  }
+
+  return true;
+}`}
+  testCases={[
+    {
+      input: [[
+        ["5","3",".",".","7",".",".",".","."],
+        ["6",".",".","1","9","5",".",".","."],
+        [".","9","8",".",".",".",".","6","."],
+        ["8",".",".",".","6",".",".",".","3"],
+        ["4",".",".","8",".","3",".",".","1"],
+        ["7",".",".",".","2",".",".",".","6"],
+        [".","6",".",".",".",".","2","8","."],
+        [".",".",".","4","1","9",".",".","5"],
+        [".",".",".",".","8",".",".","7","9"]
+      ]],
+      expected: true,
+      description: 'Valid sudoku board'
+    },
+    {
+      input: [[
+        ["8","3",".",".","7",".",".",".","."],
+        ["6",".",".","1","9","5",".",".","."],
+        [".","9","8",".",".",".",".","6","."],
+        ["8",".",".",".","6",".",".",".","3"],
+        ["4",".",".","8",".","3",".",".","1"],
+        ["7",".",".",".","2",".",".",".","6"],
+        [".","6",".",".",".",".","2","8","."],
+        [".",".",".","4","1","9",".",".","5"],
+        [".",".",".",".","8",".",".","7","9"]
+      ]],
+      expected: false,
+      description: 'Invalid - duplicate 8 in first column'
+    },
+    {
+      input: [[
+        [".",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."]
+      ]],
+      expected: true,
+      description: 'Empty board is valid'
+    },
+    {
+      input: [[
+        ["1","2","3","4","5","6","7","8","9"],
+        [".",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."]
+      ]],
+      expected: true,
+      description: 'Valid - one complete row'
+    },
+    {
+      input: [[
+        ["1",".",".",".",".",".",".",".","."],
+        ["1",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."]
+      ]],
+      expected: false,
+      description: 'Invalid - duplicate in column'
+    },
+    {
+      input: [[
+        ["1","2",".",".",".",".",".",".","."],
+        ["3","4",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."],
+        ["1",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."],
+        [".",".",".",".",".",".",".",".","."]
+      ]],
+      expected: false,
+      description: 'Invalid - duplicate in 3x3 box'
+    }
+  ]}
+  functionName="isValidSudoku"
+/>
+
+## Solution Explanation
+
+### Approach: Single Pass with Hash Sets
+
+**Time Complexity:** O(1) - always 81 cells
+**Space Complexity:** O(1) - always 9 sets of max 9 elements each
+
+Use hash sets to track seen digits in rows, columns, and 3x3 boxes.
+
+```javascript
+function isValidSudoku(board) {
+  const rows = Array(9).fill(null).map(() => new Set());
+  const cols = Array(9).fill(null).map(() => new Set());
+  const boxes = Array(9).fill(null).map(() => new Set());
+
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      const cell = board[r][c];
+
+      if (cell === '.') continue;
+
+      // Calculate which 3x3 box this cell belongs to
+      const boxIndex = Math.floor(r / 3) * 3 + Math.floor(c / 3);
+
+      // Check for duplicates
+      if (rows[r].has(cell) || cols[c].has(cell) || boxes[boxIndex].has(cell)) {
+        return false;
+      }
+
+      // Add to sets
+      rows[r].add(cell);
+      cols[c].add(cell);
+      boxes[boxIndex].add(cell);
+    }
+  }
+
+  return true;
+}
+```
+
+**How it works:**
+
+1. **Create 3 arrays of sets**: one for rows, columns, and boxes
+2. **Iterate through each cell** in the board
+3. **Calculate box index** using formula: `Math.floor(r/3) * 3 + Math.floor(c/3)`
+4. **Check for duplicates** in corresponding row, column, and box
+5. **Add digit** to all three sets if not duplicate
+
+**Box index calculation:**
+
+```
+Box indices for 9x9 grid:
+  0 | 1 | 2
+  ---------
+  3 | 4 | 5
+  ---------
+  6 | 7 | 8
+
+For cell at (r, c):
+  boxRow = Math.floor(r / 3)    (0, 1, or 2)
+  boxCol = Math.floor(c / 3)    (0, 1, or 2)
+  boxIndex = boxRow * 3 + boxCol
+
+Examples:
+  (0,0) → boxIndex = 0*3 + 0 = 0
+  (2,5) → boxIndex = 0*3 + 1 = 1
+  (5,8) → boxIndex = 1*3 + 2 = 5
+  (8,8) → boxIndex = 2*3 + 2 = 8
+```
+
+**Example walkthrough:**
+
+```
+board[0][0] = '5'
+  row 0, col 0, box 0
+  rows[0] = {'5'}
+  cols[0] = {'5'}
+  boxes[0] = {'5'}
+
+board[0][1] = '3'
+  row 0, col 1, box 0
+  rows[0] = {'5', '3'}
+  cols[1] = {'3'}
+  boxes[0] = {'5', '3'}
+
+If we encounter '5' again in row 0:
+  rows[0].has('5') → true → return false
+```
+
+### Alternative: String Encoding
+
+```javascript
+function isValidSudoku(board) {
+  const seen = new Set();
+
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      const cell = board[r][c];
+      if (cell === '.') continue;
+
+      const rowKey = `r${r}-${cell}`;
+      const colKey = `c${c}-${cell}`;
+      const boxKey = `b${Math.floor(r/3)*3 + Math.floor(c/3)}-${cell}`;
+
+      if (seen.has(rowKey) || seen.has(colKey) || seen.has(boxKey)) {
+        return false;
+      }
+
+      seen.add(rowKey);
+      seen.add(colKey);
+      seen.add(boxKey);
+    }
+  }
+
+  return true;
+}
+```
+
+## Common Mistakes
+
+❌ Wrong box index calculation
+```javascript
+const boxIndex = r * 3 + c; // Wrong!
+```
+
+✅ Correct box index formula
+```javascript
+const boxIndex = Math.floor(r / 3) * 3 + Math.floor(c / 3);
+```
+
+❌ Not skipping empty cells
+```javascript
+if (board[r][c]) // This will process '.'
+```
+
+✅ Explicitly check for '.'
+```javascript
+if (cell === '.') continue;
+```
+
+❌ Using arrays instead of sets
+```javascript
+const rows = Array(9).fill([]); // Same array reference!
+```
+
+✅ Create separate sets
+```javascript
+const rows = Array(9).fill(null).map(() => new Set());
+```
+
+## Interview Tips
+
+**When discussing:**
+1. Explain need to validate rows, columns, and 3x3 boxes
+2. Show box index calculation on paper
+3. Mention single pass O(1) time and space
+4. Walk through example with visualization
+5. Discuss why sets are perfect data structure
+
+**Follow-up questions:**
+- What if board size varies? → Adjust constants and formulas
+- How to solve the sudoku? → Backtracking (different problem)
+- Can you validate in-place? → Yes, but modifying input is bad practice
+- Time complexity? → O(1) since board is always 9x9

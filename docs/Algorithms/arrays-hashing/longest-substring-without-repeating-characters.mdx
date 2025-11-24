@@ -1,0 +1,315 @@
+---
+sidebar_position: 10
+difficulty: Medium
+tags: [string, hash-table, sliding-window, amazon, google]
+leetcode_url: https://leetcode.com/problems/longest-substring-without-repeating-characters/
+companies: [Amazon, Google, Meta, Microsoft, Apple]
+pattern: "Arrays & Hashing"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Longest Substring Without Repeating Characters
+
+<AlgorithmProblem
+  title="Longest Substring Without Repeating Characters"
+  difficulty="Medium"
+  description={`
+<p>Given a string <code>s</code>, find the length of the <strong>longest substring</strong> without repeating characters.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>0 ≤ s.length ≤ 5 × 10<sup>4</sup></li>
+  <li>s consists of English letters, digits, symbols and spaces.</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 's = "abcabcbb"',
+      output: '3',
+      explanation: 'The answer is "abc", with the length of 3.'
+    },
+    {
+      input: 's = "bbbbb"',
+      output: '1',
+      explanation: 'The answer is "b", with the length of 1.'
+    },
+    {
+      input: 's = "pwwkew"',
+      output: '3',
+      explanation: 'The answer is "wke", with the length of 3. Note that "pwke" is a subsequence, not a substring.'
+    }
+  ]}
+  starterCode={`function lengthOfLongestSubstring(s) {
+  // Write your code here
+
+}`}
+  solution={`function lengthOfLongestSubstring(s) {
+  // Sliding window with hash set
+  const seen = new Set();
+  let left = 0;
+  let maxLength = 0;
+
+  for (let right = 0; right < s.length; right++) {
+    // Shrink window until no duplicate
+    while (seen.has(s[right])) {
+      seen.delete(s[left]);
+      left++;
+    }
+
+    // Add current character
+    seen.add(s[right]);
+
+    // Update max length
+    maxLength = Math.max(maxLength, right - left + 1);
+  }
+
+  return maxLength;
+}`}
+  testCases={[
+    {
+      input: ["abcabcbb"],
+      expected: 3,
+      description: 'Substring "abc"'
+    },
+    {
+      input: ["bbbbb"],
+      expected: 1,
+      description: 'All same characters'
+    },
+    {
+      input: ["pwwkew"],
+      expected: 3,
+      description: 'Substring "wke"'
+    },
+    {
+      input: [""],
+      expected: 0,
+      description: 'Empty string'
+    },
+    {
+      input: [" "],
+      expected: 1,
+      description: 'Single space'
+    },
+    {
+      input: ["au"],
+      expected: 2,
+      description: 'Two different characters'
+    },
+    {
+      input: ["dvdf"],
+      expected: 3,
+      description: 'Substring "vdf"'
+    }
+  ]}
+  functionName="lengthOfLongestSubstring"
+/>
+
+## Solution Explanation
+
+### Approach 1: Brute Force (Not Optimal)
+
+**Time:** O(n³)
+**Space:** O(min(n, m)) where m = charset size
+
+```javascript
+function lengthOfLongestSubstring(s) {
+  let maxLength = 0;
+
+  for (let i = 0; i < s.length; i++) {
+    for (let j = i; j < s.length; j++) {
+      if (allUnique(s, i, j)) {
+        maxLength = Math.max(maxLength, j - i + 1);
+      }
+    }
+  }
+
+  return maxLength;
+}
+
+function allUnique(s, start, end) {
+  const seen = new Set();
+  for (let i = start; i <= end; i++) {
+    if (seen.has(s[i])) return false;
+    seen.add(s[i]);
+  }
+  return true;
+}
+```
+
+**Why not optimal?** Checking every substring is O(n²), and validating uniqueness is O(n).
+
+### Approach 2: Sliding Window with Set (Optimal) ✅
+
+**Time:** O(n)
+**Space:** O(min(n, m)) where m = charset size
+
+```javascript
+function lengthOfLongestSubstring(s) {
+  const seen = new Set();
+  let left = 0;
+  let maxLength = 0;
+
+  for (let right = 0; right < s.length; right++) {
+    // Shrink window from left while duplicate exists
+    while (seen.has(s[right])) {
+      seen.delete(s[left]);
+      left++;
+    }
+
+    // Add current character
+    seen.add(s[right]);
+
+    // Update max length
+    maxLength = Math.max(maxLength, right - left + 1);
+  }
+
+  return maxLength;
+}
+```
+
+**How it works:**
+
+1. **Two pointers**: `left` and `right` define the sliding window
+2. **Expand** window by moving `right`
+3. **Shrink** window from `left` when duplicate found
+4. **Track** maximum window size seen
+
+**Example walkthrough:**
+
+```
+s = "abcabcbb"
+
+right=0, s[0]='a': seen={}, add 'a', seen={a}, len=1
+right=1, s[1]='b': seen={a}, add 'b', seen={a,b}, len=2
+right=2, s[2]='c': seen={a,b}, add 'c', seen={a,b,c}, len=3
+right=3, s[3]='a': seen={a,b,c}, has 'a'!
+  Shrink: remove s[0]='a', left=1, seen={b,c}
+  Add 'a', seen={b,c,a}, len=3
+right=4, s[4]='b': seen={b,c,a}, has 'b'!
+  Shrink: remove s[1]='b', left=2, seen={c,a}
+  Add 'b', seen={c,a,b}, len=3
+right=5, s[5]='c': seen={c,a,b}, has 'c'!
+  Shrink: remove s[2]='c', left=3, seen={a,b}
+  Add 'c', seen={a,b,c}, len=3
+right=6, s[6]='b': seen={a,b,c}, has 'b'!
+  Shrink: remove s[3]='a', left=4, seen={b,c}
+  Still has 'b'!
+  Shrink: remove s[4]='b', left=5, seen={c}
+  Add 'b', seen={c,b}, len=2
+right=7, s[7]='b': seen={c,b}, has 'b'!
+  Shrink: remove s[5]='c', left=6, seen={b}
+  Still has 'b'!
+  Shrink: remove s[6]='b', left=7, seen={}
+  Add 'b', seen={b}, len=1
+
+maxLength = 3
+```
+
+### Approach 3: Sliding Window with Map (Optimized)
+
+**Time:** O(n)
+**Space:** O(min(n, m))
+
+```javascript
+function lengthOfLongestSubstring(s) {
+  const charIndex = new Map(); // char → last seen index
+  let left = 0;
+  let maxLength = 0;
+
+  for (let right = 0; right < s.length; right++) {
+    const char = s[right];
+
+    // If char seen and within window, move left
+    if (charIndex.has(char) && charIndex.get(char) >= left) {
+      left = charIndex.get(char) + 1;
+    }
+
+    // Update last seen index
+    charIndex.set(char, right);
+
+    // Update max length
+    maxLength = Math.max(maxLength, right - left + 1);
+  }
+
+  return maxLength;
+}
+```
+
+**Optimization:** Instead of shrinking left one by one, jump directly to the position after the duplicate.
+
+## Common Mistakes
+
+❌ Using substring extraction in loop
+```javascript
+for (let i = 0; i < s.length; i++) {
+  for (let j = i; j < s.length; j++) {
+    const sub = s.substring(i, j + 1); // O(n)
+  }
+}
+```
+
+✅ Use sliding window with pointers
+```javascript
+let left = 0;
+for (let right = 0; right < s.length; right++) {
+  // O(1) operations
+}
+```
+
+❌ Not removing characters when shrinking
+```javascript
+while (seen.has(s[right])) {
+  left++; // Forgot to remove s[left] from set!
+}
+```
+
+✅ Remove characters from set when shrinking
+```javascript
+while (seen.has(s[right])) {
+  seen.delete(s[left]);
+  left++;
+}
+```
+
+❌ Confusing substring vs subsequence
+```javascript
+// "pwke" is subsequence, not substring!
+// Substring must be continuous
+```
+
+✅ Understand substring definition
+```javascript
+// Substring: continuous sequence
+// "abc" is substring of "abcdef"
+// "ace" is subsequence, not substring
+```
+
+## Interview Tips
+
+**When discussing:**
+1. Start with brute force to show understanding
+2. Identify it as a sliding window problem
+3. Explain two-pointer technique
+4. Walk through example with window visualization
+5. Mention Map optimization for jumping left pointer
+
+**Follow-up questions:**
+- What if we need the actual substring? → Track start position at maxLength
+- What about Unicode? → JavaScript handles it, but be aware
+- Can you optimize space? → Limited by charset size already
+- How to handle very long strings? → Streaming approach possible
+- What if we want k unique characters? → Slightly different problem
+
+**Key insights:**
+- Sliding window is classic pattern for substring problems
+- Hash set provides O(1) membership testing
+- Each character added/removed at most once → O(n)
+- Map optimization avoids unnecessary left pointer moves
+- Space bounded by charset size (constant for ASCII/Unicode)
+
+**Pattern recognition:**
+This is a fundamental sliding window problem. Similar patterns appear in:
+- Longest substring with at most K distinct characters
+- Minimum window substring
+- Substring with concatenation of words

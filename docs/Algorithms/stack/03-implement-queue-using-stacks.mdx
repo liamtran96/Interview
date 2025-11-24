@@ -1,0 +1,422 @@
+---
+sidebar_position: 3
+difficulty: Easy
+tags: [stack, queue, design, microsoft, bloomberg]
+leetcode_url: https://leetcode.com/problems/implement-queue-using-stacks/
+companies: [Microsoft, Bloomberg, Amazon, Apple]
+pattern: "Stack"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Implement Queue using Stacks
+
+<AlgorithmProblem
+  title="Implement Queue using Stacks"
+  difficulty="Easy"
+  description={`
+<p>Implement a first in first out (FIFO) queue using only two stacks. The implemented queue should support all the functions of a normal queue (<code>push</code>, <code>peek</code>, <code>pop</code>, and <code>empty</code>).</p>
+<p>Implement the <code>MyQueue</code> class:</p>
+<ul>
+  <li><code>void push(int x)</code> Pushes element x to the back of the queue.</li>
+  <li><code>int pop()</code> Removes the element from the front of the queue and returns it.</li>
+  <li><code>int peek()</code> Returns the element at the front of the queue.</li>
+  <li><code>boolean empty()</code> Returns <code>true</code> if the queue is empty, <code>false</code> otherwise.</li>
+</ul>
+<p><strong>Notes:</strong></p>
+<ul>
+  <li>You must use <strong>only</strong> standard operations of a stack, which means only <code>push to top</code>, <code>peek/pop from top</code>, <code>size</code>, and <code>is empty</code> operations are valid.</li>
+  <li>Depending on your language, the stack may not be supported natively. You may simulate a stack using a list or deque (double-ended queue) as long as you use only a stack's standard operations.</li>
+</ul>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &lt;= x &lt;= 9</li>
+  <li>At most <code>100</code> calls will be made to <code>push</code>, <code>pop</code>, <code>peek</code>, and <code>empty</code>.</li>
+  <li>All the calls to <code>pop</code> and <code>peek</code> are valid.</li>
+</ul>
+`}
+  examples={[
+    {
+      input: '["MyQueue", "push", "push", "peek", "pop", "empty"]\n[[], [1], [2], [], [], []]',
+      output: '[null, null, null, 1, 1, false]',
+      explanation: `MyQueue myQueue = new MyQueue();
+myQueue.push(1); // queue is: [1]
+myQueue.push(2); // queue is: [1, 2] (leftmost is front of the queue)
+myQueue.peek(); // return 1
+myQueue.pop(); // return 1, queue is [2]
+myQueue.empty(); // return false`
+    }
+  ]}
+  starterCode={`class MyQueue {
+  constructor() {
+    // Initialize your data structure here
+  }
+
+  push(x) {
+    // Push element x to the back of queue
+  }
+
+  pop() {
+    // Removes the element from front of queue and returns it
+  }
+
+  peek() {
+    // Get the front element
+  }
+
+  empty() {
+    // Returns whether the queue is empty
+  }
+}`}
+  solution={`class MyQueue {
+  constructor() {
+    // Two stacks: input for push, output for pop/peek
+    this.input = [];
+    this.output = [];
+  }
+
+  push(x) {
+    // Always push to input stack: O(1)
+    this.input.push(x);
+  }
+
+  pop() {
+    // Move elements to output if needed
+    this._transfer();
+    // Pop from output stack
+    return this.output.pop();
+  }
+
+  peek() {
+    // Move elements to output if needed
+    this._transfer();
+    // Peek at output stack top
+    return this.output[this.output.length - 1];
+  }
+
+  empty() {
+    // Empty if both stacks are empty
+    return this.input.length === 0 && this.output.length === 0;
+  }
+
+  _transfer() {
+    // Only transfer if output is empty
+    if (this.output.length === 0) {
+      while (this.input.length > 0) {
+        this.output.push(this.input.pop());
+      }
+    }
+  }
+}`}
+  testCases={[
+    {
+      input: [
+        ["MyQueue", "push", "push", "peek", "pop", "empty"],
+        [[], [1], [2], [], [], []]
+      ],
+      expected: [null, null, null, 1, 1, false],
+      description: 'Basic queue operations'
+    },
+    {
+      input: [
+        ["MyQueue", "push", "push", "pop", "push", "pop", "pop"],
+        [[], [1], [2], [], [3], [], []]
+      ],
+      expected: [null, null, null, 1, null, 2, 3],
+      description: 'Interleaved push and pop'
+    },
+    {
+      input: [
+        ["MyQueue", "push", "pop", "push", "push", "peek", "pop", "peek"],
+        [[], [1], [], [2], [3], [], [], []]
+      ],
+      expected: [null, null, 1, null, null, 2, 2, 3],
+      description: 'Multiple operations'
+    },
+    {
+      input: [
+        ["MyQueue", "empty", "push", "empty", "peek", "pop", "empty"],
+        [[], [], [5], [], [], [], []]
+      ],
+      expected: [null, true, null, false, 5, 5, true],
+      description: 'Empty checks'
+    },
+    {
+      input: [
+        ["MyQueue", "push", "push", "push", "pop", "pop", "push", "peek"],
+        [[], [1], [2], [3], [], [], [4], []]
+      ],
+      expected: [null, null, null, null, 1, 2, null, 3],
+      description: 'Queue maintains order'
+    },
+    {
+      input: [
+        ["MyQueue", "push", "peek", "peek", "pop", "push", "peek"],
+        [[], [7], [], [], [], [8], []]
+      ],
+      expected: [null, null, 7, 7, 7, null, 8],
+      description: 'Multiple peeks'
+    }
+  ]}
+  functionName="MyQueue"
+/>
+
+## Solution Explanation
+
+### Approach 1: Transfer on Every Pop (Inefficient)
+
+**Time Complexity:** push O(1), pop O(n), peek O(n)
+**Space Complexity:** O(n)
+
+Transfer all elements on every pop/peek:
+
+```javascript
+class MyQueue {
+  constructor() {
+    this.stack1 = [];
+    this.stack2 = [];
+  }
+
+  push(x) {
+    this.stack1.push(x);
+  }
+
+  pop() {
+    // Transfer all elements every time
+    while (this.stack1.length > 0) {
+      this.stack2.push(this.stack1.pop());
+    }
+    const result = this.stack2.pop();
+    // Transfer back
+    while (this.stack2.length > 0) {
+      this.stack1.push(this.stack2.pop());
+    }
+    return result;
+  }
+
+  peek() {
+    // Same inefficiency as pop
+    while (this.stack1.length > 0) {
+      this.stack2.push(this.stack1.pop());
+    }
+    const result = this.stack2[this.stack2.length - 1];
+    while (this.stack2.length > 0) {
+      this.stack1.push(this.stack2.pop());
+    }
+    return result;
+  }
+
+  empty() {
+    return this.stack1.length === 0;
+  }
+}
+```
+
+**Why not use this?**
+- Transfers all elements on every pop/peek
+- O(n) time for each operation
+- Unnecessary work when output stack still has elements
+
+### Approach 2: Lazy Transfer (Optimal) ✅
+
+**Time Complexity:** push O(1), pop amortized O(1), peek amortized O(1)
+**Space Complexity:** O(n)
+
+Only transfer when output stack is empty:
+
+```javascript
+class MyQueue {
+  constructor() {
+    this.input = [];   // For push operations
+    this.output = [];  // For pop/peek operations
+  }
+
+  push(x) {
+    // Simple push to input: O(1)
+    this.input.push(x);
+  }
+
+  pop() {
+    this._transfer();
+    return this.output.pop();
+  }
+
+  peek() {
+    this._transfer();
+    return this.output[this.output.length - 1];
+  }
+
+  empty() {
+    return this.input.length === 0 && this.output.length === 0;
+  }
+
+  _transfer() {
+    // Only transfer if output is empty (lazy evaluation)
+    if (this.output.length === 0) {
+      while (this.input.length > 0) {
+        this.output.push(this.input.pop());
+      }
+    }
+  }
+}
+```
+
+**How Lazy Transfer Works:**
+
+```
+Operation sequence: push(1), push(2), push(3), pop(), pop(), push(4), pop()
+
+After push(1), push(2), push(3):
+  input:  [1, 2, 3] (3 is at top)
+  output: []
+
+First pop() - triggers transfer:
+  1. Transfer input to output:
+     input:  []
+     output: [3, 2, 1] (1 is at top)
+  2. Pop from output: return 1
+     output: [3, 2]
+
+Second pop() - no transfer needed:
+  output already has elements
+  Pop from output: return 2
+  output: [3]
+
+push(4):
+  input:  [4]
+  output: [3]
+
+Third pop() - no transfer needed:
+  output still has element
+  Pop from output: return 3
+  output: []
+
+Fourth pop() would trigger transfer again
+```
+
+**Why This is Amortized O(1):**
+
+Each element:
+- Pushed to input once: 1 operation
+- Transferred to output once: 1 operation
+- Popped from output once: 1 operation
+
+Total: 3 operations per element = O(1) amortized
+
+### Alternative: Push to Output Stack
+
+```javascript
+class MyQueue {
+  constructor() {
+    this.input = [];
+    this.output = [];
+  }
+
+  push(x) {
+    // Transfer all output to input
+    while (this.output.length > 0) {
+      this.input.push(this.output.pop());
+    }
+    // Push new element
+    this.input.push(x);
+    // Transfer back
+    while (this.input.length > 0) {
+      this.output.push(this.input.pop());
+    }
+  }
+
+  pop() {
+    return this.output.pop();
+  }
+
+  peek() {
+    return this.output[this.output.length - 1];
+  }
+
+  empty() {
+    return this.output.length === 0;
+  }
+}
+```
+
+This makes push O(n) but pop/peek O(1) always. Not recommended for typical queue usage.
+
+### Key Insights
+
+1. **Two stacks reverse order twice**: Reversing twice gives FIFO from LIFO
+2. **Lazy evaluation**: Only transfer when necessary (output empty)
+3. **Amortized analysis**: Each element moved at most twice
+4. **Stack separation**: Input for push, output for pop/peek
+
+## Common Mistakes
+
+❌ Transferring on every operation:
+```javascript
+pop() {
+  // Inefficient - transfers even when output has elements
+  while (this.input.length > 0) {
+    this.output.push(this.input.pop());
+  }
+  return this.output.pop();
+}
+```
+
+❌ Not checking if output is empty before transfer:
+```javascript
+_transfer() {
+  // Wrong - loses elements in output!
+  while (this.input.length > 0) {
+    this.output.push(this.input.pop());
+  }
+}
+```
+
+❌ Forgetting to check both stacks for empty:
+```javascript
+empty() {
+  return this.input.length === 0; // Wrong! Output might have elements
+}
+```
+
+✅ Correct approach with lazy transfer:
+```javascript
+_transfer() {
+  // Only transfer when output is truly empty
+  if (this.output.length === 0) {
+    while (this.input.length > 0) {
+      this.output.push(this.input.pop());
+    }
+  }
+}
+
+pop() {
+  this._transfer(); // Transfer only if needed
+  return this.output.pop();
+}
+
+empty() {
+  // Check both stacks
+  return this.input.length === 0 && this.output.length === 0;
+}
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Explain the **LIFO vs FIFO** difference
+2. Show how **two reversals create FIFO** from LIFO
+3. Discuss the **lazy transfer optimization**
+4. Walk through amortized time complexity analysis
+5. Mention when each stack is used
+
+**Key talking points:**
+- "A stack is LIFO, but we need FIFO for a queue"
+- "Two reversals restore original order: stack → reverse → reverse → queue"
+- "We optimize by only transferring when output stack is empty"
+- "Each element is moved at most twice, giving amortized O(1)"
+
+**Follow-up questions you might get:**
+- **Can you implement stack using queues?** Yes, but more complex
+- **What if you need to optimize push instead?** Transfer on push, makes pop/peek O(1) always
+- **How to implement with one stack?** Not possible without recursion (uses call stack)
+- **Real-world use case?** Understanding data structure conversions, browser history

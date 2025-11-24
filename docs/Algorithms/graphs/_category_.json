@@ -1,0 +1,9 @@
+{
+  "label": "Graphs",
+  "position": 8,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "description": "Solve complex problems with BFS, DFS, and shortest path algorithms."
+  }
+}

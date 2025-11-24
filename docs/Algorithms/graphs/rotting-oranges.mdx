@@ -1,0 +1,433 @@
+---
+sidebar_position: 8
+difficulty: Medium
+tags: [graphs, bfs, matrix, google, amazon, microsoft]
+leetcode_url: https://leetcode.com/problems/rotting-oranges/
+companies: [Google, Amazon, Microsoft, Meta, Apple]
+pattern: "Graphs"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Rotting Oranges
+
+<AlgorithmProblem
+  title="Rotting Oranges"
+  difficulty="Medium"
+  description={`
+<p>You are given an <code>m x n</code> <code>grid</code> where each cell can have one of three values:</p>
+<ul>
+  <li><code>0</code> representing an empty cell</li>
+  <li><code>1</code> representing a fresh orange</li>
+  <li><code>2</code> representing a rotten orange</li>
+</ul>
+<p>Every minute, any fresh orange that is 4-directionally adjacent to a rotten orange becomes rotten.</p>
+<p>Return <em>the minimum number of minutes that must elapse until no cell has a fresh orange</em>. If this is impossible, return <code>-1</code>.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li><code>m == grid.length</code></li>
+  <li><code>n == grid[i].length</code></li>
+  <li>1 &lt;= m, n &lt;= 10</li>
+  <li>grid[i][j]</li> is 0, 1, or 2.</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'grid = [[2,1,1],[1,1,0],[0,1,1]]',
+      output: '4',
+      explanation: 'The grid becomes all rotten in 4 minutes.'
+    },
+    {
+      input: 'grid = [[2,1,1],[0,1,1],[1,0,1]]',
+      output: '-1',
+      explanation: 'The orange at [1,0] cannot get rotten (isolated).'
+    },
+    {
+      input: 'grid = [[0,2]]',
+      output: '0',
+      explanation: 'No fresh oranges, so return 0.'
+    }
+  ]}
+  starterCode={`function orangesRotting(grid) {
+  // Write your code here
+  return 0;
+}`}
+  solution={`function orangesRotting(grid) {
+  // Multi-source BFS: all rotten oranges spread simultaneously
+  // Time: O(m × n), Space: O(m × n) for queue
+
+  const rows = grid.length;
+  const cols = grid[0].length;
+  let freshCount = 0;
+  const queue = [];
+
+  // Find all initial rotten oranges and count fresh ones
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      if (grid[i][j] === 2) {
+        queue.push([i, j, 0]);  // [row, col, minutes]
+      } else if (grid[i][j] === 1) {
+        freshCount++;
+      }
+    }
+  }
+
+  // If no fresh oranges, return 0
+  if (freshCount === 0) {
+    return 0;
+  }
+
+  const directions = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+  let minutes = 0;
+
+  // Multi-source BFS
+  while (queue.length > 0) {
+    const [row, col, time] = queue.shift();
+    minutes = time;
+
+    // Try all 4 directions
+    for (const [dr, dc] of directions) {
+      const newRow = row + dr;
+      const newCol = col + dc;
+
+      if (newRow >= 0 && newRow < rows &&
+          newCol >= 0 && newCol < cols &&
+          grid[newRow][newCol] === 1) {
+        grid[newRow][newCol] = 2;  // Mark as rotten
+        freshCount--;
+        queue.push([newRow, newCol, time + 1]);
+      }
+    }
+  }
+
+  // If there are still fresh oranges, impossible
+  return freshCount === 0 ? minutes : -1;
+}`}
+  testCases={[
+    {
+      input: [[[2,1,1],[1,1,0],[0,1,1]]],
+      expected: 4,
+      description: 'Rotten spreads gradually'
+    },
+    {
+      input: [[[2,1,1],[0,1,1],[1,0,1]]],
+      expected: -1,
+      description: 'Impossible: isolated orange at [1,0]'
+    },
+    {
+      input: [[[0,2]]],
+      expected: 0,
+      description: 'No fresh oranges'
+    },
+    {
+      input: [[[2]]],
+      expected: 0,
+      description: 'Single rotten orange'
+    },
+    {
+      input: [[[1]]],
+      expected: -1,
+      description: 'Single fresh orange (never rots)'
+    },
+    {
+      input: [[[2,1],[1,1]]],
+      expected: 2,
+      description: '2x2 grid with rotten at corner'
+    }
+  ]}
+  functionName="orangesRotting"
+/>
+
+## Solution Explanation
+
+### Approach 1: Multi-Source BFS ✅
+
+**Time Complexity:** O(m × n) - visit each cell once
+**Space Complexity:** O(m × n) for queue in worst case
+
+This is a classic multi-source BFS problem where all rotten oranges spread simultaneously:
+
+```javascript
+function orangesRotting(grid) {
+  const rows = grid.length;
+  const cols = grid[0].length;
+  let freshCount = 0;
+  const queue = [];
+
+  // Step 1: Find all rotten oranges (sources) and count fresh oranges
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      if (grid[i][j] === 2) {
+        queue.push([i, j, 0]);  // Add rotten to queue with time 0
+      } else if (grid[i][j] === 1) {
+        freshCount++;
+      }
+    }
+  }
+
+  // Edge case: no fresh oranges
+  if (freshCount === 0) {
+    return 0;
+  }
+
+  const directions = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+  let minutes = 0;
+
+  // Step 2: BFS to spread rotting
+  while (queue.length > 0) {
+    const [row, col, time] = queue.shift();
+    minutes = time;
+
+    // Try all 4 neighbors
+    for (const [dr, dc] of directions) {
+      const newRow = row + dr;
+      const newCol = col + dc;
+
+      // Check bounds and if cell is fresh
+      if (newRow >= 0 && newRow < rows &&
+          newCol >= 0 && newCol < cols &&
+          grid[newRow][newCol] === 1) {
+        grid[newRow][newCol] = 2;  // Make it rotten
+        freshCount--;
+        queue.push([newRow, newCol, time + 1]);
+      }
+    }
+  }
+
+  // Step 3: Check if all oranges are rotten
+  return freshCount === 0 ? minutes : -1;
+}
+```
+
+**How multi-source BFS works:**
+
+```
+Grid:
+[2,1,1]
+[1,1,0]
+[0,1,1]
+
+Initial state:
+- Rotten: (0,0)
+- Fresh: (0,1), (0,2), (1,0), (1,1), (1,2), (2,1), (2,2)
+- freshCount = 7
+- queue = [[0,0,0]]
+
+Minute 0:
+  Process (0,0):
+    Neighbors: (0,1)✓, (1,0)✓
+  queue = [[0,1,1], [1,0,1]]
+  freshCount = 5
+
+Minute 1:
+  Process (0,1):
+    Neighbors: (0,2)✓, (1,1)✓
+  Process (1,0):
+    Neighbors: (1,1) already rotten
+  queue = [[0,2,2], [1,1,2]]
+  freshCount = 3
+
+Minute 2:
+  Process (0,2):
+    Neighbors: none fresh
+  Process (1,1):
+    Neighbors: (1,2)✓, (2,1)✓
+  queue = [[1,2,3], [2,1,3]]
+  freshCount = 1
+
+Minute 3:
+  Process (1,2):
+    Neighbors: none fresh
+  Process (2,1):
+    Neighbors: (2,2)✓
+  queue = [[2,2,4]]
+  freshCount = 0
+
+Minute 4:
+  Process (2,2):
+    Neighbors: none fresh
+  queue = []
+  freshCount = 0
+
+Result: minutes = 4 ✓
+```
+
+### Why Multi-Source BFS Works
+
+The key insight is that all rotten oranges rot their neighbors **simultaneously** each minute:
+
+```
+Minute 0: Only (0,0) is rotten
+Minute 1: (0,0) rots its neighbors (0,1) and (1,0)
+          This happens simultaneously, not one at a time
+Minute 2: (0,1) and (1,0) rot their fresh neighbors
+```
+
+By starting BFS from ALL rotten oranges at once, we naturally simulate simultaneous spreading.
+
+### Approach 2: DFS (Less Efficient)
+
+**Time Complexity:** O(m × n × max(m,n)) in worst case
+**Space Complexity:** O(m × n)
+
+```javascript
+function orangesRotting(grid) {
+  const rows = grid.length;
+  const cols = grid[0].length;
+  const time = Array(rows).fill().map(() => Array(cols).fill(-1));
+
+  // Mark time for each rotten orange
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      if (grid[i][j] === 2) {
+        time[i][j] = 0;
+      }
+    }
+  }
+
+  // DFS from each rotten orange
+  function dfs(row, col, t) {
+    for (const [dr, dc] of [[0,1],[0,-1],[1,0],[-1,0]]) {
+      const nr = row + dr;
+      const nc = col + dc;
+      if (nr >= 0 && nr < rows && nc >= 0 && nc < cols &&
+          grid[nr][nc] === 1 && t + 1 < (time[nr][nc] ?? Infinity)) {
+        time[nr][nc] = t + 1;
+        dfs(nr, nc, t + 1);
+      }
+    }
+  }
+
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      if (grid[i][j] === 2) {
+        dfs(i, j, 0);
+      }
+    }
+  }
+
+  let maxTime = 0;
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      if (grid[i][j] === 1) {
+        return -1;  // Fresh orange unreached
+      }
+      if (time[i][j] !== -1) {
+        maxTime = Math.max(maxTime, time[i][j]);
+      }
+    }
+  }
+
+  return maxTime;
+}
+```
+
+**DFS is less efficient:** Each rotten orange explores independently, potentially covering same area multiple times.
+
+### Key Concepts
+
+1. **Multi-Source BFS**: All sources (rotten oranges) spread simultaneously
+2. **Simultaneous Spreading**: Each minute, all rotten oranges rot adjacent fresh ones
+3. **Time Tracking**: Track time when each orange becomes rotten
+4. **Impossibility Check**: Some fresh oranges might never be reached
+
+## Common Mistakes
+
+❌ Using single-source BFS (spreading from one orange):
+```javascript
+// Wrong - doesn't simulate simultaneous spreading
+function orangesRotting(grid) {
+  queue.push([findFirstRotten()]);  // Only one source!
+  // This makes it sequential, not simultaneous
+}
+```
+
+❌ Not counting fresh oranges:
+```javascript
+// Wrong - can't verify if all fresh oranges rot
+function orangesRotting(grid) {
+  // Missing: count fresh oranges
+  // Can't return -1 properly
+}
+```
+
+❌ Modifying grid without careful state tracking:
+```javascript
+// Potentially problematic - loses information
+grid[newRow][newCol] = 2;  // OK if you're tracking carefully
+```
+
+✅ Correct approach:
+```javascript
+// 1. Find ALL rotten oranges as initial sources
+const queue = [];
+let freshCount = 0;
+for (let i = 0; i < rows; i++) {
+  for (let j = 0; j < cols; j++) {
+    if (grid[i][j] === 2) {
+      queue.push([i, j, 0]);  // Add as source with time
+    } else if (grid[i][j] === 1) {
+      freshCount++;
+    }
+  }
+}
+
+// 2. BFS spreads from all sources simultaneously
+while (queue.length > 0) {
+  const [row, col, time] = queue.shift();
+  for (const [dr, dc] of directions) {
+    if (inBounds && grid[newRow][newCol] === 1) {
+      grid[newRow][newCol] = 2;
+      freshCount--;
+      queue.push([newRow, newCol, time + 1]);
+    }
+  }
+}
+
+// 3. Check if all fresh oranges were rotten
+return freshCount === 0 ? minutes : -1;
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Recognize: "Multi-source BFS problem (simultaneous spreading)"
+2. Key insight: "All rotten oranges rot adjacent fresh ones each minute simultaneously"
+3. Approach: "Start BFS from ALL rotten oranges at once"
+4. Check: "Verify all fresh oranges got rotten"
+5. Complexity: "O(m × n) time and space"
+
+**Key talking points:**
+- "Multi-source BFS starts from multiple sources, not just one"
+- "All rotten oranges spread their rotting in parallel each minute"
+- "Must count fresh oranges to detect impossible cases"
+- "Grid modification marks which cells were processed"
+
+**Why multi-source matters:**
+```
+Single-source (WRONG):
+Start only from (0,0), search reaches (0,1) in minute 1
+But actually (0,1) and (1,0) both rot from (0,0) in minute 1
+
+Multi-source (CORRECT):
+All rotten oranges in queue at minute 0
+They all rot adjacent oranges in minute 1 simultaneously
+```
+
+**What if interviewer asks:**
+- **"Why not single-source BFS?"** - Doesn't model simultaneous spreading
+- **"Can we use DFS?"** - Possible but less efficient
+- **"What if grid is very large?"** - Still O(m × n), optimal
+- **"How to return path of rot?"** - Track parent pointers during BFS
+
+**Related LeetCode Problems:**
+- Number of Islands
+- Zombie in Matrix
+- 01 Matrix (similar multi-source BFS)
+- Surrounded Regions
+
+**Follow-up variations:**
+- Return the path of rotting (which oranges rot in which order)
+- Handle 3D grid instead of 2D
+- Minimize rotting with obstacles
+- Some oranges are immune to rotting

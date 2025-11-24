@@ -1,0 +1,510 @@
+---
+sidebar_position: 10
+difficulty: Hard
+tags: [linked-lists, heap, merge, divide-and-conquer, amazon, google]
+leetcode_url: https://leetcode.com/problems/merge-k-sorted-lists/
+companies: [Amazon, Google, Microsoft, Meta, Apple, Bloomberg]
+pattern: "Linked Lists"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Merge k Sorted Lists
+
+<AlgorithmProblem
+  title="Merge k Sorted Lists"
+  difficulty="Hard"
+  description={`
+<p>You are given an array of <code>k</code> linked-lists <code>lists</code>, each linked-list is sorted in <strong>ascending order</strong>.</p>
+<p><em>Merge all the linked-lists into one sorted linked-list and return it.</em></p>
+<h4>Constraints:</h4>
+<ul>
+  <li>k ≤ 10<sup>4</sup></li>
+  <li>0 ≤ lists[i].length ≤ 100</li>
+  <li>-1000 ≤ lists[i][j] ≤ 1000</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'lists = [[1,4,5],[1,3,4],[2,6]]',
+      output: '[1,1,2,1,3,4,4,5,6]',
+      explanation: 'Merge all three lists into one sorted list'
+    },
+    {
+      input: 'lists = []',
+      output: '[]',
+      explanation: 'Empty array of lists'
+    },
+    {
+      input: 'lists = [[]]',
+      output: '[]',
+      explanation: 'Array with one empty list'
+    }
+  ]}
+  starterCode={`class ListNode {
+  constructor(val = 0, next = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+function mergeKLists(lists) {
+  // TODO: Merge k sorted lists
+  return null;
+}`}
+  solution={`class ListNode {
+  constructor(val = 0, next = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+function mergeKLists(lists) {
+  if (!lists || lists.length === 0) return null;
+
+  // Use min-heap approach with priority queue simulation
+  // For simplicity, using array-based heap would be ideal
+  // Here's a practical approach using sorting and merging
+
+  const merge = (l1, l2) => {
+    const dummy = new ListNode(0);
+    let curr = dummy;
+
+    while (l1 && l2) {
+      if (l1.val <= l2.val) {
+        curr.next = l1;
+        l1 = l1.next;
+      } else {
+        curr.next = l2;
+        l2 = l2.next;
+      }
+      curr = curr.next;
+    }
+
+    curr.next = l1 ? l1 : l2;
+    return dummy.next;
+  };
+
+  // Divide and conquer approach
+  const mergeHelper = (lists, left, right) => {
+    if (left === right) return lists[left];
+    if (left > right) return null;
+
+    const mid = Math.floor((left + right) / 2);
+    const leftMerged = mergeHelper(lists, left, mid);
+    const rightMerged = mergeHelper(lists, mid + 1, right);
+
+    return merge(leftMerged, rightMerged);
+  };
+
+  return mergeHelper(lists, 0, lists.length - 1);
+}`}
+  testCases={[
+    {
+      input: [[[1, 4, 5], [1, 3, 4], [2, 6]]],
+      expected: [1, 1, 2, 1, 3, 4, 4, 5, 6],
+      description: 'Merge three sorted lists'
+    },
+    {
+      input: [[]],
+      expected: [],
+      description: 'Empty array'
+    },
+    {
+      input: [[[]]],
+      expected: [],
+      description: 'Array with one empty list'
+    },
+    {
+      input: [[[1, 2, 3], [4, 5, 6], [7, 8, 9]]],
+      expected: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      description: 'Non-overlapping sorted lists'
+    },
+    {
+      input: [[[1, 3, 5], [2, 4, 6], [1, 2, 3]]],
+      expected: [1, 1, 2, 2, 3, 3, 4, 5, 6],
+      description: 'Overlapping values'
+    },
+    {
+      input: [[[5], [4], [3], [2], [1]]],
+      expected: [1, 2, 3, 4, 5],
+      description: 'Single elements in reverse order'
+    }
+  ]}
+  functionName="mergeKLists"
+/>
+
+## Solution Explanation
+
+### Approach 1: Divide &amp; Conquer with Merge (Optimal) ✅
+
+**Time Complexity:** O(n log k) where n is total nodes, k is number of lists
+**Space Complexity:** O(log k) - recursion stack depth
+
+Recursively divide lists into halves, merge pairs, then merge results:
+
+```javascript
+function mergeKLists(lists) {
+  if (!lists || lists.length === 0) return null;
+
+  // Helper to merge two sorted lists
+  const merge = (l1, l2) => {
+    const dummy = new ListNode(0);
+    let curr = dummy;
+
+    while (l1 &amp;&amp; l2) {
+      if (l1.val &lt;= l2.val) {
+        curr.next = l1;
+        l1 = l1.next;
+      } else {
+        curr.next = l2;
+        l2 = l2.next;
+      }
+      curr = curr.next;
+    }
+
+    curr.next = l1 ? l1 : l2;
+    return dummy.next;
+  };
+
+  // Divide and conquer
+  const mergeHelper = (lists, left, right) => {
+    if (left === right) return lists[left];
+    if (left &gt; right) return null;
+
+    const mid = Math.floor((left + right) / 2);
+    const leftMerged = mergeHelper(lists, left, mid);
+    const rightMerged = mergeHelper(lists, mid + 1, right);
+
+    return merge(leftMerged, rightMerged);
+  };
+
+  return mergeHelper(lists, 0, lists.length - 1);
+}
+```
+
+**How it works:**
+
+```
+Lists: [1→4→5], [1→3→4], [2→6]
+
+Divide:
+  [1→4→5] | [1→3→4], [2→6]
+
+Subdivide:
+  [1→4→5] | [1→3→4] | [2→6]
+
+Merge back up:
+  merge([1→4→5], [1→3→4]) = [1→1→3→4→4→5]
+  merge([2→6], null) = [2→6]
+
+Final merge:
+  merge([1→1→3→4→4→5], [2→6]) = [1→1→2→3→4→4→5→6]
+```
+
+**Why it's optimal:**
+- Each node is compared at most log k times
+- Total comparisons: n log k
+- Much better than sequential merging: O(n*k)
+
+### Approach 2: Min-Heap (Priority Queue)
+
+**Time Complexity:** O(n log k)
+**Space Complexity:** O(k) - heap size
+
+Use a min-heap to always get smallest element:
+
+```javascript
+function mergeKLists(lists) {
+  if (!lists || lists.length === 0) return null;
+
+  // Min-heap (simulated with custom implementation or array)
+  const heap = [];
+
+  // Add first node of each list to heap
+  for (let i = 0; i &lt; lists.length; i++) {
+    if (lists[i]) {
+      heap.push({ val: lists[i].val, listIdx: i, node: lists[i] });
+    }
+  }
+
+  // Sort to use as min-heap
+  heap.sort((a, b) =&gt; a.val - b.val);
+
+  const dummy = new ListNode(0);
+  let curr = dummy;
+
+  while (heap.length &gt; 0) {
+    // Get minimum
+    const min = heap.shift();
+    curr.next = min.node;
+    curr = curr.next;
+
+    // Add next node from same list
+    if (min.node.next) {
+      heap.push({
+        val: min.node.next.val,
+        listIdx: min.listIdx,
+        node: min.node.next
+      });
+      heap.sort((a, b) =&gt; a.val - b.val);
+    }
+  }
+
+  return dummy.next;
+}
+```
+
+**Process:**
+1. Add first node from each list to heap
+2. Repeatedly extract minimum
+3. Add next node from same list
+4. Continue until heap empty
+
+### Approach 3: Sequential Merging (Simple)
+
+**Time Complexity:** O(n*k) - k-1 merge operations
+**Space Complexity:** O(1)
+
+Merge lists one by one:
+
+```javascript
+function mergeKLists(lists) {
+  if (!lists || lists.length === 0) return null;
+
+  const merge = (l1, l2) => {
+    const dummy = new ListNode(0);
+    let curr = dummy;
+
+    while (l1 &amp;&amp; l2) {
+      if (l1.val &lt;= l2.val) {
+        curr.next = l1;
+        l1 = l1.next;
+      } else {
+        curr.next = l2;
+        l2 = l2.next;
+      }
+      curr = curr.next;
+    }
+
+    curr.next = l1 ? l1 : l2;
+    return dummy.next;
+  };
+
+  let result = lists[0];
+  for (let i = 1; i &lt; lists.length; i++) {
+    result = merge(result, lists[i]);
+  }
+
+  return result;
+}
+```
+
+**Disadvantage:** Less efficient for many lists
+
+### Approach 4: Brute Force (Collect All Values)
+
+**Time Complexity:** O(n log n) - due to sorting
+**Space Complexity:** O(n) - for storing values
+
+Collect all values, sort, rebuild list:
+
+```javascript
+function mergeKLists(lists) {
+  const values = [];
+
+  // Collect all values
+  for (let list of lists) {
+    let curr = list;
+    while (curr) {
+      values.push(curr.val);
+      curr = curr.next;
+    }
+  }
+
+  if (values.length === 0) return null;
+
+  // Sort
+  values.sort((a, b) =&gt; a - b);
+
+  // Rebuild list
+  const dummy = new ListNode(0);
+  let curr = dummy;
+  for (let val of values) {
+    curr.next = new ListNode(val);
+    curr = curr.next;
+  }
+
+  return dummy.next;
+}
+```
+
+**Disadvantage:** Doesn't reuse existing nodes (less efficient)
+
+## Comparison of Approaches
+
+| Approach | Time | Space | Simplicity | Best For |
+|----------|------|-------|-----------|----------|
+| Divide &amp; Conquer | O(n log k) | O(log k) | Medium | **Recommended** |
+| Min-Heap | O(n log k) | O(k) | Medium | Better intuition |
+| Sequential | O(n*k) | O(1) | Easy | Few lists |
+| Brute Force | O(n log n) | O(n) | Easy | Learning |
+
+## Common Mistakes
+
+❌ **Using nested loops for merging:**
+```javascript
+for (let i = 0; i &lt; lists.length; i++) {
+  for (let j = 0; j &lt; lists.length; j++) {
+    // This is O(k²) comparisons!
+  }
+}
+```
+
+✅ **Use divide &amp; conquer or heap:**
+```javascript
+// Divide &amp; conquer: O(log k) merges
+// Heap: O(log k) heap operations
+```
+
+---
+
+❌ **Not handling empty lists or null pointers:**
+```javascript
+const merge = (l1, l2) =&gt; {
+  // What if l1 or l2 is null?
+  if (l1.val &lt;= l2.val) {  // ERROR!
+    // ...
+  }
+}
+```
+
+✅ **Check for null first:**
+```javascript
+while (l1 &amp;&amp; l2) {
+  if (l1.val &lt;= l2.val) {
+    // ...
+  }
+}
+// Handle remaining
+curr.next = l1 ? l1 : l2;
+```
+
+---
+
+❌ **Forgetting to add next node from source list:**
+```javascript
+// In heap approach:
+const min = heap.shift();
+curr.next = min.node;
+// ERROR: didn't add min.node.next to heap!
+```
+
+✅ **Always add the next node:**
+```javascript
+curr.next = min.node;
+if (min.node.next) {
+  heap.push(min.node.next);
+  heapify();
+}
+```
+
+---
+
+❌ **Not handling empty input:**
+```javascript
+function mergeKLists(lists) {
+  // lists.length might be 0
+  const result = lists[0];  // ERROR: null reference!
+}
+```
+
+✅ **Check at the start:**
+```javascript
+if (!lists || lists.length === 0) return null;
+```
+
+## Interview Tips
+
+**What to mention:**
+1. **Divide &amp; Conquer:** More efficient than sequential merging
+2. **Why O(n log k):** Each node compared log k times (k lists halved repeatedly)
+3. **Compare to sequential:** Sequential is O(n*k) - much worse
+4. **Min-heap alternative:** Equally efficient, different approach
+5. **Answer the hard follow-up:** This IS one of the optimal solutions!
+
+**Follow-up questions:**
+
+**Q: What if you have millions of lists?**
+A: Divide &amp; conquer is still O(n log k), optimal for large k.
+
+**Q: Can you use a real priority queue/min-heap?**
+A: Yes! In Java/Python with built-in structures. In JS, would need custom implementation.
+
+**Q: Why not just merge all into array and sort?**
+A: O(n log n) is worse than O(n log k) when k &lt; n.
+
+**Q: How would you handle extremely large lists?**
+A: Same algorithm - it's still streaming, not loading entire lists.
+
+**Q: What's the memory impact?**
+A: Divide &amp; conquer uses O(log k) recursion stack. Heap uses O(k) for heap.
+
+## Edge Cases
+
+```javascript
+// Empty array
+[] → []
+
+// Array with one empty list
+[[]] → []
+
+// Array with nulls
+[null, [1,2], null] → [1,2]
+
+// Single list
+[[1,2,3]] → [1,2,3]
+
+// Single node per list
+[[1], [2], [3]] → [1,2,3]
+
+// All same value
+[[5,5,5], [5,5,5]] → [5,5,5,5,5,5]
+
+// Negative numbers
+[[-5,-3,-1], [-4,-2,0]] → [-5,-4,-3,-2,-1,0]
+
+// Large value differences
+[[1], [1000], [500]] → [1,500,1000]
+```
+
+## Complexity Analysis Breakdown
+
+```
+k lists with n total nodes
+
+Divide &amp; Conquer:
+  Level 1: k/2 pairs, each does O(n₁+n₂) work
+  Level 2: k/4 pairs, each does O(n₁+n₂+n₃+n₄) work
+  ...
+  Level log k: 1 pair with O(n) work total
+
+Total: O(n) work at each level, log k levels
+Total: O(n log k)
+
+Sequential Merging:
+  Merge list 1 &amp; 2: O(n₁+n₂) work
+  Merge result &amp; 3: O(n₁+n₂+n₃) work
+  ...
+  Total: O(n) + O(n) + ... k times = O(n*k)
+```
+
+This shows why divide &amp; conquer is better!
+
+## Related Problems
+
+- **Merge Two Sorted Lists** (Easy) - Building block for this problem
+- **Merge k Largest Elements** (Medium) - Similar approach
+- **Merge Sort Linked List** (Medium) - Uses divide &amp; conquer
+- **Merge Intervals** (Medium) - Similar merging concept
+- **K Closest Points to Origin** (Medium) - Uses similar k-element techniques

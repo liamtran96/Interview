@@ -1,0 +1,486 @@
+---
+sidebar_position: 6
+difficulty: Easy
+tags: [backtracking, string, dynamic-programming, amazon, google]
+leetcode_url: https://leetcode.com/problems/palindrome-partitioning/
+companies: [Amazon, Google, Microsoft, Meta]
+pattern: "Backtracking & Greedy"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Palindrome Partitioning
+
+<AlgorithmProblem
+  title="Palindrome Partitioning"
+  difficulty="Easy"
+  description={`
+<p>Given a string <code>s</code>, partition <code>s</code> such that every <strong>substring</strong> of the partition is a <strong>palindrome</strong>. Return <em>all possible palindrome partitioning of</em> <code>s</code>.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &le; s.length &le; 16</li>
+  <li><code>s</code> contains only lower case English letters</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 's = "aab"',
+      output: '[["a","a","b"],["aa","b"]]'
+    },
+    {
+      input: 's = "a"',
+      output: '[["a"]]'
+    }
+  ]}
+  starterCode={`function partition(s) {
+  // Write your code here
+
+}`}
+  solution={`function partition(s) {
+  // Backtracking with pruning: O(2^n * n) time, O(n) space
+  const result = [];
+
+  function isPalindrome(str, left, right) {
+    while (left < right) {
+      if (str[left] !== str[right]) return false;
+      left++;
+      right--;
+    }
+    return true;
+  }
+
+  function backtrack(index, currentPartition) {
+    // Base case: reached end of string
+    if (index === s.length) {
+      result.push([...currentPartition]);
+      return;
+    }
+
+    // Try each possible end position for next palindrome
+    for (let end = index; end < s.length; end++) {
+      // Pruning: only explore if substring is palindrome
+      if (isPalindrome(s, index, end)) {
+        // Include this palindrome
+        currentPartition.push(s.substring(index, end + 1));
+        backtrack(end + 1, currentPartition);
+        currentPartition.pop();
+      }
+    }
+  }
+
+  backtrack(0, []);
+  return result;
+}`}
+  testCases={[
+    {
+      input: ['"aab"'],
+      expected: [['a', 'a', 'b'], ['aa', 'b']],
+      description: 'String "aab" has 2 palindrome partitions'
+    },
+    {
+      input: ['"a"'],
+      expected: [['a']],
+      description: 'Single character is palindrome'
+    },
+    {
+      input: ['"ab"'],
+      expected: [['a', 'b']],
+      description: 'No multi-char palindromes'
+    },
+    {
+      input: ['"aba"'],
+      expected: [['a', 'b', 'a'], ['aba']],
+      description: 'Entire string is palindrome'
+    },
+    {
+      input: ['"abba"'],
+      expected: [['a', 'b', 'b', 'a'], ['a', 'bba'], ['abba']],
+      description: 'Multiple palindrome options'
+    },
+    {
+      input: ['"aabb"'],
+      expected: [['a', 'a', 'b', 'b'], ['a', 'abb'], ['aa', 'b', 'b'], ['aab', 'b']],
+      description: 'Multiple partitions'
+    }
+  ]}
+  functionName="partition"
+/>
+
+## Solution Explanation
+
+### Approach 1: Backtracking with Pruning (Optimal) ✅
+
+**Time Complexity:** O(2^n × n) - at most 2^n partitions, each checked in O(n)
+**Space Complexity:** O(n) for recursion depth
+
+Only explore paths where substrings are palindromes:
+
+```javascript
+function partition(s) {
+  const result = [];
+
+  function isPalindrome(str, left, right) {
+    while (left < right) {
+      if (str[left] !== str[right]) return false;
+      left++;
+      right--;
+    }
+    return true;
+  }
+
+  function backtrack(index, currentPartition) {
+    // Base case: used all characters
+    if (index === s.length) {
+      result.push([...currentPartition]);
+      return;
+    }
+
+    // Try each ending position for next palindrome substring
+    for (let end = index; end < s.length; end++) {
+      // Pruning: only continue if substring is palindrome
+      if (isPalindrome(s, index, end)) {
+        currentPartition.push(s.substring(index, end + 1));
+        backtrack(end + 1, currentPartition);
+        currentPartition.pop();
+      }
+    }
+  }
+
+  backtrack(0, []);
+  return result;
+}
+```
+
+**Decision tree for "aab":**
+
+```
+                      index=0, ""
+                      /    |     \
+                  "a"      "aa"   "aab"
+                /   |      |      (not palindrome)
+            index=1 |   (invalid branch pruned)
+           /    \   |
+        "a"      "ab"
+       /        (not palindrome)
+    index=2
+      |
+     "b"
+    index=3
+      ✓ ["a","a","b"]
+
+Also explore:
+    "aa" at index=0
+      |
+    index=2
+      |
+     "b"
+    index=3
+      ✓ ["aa","b"]
+```
+
+**Trace for "aab":**
+```
+backtrack(0, [])
+
+  end=0: s[0:1]="a" is palindrome
+    currentPartition = ["a"]
+    backtrack(1, ["a"])
+
+      end=1: s[1:2]="a" is palindrome
+        currentPartition = ["a","a"]
+        backtrack(2, ["a","a"])
+
+          end=2: s[2:3]="b" is palindrome
+            currentPartition = ["a","a","b"]
+            backtrack(3, ["a","a","b"])
+              index === length → result = [["a","a","b"]]
+
+      end=2: s[1:3]="ab" NOT palindrome - SKIP
+
+  end=1: s[0:2]="aa" is palindrome
+    currentPartition = ["aa"]
+    backtrack(2, ["aa"])
+
+      end=2: s[2:3]="b" is palindrome
+        currentPartition = ["aa","b"]
+        backtrack(3, ["aa","b"])
+          index === length → result = [["a","a","b"],["aa","b"]]
+
+  end=2: s[0:3]="aab" NOT palindrome - SKIP
+```
+
+### Approach 2: DP + Backtracking (Optimized)
+
+**Time Complexity:** O(2^n × n)
+**Space Complexity:** O(n^2) for DP table
+
+Precompute palindromes to avoid redundant checks:
+
+```javascript
+function partition(s) {
+  const n = s.length;
+  const dp = Array.from({ length: n }, () => Array(n).fill(false));
+
+  // Precompute all palindromes
+  for (let i = 0; i < n; i++) {
+    dp[i][i] = true; // Single character
+  }
+
+  for (let len = 2; len <= n; len++) {
+    for (let i = 0; i + len - 1 < n; i++) {
+      const j = i + len - 1;
+      if (s[i] === s[j]) {
+        dp[i][j] = (len === 2) || dp[i + 1][j - 1];
+      }
+    }
+  }
+
+  const result = [];
+
+  function backtrack(index, currentPartition) {
+    if (index === n) {
+      result.push([...currentPartition]);
+      return;
+    }
+
+    for (let end = index; end < n; end++) {
+      if (dp[index][end]) {
+        currentPartition.push(s.substring(index, end + 1));
+        backtrack(end + 1, currentPartition);
+        currentPartition.pop();
+      }
+    }
+  }
+
+  backtrack(0, []);
+  return result;
+}
+```
+
+**How DP table works:**
+
+```
+String: "aab"
+    0 1 2
+    a a b
+
+dp[0][0] = true   (a is palindrome)
+dp[1][1] = true   (a is palindrome)
+dp[2][2] = true   (b is palindrome)
+
+dp[0][1]: s[0]===s[1]? ('a'==='a'? true) && len===2? true
+         dp[0][1] = true
+
+dp[1][2]: s[1]===s[2]? ('a'==='b'? false)
+         dp[1][2] = false
+
+dp[0][2]: s[0]===s[2]? ('a'==='b'? false)
+         dp[0][2] = false
+
+So palindromes are: [0,0], [1,1], [2,2], [0,1]
+Which are: "a", "a", "b", "aa"
+```
+
+### Approach 3: Simple Recursive (No Optimization)
+
+**Time Complexity:** O(2^n × n)
+**Space Complexity:** O(n)
+
+```javascript
+function partition(s) {
+  const result = [];
+
+  function isPalindrome(str) {
+    let left = 0, right = str.length - 1;
+    while (left < right) {
+      if (str[left] !== str[right]) return false;
+      left++;
+      right--;
+    }
+    return true;
+  }
+
+  function backtrack(index, currentPartition) {
+    if (index === s.length) {
+      result.push([...currentPartition]);
+      return;
+    }
+
+    for (let i = index; i < s.length; i++) {
+      const substring = s.substring(index, i + 1);
+      if (isPalindrome(substring)) {
+        currentPartition.push(substring);
+        backtrack(i + 1, currentPartition);
+        currentPartition.pop();
+      }
+    }
+  }
+
+  backtrack(0, []);
+  return result;
+}
+```
+
+## Backtracking Template with Pruning
+
+```javascript
+function partition(s) {
+  // 1. Initialize result
+  const result = [];
+
+  // 2. Helper to check if substring is valid
+  function isValid(str, left, right) {
+    while (left < right) {
+      if (str[left] !== str[right]) return false;
+      left++;
+      right--;
+    }
+    return true;
+  }
+
+  // 3. Define backtracking function
+  function backtrack(index, currentPartition) {
+    // 4. Base case: consumed all characters
+    if (index === s.length) {
+      result.push([...currentPartition]);
+      return;
+    }
+
+    // 5. Try all possible next palindromes
+    for (let end = index; end < s.length; end++) {
+      // Pruning: only explore valid partitions
+      if (isValid(s, index, end)) {
+        // Include this palindrome
+        currentPartition.push(s.substring(index, end + 1));
+
+        // Explore further
+        backtrack(end + 1, currentPartition);
+
+        // Backtrack
+        currentPartition.pop();
+      }
+    }
+  }
+
+  // 6. Start from index 0
+  backtrack(0, []);
+
+  return result;
+}
+```
+
+## Common Mistakes
+
+❌ **Not checking if palindrome before exploring:**
+```javascript
+// Wrong: explores all substrings, many invalid
+for (let end = index; end < s.length; end++) {
+  currentPartition.push(s.substring(index, end + 1));
+  backtrack(end + 1, currentPartition);
+  currentPartition.pop();
+}
+
+// Correct: only explore palindrome substrings
+for (let end = index; end < s.length; end++) {
+  if (isPalindrome(s, index, end)) {
+    currentPartition.push(s.substring(index, end + 1));
+    backtrack(end + 1, currentPartition);
+    currentPartition.pop();
+  }
+}
+```
+
+❌ **Inefficient palindrome checking in tight loop:**
+```javascript
+// Wrong: checks same substrings multiple times
+function backtrack(index, currentPartition) {
+  for (let end = index; end < s.length; end++) {
+    if (isPalindrome(s.substring(index, end + 1))) {
+      // ... creates new substring each time
+    }
+  }
+}
+
+// Better: pass indices instead
+if (isPalindrome(s, index, end)) {
+  // ... no string creation
+}
+```
+
+❌ **Not copying partition when adding to result:**
+```javascript
+// Wrong: all references point to same array
+result.push(currentPartition);
+
+// Correct: independent copy
+result.push([...currentPartition]);
+```
+
+❌ **Wrong loop bounds:**
+```javascript
+// Wrong: misses last character
+for (let end = index; end < s.length - 1; end++) {
+
+// Correct: includes last character
+for (let end = index; end < s.length; end++) {
+```
+
+## Interview Tips
+
+**What to mention:**
+
+1. **Problem breakdown:**
+   - Find all ways to partition string
+   - Each partition substring must be palindrome
+   - This is a constraint satisfaction problem
+
+2. **Algorithm explanation:**
+   - Backtracking explores all valid partitions
+   - Pruning: skip non-palindrome substrings early
+   - Early termination when all characters used
+
+3. **Optimization:**
+   - Palindrome check: compare ends moving inward
+   - DP precomputation: O(n^2) table for all palindromes
+   - Significant speedup for repeated checks
+
+4. **Complexity discussion:**
+   - Time: O(2^n × n) - at most 2^n partitions
+   - Space: O(n) recursion or O(n^2) with DP table
+
+**Follow-up questions:**
+
+**Q: What if you need minimum cuts?**
+A: Palindrome Partitioning II - DP to find min cuts needed.
+
+**Q: How would you handle very long strings?**
+A: Use DP table to avoid redundant palindrome checks.
+
+**Q: Can you optimize further?**
+A: Expand-around-center for palindrome detection (still O(n^2) overall).
+
+## Edge Cases
+
+```javascript
+// Single character
+"a" → [["a"]]
+
+// Two same characters
+"aa" → [["a", "a"], ["aa"]]
+
+// All different
+"abc" → [["a", "b", "c"]]
+
+// Entire palindrome
+"aba" → [["a", "b", "a"], ["aba"]]
+
+// Maximum length
+"abcdefgh" (16 chars) → many partitions
+```
+
+## Related Problems
+
+- **Palindrome Partitioning II** (Medium) - Minimum cuts
+- **Word Break** (Medium) - Similar partitioning pattern
+- **Combinations** (Medium) - Similar backtracking structure
+- **Permutations** (Medium) - Generate all orderings

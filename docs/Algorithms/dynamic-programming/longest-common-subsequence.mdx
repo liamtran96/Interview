@@ -1,0 +1,409 @@
+---
+sidebar_position: 8
+difficulty: Medium
+tags: [dynamic-programming, string, two-sequences]
+leetcode_url: https://leetcode.com/problems/longest-common-subsequence/
+companies: [Amazon, Microsoft, Google, Meta, Apple]
+pattern: "Dynamic Programming"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Longest Common Subsequence
+
+<AlgorithmProblem
+  title="Longest Common Subsequence"
+  difficulty="Medium"
+  description={`
+<p>Given two strings <code>text1</code> and <code>text2</code>, return <em>the length of their longest <strong>common subsequence</strong></em>. If there is no <strong>common subsequence</strong>, return <code>0</code>.</p>
+<p>A <strong>subsequence</strong> of a string is a new string generated from the original string with some characters (can be none) deleted without changing the relative order of the remaining characters.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &le; text1.length, text2.length &le; 1000</li>
+  <li>text1 and text2 consist of only lowercase English characters</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'text1 = "abcde", text2 = "ace"',
+      output: '3',
+      explanation: 'The longest common subsequence is "ace" and its length is 3'
+    },
+    {
+      input: 'text1 = "abc", text2 = "abc"',
+      output: '3',
+      explanation: 'The longest common subsequence is "abc" and its length is 3'
+    },
+    {
+      input: 'text1 = "abc", text2 = "def"',
+      output: '0',
+      explanation: 'There is no such common subsequence, so the result is 0'
+    }
+  ]}
+  starterCode={`function longestCommonSubsequence(text1, text2) {
+  // Write your code here
+
+}`}
+  solution={`function longestCommonSubsequence(text1, text2) {
+  // 2D DP - Tabulation: O(m*n) time, O(m*n) space
+  const m = text1.length;
+  const n = text2.length;
+
+  // dp[i][j] = LCS length of text1[0..i-1] and text2[0..j-1]
+  const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (text1[i - 1] === text2[j - 1]) {
+        // Characters match: extend LCS
+        dp[i][j] = dp[i - 1][j - 1] + 1;
+      } else {
+        // Characters don't match: take better of two options
+        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+      }
+    }
+  }
+
+  return dp[m][n];
+}`}
+  testCases={[
+    {
+      input: ["abcde", "ace"],
+      expected: 3,
+      description: 'LCS is "ace"'
+    },
+    {
+      input: ["abc", "abc"],
+      expected: 3,
+      description: 'Identical strings'
+    },
+    {
+      input: ["abc", "def"],
+      expected: 0,
+      description: 'No common characters'
+    },
+    {
+      input: ["a", "a"],
+      expected: 1,
+      description: 'Single character match'
+    },
+    {
+      input: ["oxcpqrsvwf", "sxyspmqpnz"],
+      expected: 2,
+      description: 'LCS is "qp"'
+    },
+    {
+      input: ["aab", "aaab"],
+      expected: 3,
+      description: 'LCS is "aab"'
+    }
+  ]}
+  functionName="longestCommonSubsequence"
+/>
+
+## Solution Explanation
+
+### Approach 1: Brute Force (Exponential)
+
+**Time Complexity:** O(2<sup>m + n</sup>)
+**Space Complexity:** O(m + n) recursive stack
+
+Try all subsequences:
+
+```javascript
+function longestCommonSubsequence(text1, text2) {
+  function helper(i, j) {
+    // Base cases: reached end of either string
+    if (i === text1.length || j === text2.length) return 0;
+
+    if (text1[i] === text2[j]) {
+      // Characters match: include in LCS
+      return 1 + helper(i + 1, j + 1);
+    } else {
+      // Characters don't match: try skipping each
+      const skipFirst = helper(i + 1, j);
+      const skipSecond = helper(i, j + 1);
+      return Math.max(skipFirst, skipSecond);
+    }
+  }
+
+  return helper(0, 0);
+}
+
+// Trace: text1="ab", text2="ba"
+//              helper(0,0)
+//             /           \
+//         helper(1,0)    helper(0,1)
+//        /      \         /      \
+//    h(2,0)   h(1,1)   h(1,1)   h(0,2)
+//      0        1        1        0
+// Much duplication! helper(1,1) computed twice
+```
+
+**Why avoid?** Exponential overlapping subproblems.
+
+### Approach 2: Memoization (Top-down)
+
+**Time Complexity:** O(m &#215; n)
+**Space Complexity:** O(m &#215; n)
+
+Cache intermediate results:
+
+```javascript
+function longestCommonSubsequence(text1, text2) {
+  const memo = {};
+
+  function helper(i, j) {
+    if (i === text1.length || j === text2.length) return 0;
+
+    const key = `${i},${j}`;
+    if (key in memo) return memo[key];
+
+    if (text1[i] === text2[j]) {
+      memo[key] = 1 + helper(i + 1, j + 1);
+    } else {
+      memo[key] = Math.max(helper(i + 1, j), helper(i, j + 1));
+    }
+
+    return memo[key];
+  }
+
+  return helper(0, 0);
+}
+
+// With memoization: O(m × n) states
+// Each state computed once
+// Each computation is O(1)
+```
+
+### Approach 3: DP Tabulation (Optimal) ✅
+
+**Time Complexity:** O(m &#215; n)
+**Space Complexity:** O(m &#215; n)
+
+Build table bottom-up:
+
+```javascript
+function longestCommonSubsequence(text1, text2) {
+  const m = text1.length;
+  const n = text2.length;
+
+  // dp[i][j] = LCS length of text1[0..i-1] and text2[0..j-1]
+  const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (text1[i - 1] === text2[j - 1]) {
+        // Characters match: extend diagonal
+        dp[i][j] = dp[i - 1][j - 1] + 1;
+      } else {
+        // Don't match: take best of skipping either string
+        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+      }
+    }
+  }
+
+  return dp[m][n];
+}
+
+// Trace: text1="abcde", text2="ace"
+//     ''  a  c  e
+// ''  0  0  0  0
+// a   0  1  1  1
+// b   0  1  1  1
+// c   0  1  2  2
+// d   0  1  2  2
+// e   0  1  2  3 ✓
+//
+// dp[3][1]: text1[2]='c' === text2[0]='a'? No.
+//           max(dp[2][1]=1, dp[3][0]=0) = 1
+// dp[3][2]: text1[2]='c' === text2[1]='c'? Yes!
+//           dp[2][1] + 1 = 1 + 1 = 2
+// etc.
+```
+
+## DP Recurrence Relation
+
+```
+dp[i][j] = LCS length of text1[0..i-1] and text2[0..j-1]
+
+If text1[i-1] === text2[j-1]:
+  dp[i][j] = dp[i-1][j-1] + 1
+  (characters match, extend LCS)
+
+Otherwise:
+  dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+  (skip from either text1 or text2)
+
+Base cases:
+  dp[0][j] = 0 (empty text1)
+  dp[i][0] = 0 (empty text2)
+```
+
+## Visualization: Building the DP Table
+
+```
+text1 = "abcde"
+text2 = "ace"
+
+       ''  a  c  e
+    '' 0   0  0  0
+    a  0   1  1  1     (a matches a)
+    b  0   1  1  1     (b doesn't match a, c, or e)
+    c  0   1  2  2     (c matches c)
+    d  0   1  2  2     (d doesn't match)
+    e  0   1  2  3     (e matches e)
+
+LCS = 3 (the sequence "ace")
+
+Cell computation:
+- (1,1): text1[0]='a', text2[0]='a' → match → dp[0][0]+1 = 1
+- (2,2): text1[1]='b', text2[1]='c' → no match → max(dp[1][2], dp[2][1]) = 1
+- (3,2): text1[2]='c', text2[1]='c' → match → dp[2][1]+1 = 2
+- (5,3): text1[4]='e', text2[2]='e' → match → dp[4][2]+1 = 3
+```
+
+## Key Insights
+
+**Why this DP works:**
+
+At position (i, j), we ask: "What's the LCS of first i chars of text1 and first j chars of text2?"
+
+```
+Two cases:
+1. text1[i-1] === text2[j-1]:
+   These characters match, so include them in LCS
+   Answer = 1 + LCS(i-1, j-1)
+
+2. text1[i-1] !== text2[j-1]:
+   Characters don't match, try:
+   - Skip text1[i-1]: LCS(i-1, j)
+   - Skip text2[j-1]: LCS(i, j-1)
+   Answer = max of these two
+```
+
+**2D table necessity:**
+- Can't use 1D array like some problems
+- Need both previous row (i-1) and previous column (j-1)
+- Could optimize to use two rows, but usually not worth the complexity
+
+## Comparison of Approaches
+
+| Approach | Time | Space | Pros | Cons |
+|----------|------|-------|------|------|
+| Brute Force | O(2<sup>m+n</sup>) | O(m+n) | Simple | Exponential |
+| Memoization | O(m × n) | O(m × n) | Intuitive | Top-down |
+| **Tabulation** | **O(m × n)** | **O(m × n)** | **Standard DP** | **Optimal** |
+
+## Common Mistakes
+
+❌ **Using 1D array when 2D needed:**
+```javascript
+// Wrong - can't track both dimensions
+const dp = new Array(m + 1).fill(0);
+
+// Correct - 2D for text1 and text2
+const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+```
+
+❌ **Wrong indices in comparison:**
+```javascript
+// Wrong - text1[i] instead of text1[i-1]
+if (text1[i] === text2[j]) {  // Off-by-one error!
+  dp[i][j] = dp[i - 1][j - 1] + 1;
+}
+
+// Correct - use i-1 and j-1
+if (text1[i - 1] === text2[j - 1]) {
+  dp[i][j] = dp[i - 1][j - 1] + 1;
+}
+```
+
+❌ **Wrong recurrence when no match:**
+```javascript
+// Wrong - returns 0 or 1, doesn't consider both options
+dp[i][j] = 0;
+
+// Correct - take better option
+dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+```
+
+❌ **Not initializing all rows:**
+```javascript
+// Wrong - might not initialize properly
+const dp = Array(m + 1);
+dp[0] = Array(n + 1).fill(0);  // Only first row!
+
+// Correct - initialize all rows
+const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+```
+
+✅ **Correct solution:**
+```javascript
+function longestCommonSubsequence(text1, text2) {
+  const m = text1.length;
+  const n = text2.length;
+
+  const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (text1[i - 1] === text2[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1] + 1;
+      } else {
+        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+      }
+    }
+  }
+
+  return dp[m][n];
+}
+```
+
+## Interview Tips
+
+**When discussing:**
+1. State: "`dp[i][j]` = LCS length of first i and j characters"
+2. Base: "Empty string has 0 LCS"
+3. Transition: "Match: extend. No match: choose better skip"
+4. Complexity: "O(m × n) time and space"
+5. Reconstruct: "Can backtrack to find actual LCS"
+
+**Key talking points:**
+- "This is a classic 2D DP problem"
+- "Need to consider both text1 and text2 independently"
+- "When characters match, they're definitely in LCS"
+- "When they don't, we skip from the longer contribution side"
+- "Similar to edit distance but simpler recurrence"
+
+**Follow-up questions:**
+
+**Q: Return the actual LCS, not just length?**
+A: Backtrack from dp[m][n], reconstructing the sequence.
+
+**Q: Optimize space to O(min(m,n))?**
+A: Use rolling array, keep only last row.
+
+**Q: What if strings can have uppercase or case-insensitive?**
+A: Convert to same case before processing.
+
+**Q: Can you do this with just O(n) space?**
+A: Yes, with rolling array of smaller dimension.
+
+## Edge Cases
+
+```javascript
+longestCommonSubsequence("a", "a") → 1         // Single match
+longestCommonSubsequence("a", "b") → 0         // No match
+longestCommonSubsequence("abc", "abc") → 3     // Identical
+longestCommonSubsequence("abc", "def") → 0     // No common char
+longestCommonSubsequence("oxcpqrsvwf", "sxyspmqpnz") → 2  // Complex
+```
+
+## Related Problems
+
+- **Edit Distance** (Hard) - Similar DP with different recurrence
+- **Shortest Common Supersequence** (Hard) - Includes both strings
+- **Longest Common Substring** (Medium) - Contiguous version
+- **Interleaving String** (Medium) - Different DP variant
+- **Distinct Subsequences** (Hard) - Count distinct subsequences

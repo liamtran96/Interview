@@ -1,0 +1,363 @@
+---
+sidebar_position: 3
+difficulty: Easy
+tags: [graphs, dfs, bfs, matrix, google, amazon, microsoft]
+leetcode_url: https://leetcode.com/problems/pacific-atlantic-water-flow/
+companies: [Google, Amazon, Microsoft, Meta, Apple]
+pattern: "Graphs"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Pacific Atlantic Water Flow
+
+<AlgorithmProblem
+  title="Pacific Atlantic Water Flow"
+  difficulty="Easy"
+  description={`
+<p>There is an <code>m x n</code> rectangular island that borders both the <strong>Pacific Ocean</strong> and <strong>Atlantic Ocean</strong>. The Pacific Ocean touches the island&apos;s left and top edges, and the Atlantic Ocean touches the island&apos;s right and bottom edges.</p>
+<p>The island is partitioned into a grid of individual cells. You are given an <code>m x n</code> matrix <code>heights</code> of non-negative integers representing the height of each cell in the island.</p>
+<p>Water can only flow in four directions (up, down, left, right) from a cell to an adjacent cell with <strong>height less than or equal</strong> to the height of the current cell. Water flows from higher or same height to lower height.</p>
+<p>Find all cells in the island such that water can flow to <strong>both</strong> the Pacific and Atlantic oceans.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li><code>m == heights.length</code></li>
+  <li><code>n == heights[i].length</code></li>
+  <li>1 &lt;= m, n &lt;= 200</li>
+  <li>0 &lt;= heights[i][j] &lt;= 10<sup>5</sup></li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'heights = [[1,2,2,3,5],[3,2,3,4,4],[2,4,5,3,1]]',
+      output: '[[0,4],[1,3],[1,4],[2,2]]',
+      explanation: 'Water at these cells flows to both oceans.'
+    },
+    {
+      input: 'heights = [[1]]',
+      output: '[[0,0]]',
+      explanation: 'Single cell flows to both oceans (on borders).'
+    },
+    {
+      input: 'heights = [[1,1],[1,1]]',
+      output: '[[0,0],[0,1],[1,0],[1,1]]',
+      explanation: 'All cells on border flow to adjacent ocean.'
+    }
+  ]}
+  starterCode={`function pacificAtlantic(heights) {
+  // Write your code here
+  return [];
+}`}
+  solution={`function pacificAtlantic(heights) {
+  // DFS approach: flow backwards from ocean borders
+  // Time: O(m * n), Space: O(m * n) for visited sets
+
+  if (!heights || heights.length === 0) return [];
+
+  const rows = heights.length;
+  const cols = heights[0].length;
+  const pacific = new Set();  // Cells that can reach Pacific
+  const atlantic = new Set();  // Cells that can reach Atlantic
+
+  // DFS to mark cells that can reach ocean
+  function dfs(i, j, visited, height) {
+    // Out of bounds or visited or height lower than previous
+    if (i < 0 || i >= rows || j < 0 || j >= cols ||
+        visited.has(\`\${i},\${j}\`) || heights[i][j] < height) {
+      return;
+    }
+
+    visited.add(\`\${i},\${j}\`);
+
+    // Explore 4 directions
+    dfs(i + 1, j, visited, heights[i][j]);  // down
+    dfs(i - 1, j, visited, heights[i][j]);  // up
+    dfs(i, j + 1, visited, heights[i][j]);  // right
+    dfs(i, j - 1, visited, heights[i][j]);  // left
+  }
+
+  // Traverse from Pacific Ocean edges (top and left)
+  for (let i = 0; i < rows; i++) {
+    dfs(i, 0, pacific, 0);      // Left edge
+  }
+  for (let j = 0; j < cols; j++) {
+    dfs(0, j, pacific, 0);      // Top edge
+  }
+
+  // Traverse from Atlantic Ocean edges (bottom and right)
+  for (let i = 0; i < rows; i++) {
+    dfs(i, cols - 1, atlantic, 0);  // Right edge
+  }
+  for (let j = 0; j < cols; j++) {
+    dfs(rows - 1, j, atlantic, 0);  // Bottom edge
+  }
+
+  // Find cells in both sets
+  const result = [];
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      const key = \`\${i},\${j}\`;
+      if (pacific.has(key) && atlantic.has(key)) {
+        result.push([i, j]);
+      }
+    }
+  }
+
+  return result;
+}`}
+  testCases={[
+    {
+      input: [[[1,2,2,3,5],[3,2,3,4,4],[2,4,5,3,1]]],
+      expected: [[0,4],[1,3],[1,4],[2,2]],
+      description: 'Standard 3x5 grid'
+    },
+    {
+      input: [[[1]]],
+      expected: [[0,0]],
+      description: 'Single cell'
+    },
+    {
+      input: [[[1,1],[1,1]]],
+      expected: [[0,0],[0,1],[1,0],[1,1]],
+      description: 'All cells have same height'
+    },
+    {
+      input: [[[1,2],[3,4]]],
+      expected: [[1,1]],
+      description: '2x2 grid, only top-right flows to both'
+    },
+    {
+      input: [[[4,3,2,1],[5,9,8,7]]],
+      expected: [[0,0],[0,1],[0,2],[0,3],[1,0]],
+      description: 'Decreasing grid'
+    },
+    {
+      input: [[[10,10,10],[10,1,10],[10,10,10]]],
+      expected: [[0,0],[0,1],[0,2],[1,0],[1,2],[2,0],[2,1],[2,2]],
+      description: 'Low cell in center'
+    }
+  ]}
+  functionName="pacificAtlantic"
+/>
+
+## Solution Explanation
+
+### Approach 1: DFS from Ocean Borders ✅
+
+**Time Complexity:** O(m × n) - visit each cell once from each ocean
+**Space Complexity:** O(m × n) for visited sets and recursion
+
+Instead of checking if water flows FROM each cell, check if each cell can be reached FROM the oceans (reverse flow):
+
+```javascript
+function pacificAtlantic(heights) {
+  if (!heights || heights.length === 0) return [];
+
+  const rows = heights.length;
+  const cols = heights[0].length;
+  const pacific = new Set();
+  const atlantic = new Set();
+
+  function dfs(i, j, visited, height) {
+    // Boundary or visited or cell is lower than previous
+    if (i < 0 || i >= rows || j < 0 || j >= cols ||
+        visited.has(\`\${i},\${j}\`) || heights[i][j] < height) {
+      return;
+    }
+
+    visited.add(\`\${i},\${j}\`);
+
+    // Continue from adjacent cells with greater or equal height
+    dfs(i + 1, j, visited, heights[i][j]);
+    dfs(i - 1, j, visited, heights[i][j]);
+    dfs(i, j + 1, visited, heights[i][j]);
+    dfs(i, j - 1, visited, heights[i][j]);
+  }
+
+  // Start DFS from Pacific edges
+  for (let i = 0; i < rows; i++) {
+    dfs(i, 0, pacific, 0);
+  }
+  for (let j = 0; j < cols; j++) {
+    dfs(0, j, pacific, 0);
+  }
+
+  // Start DFS from Atlantic edges
+  for (let i = 0; i < rows; i++) {
+    dfs(i, cols - 1, atlantic, 0);
+  }
+  for (let j = 0; j < cols; j++) {
+    dfs(rows - 1, j, atlantic, 0);
+  }
+
+  // Cells reachable from both oceans
+  const result = [];
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      const key = \`\${i},\${j}\`;
+      if (pacific.has(key) && atlantic.has(key)) {
+        result.push([i, j]);
+      }
+    }
+  }
+
+  return result;
+}
+```
+
+**Key Insight: Reverse Flow**
+
+```
+Forward (wrong): Can cell reach ocean?
+  [1] → [2] → [3] → [2] → [1]
+  Check from each cell if can reach ocean edges
+  Problem: Many starting points, complex logic
+
+Backward (correct): Can ocean reach cell?
+  Ocean → [3] → [2] → [1]
+  Start from ocean edges, flow to higher cells
+  Problem: Simple, systematic traversal
+```
+
+### Approach 2: BFS from Ocean Borders ✅
+
+**Time Complexity:** O(m × n)
+**Space Complexity:** O(m × n) for queue and visited sets
+
+```javascript
+function pacificAtlantic(heights) {
+  if (!heights || heights.length === 0) return [];
+
+  const rows = heights.length;
+  const cols = heights[0].length;
+  const pacific = new Set();
+  const atlantic = new Set();
+
+  function bfs(start, visited) {
+    const queue = [...start];
+
+    while (queue.length > 0) {
+      const [i, j] = queue.shift();
+      const key = \`\${i},\${j}\`;
+
+      if (visited.has(key)) continue;
+      visited.add(key);
+
+      // Check all 4 neighbors
+      for (const [di, dj] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+        const ni = i + di;
+        const nj = j + dj;
+        const nKey = \`\${ni},\${nj}\`;
+
+        if (ni >= 0 && ni < rows && nj >= 0 && nj < cols &&
+            !visited.has(nKey) && heights[ni][nj] >= heights[i][j]) {
+          queue.push([ni, nj]);
+        }
+      }
+    }
+  }
+
+  // Collect Pacific starting points
+  const pacificStart = [];
+  for (let i = 0; i < rows; i++) pacificStart.push([i, 0]);
+  for (let j = 1; j < cols; j++) pacificStart.push([0, j]);
+
+  // Collect Atlantic starting points
+  const atlanticStart = [];
+  for (let i = 0; i < rows; i++) atlanticStart.push([i, cols - 1]);
+  for (let j = 0; j < cols - 1; j++) atlanticStart.push([rows - 1, j]);
+
+  bfs(pacificStart, pacific);
+  bfs(atlanticStart, atlantic);
+
+  const result = [];
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      const key = \`\${i},\${j}\`;
+      if (pacific.has(key) && atlantic.has(key)) {
+        result.push([i, j]);
+      }
+    }
+  }
+
+  return result;
+}
+```
+
+### Key Concepts
+
+1. **Reverse Flow Logic**: Instead of checking FROM each cell, check what oceans can REACH the cell
+2. **Water Flow Rule**: Water flows from cell to adjacent cell only if new cell height ≥ current height
+3. **Border Detection**: Pacific = top/left, Atlantic = bottom/right
+4. **Intersection**: Find cells reachable from BOTH oceans
+
+## Common Mistakes
+
+❌ Wrong flow direction (forward instead of backward):
+```javascript
+// Wrong - checking if water flows out of cells
+function dfs(i, j) {
+  // If neighbor is lower, can reach ocean?
+  if (heights[i][j] > heights[ni][nj]) {
+    // This is wrong direction
+  }
+}
+```
+
+❌ Not starting from border cells:
+```javascript
+// Wrong - not starting from actual ocean borders
+dfs(1, 1, pacific, 0);  // Wrong starting point!
+```
+
+❌ Incorrect height comparison:
+```javascript
+// Wrong - only moving to strictly lower cells
+if (heights[ni][nj] < heights[i][j]) {  // Should be >= for reverse
+  queue.push([ni, nj]);
+}
+```
+
+✅ Correct approach:
+```javascript
+// Start from ocean borders and flow INWARD
+// Water can flow up to cells with >= height
+dfs(i, j, visited, heights[i][j]);
+
+// Only visit cells with height >= previous cell (reverse flow)
+if (heights[ni][nj] >= heights[i][j]) {
+  dfs(ni, nj, visited, heights[ni][nj]);
+}
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Recognize: "This is about finding connected components with a constraint"
+2. Key insight: "Instead of checking forward flow, work backward from oceans"
+3. Explain: "Start from ocean borders and flow inward to find reachable cells"
+4. Implementation: "Use DFS/BFS with two separate visited sets for each ocean"
+5. Complexity: "O(m × n) time as we visit each cell at most twice, O(m × n) space"
+
+**Key talking points:**
+- "Forward logic is complex; backward flow is much simpler"
+- "Water can flow from higher to lower, so reversing means lower to higher"
+- "Start from borders where oceans are, expand inward"
+- "Cells reachable from both oceans are our answers"
+
+**What if interviewer asks:**
+- **"Why backward instead of forward?"** - Fewer starting points, simpler logic
+- **"What if heights are equal?"** - Water still flows (equal heights OK)
+- **"Can we modify the input?"** - Yes, but can also use Set for visited
+- **"How to optimize space?"** - Can do one ocean at a time, keep results separate
+
+**Related LeetCode Problems:**
+- Number of Islands
+- Surrounded Regions
+- Island Perimeter
+- Max Area of Island
+
+**Follow-up variations:**
+- Count number of "rain water" cells
+- Find path to reach both oceans
+- With additional water sources

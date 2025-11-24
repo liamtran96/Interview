@@ -1,0 +1,258 @@
+---
+sidebar_position: 1
+difficulty: Easy
+tags: [arrays, sliding-window, amazon, microsoft]
+leetcode_url: https://leetcode.com/problems/maximum-average-subarray-i/
+companies: [Amazon, Microsoft, Google]
+pattern: "Sliding Window"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Maximum Average Subarray I
+
+<AlgorithmProblem
+  title="Maximum Average Subarray I"
+  difficulty="Easy"
+  description={`
+<p>You are given an integer array <code>nums</code> consisting of <code>n</code> elements, and an integer <code>k</code>.</p>
+<p>Find a contiguous subarray whose <strong>length is equal to</strong> <code>k</code> that has the maximum average value and return this value. Any answer with a calculation error less than 10<sup>-5</sup> will be accepted.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>n == nums.length</li>
+  <li>1 &lt;= k &lt;= n &lt;= 10<sup>5</sup></li>
+  <li>-10<sup>4</sup> &lt;= nums[i] &lt;= 10<sup>4</sup></li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'nums = [1,12,-5,-6,50,3], k = 4',
+      output: '12.75000',
+      explanation: 'Maximum average is (12 - 5 - 6 + 50) / 4 = 51 / 4 = 12.75'
+    },
+    {
+      input: 'nums = [5], k = 1',
+      output: '5.00000',
+      explanation: 'Maximum average is 5 / 1 = 5.0'
+    },
+    {
+      input: 'nums = [0,1,1,3,3], k = 4',
+      output: '2.00000',
+      explanation: 'Maximum average is (1 + 1 + 3 + 3) / 4 = 8 / 4 = 2.0'
+    }
+  ]}
+  starterCode={`function findMaxAverage(nums, k) {
+  // Write your code here
+
+}`}
+  solution={`function findMaxAverage(nums, k) {
+  // Sliding window approach: O(n) time, O(1) space
+  // Calculate sum of first window
+  let windowSum = 0;
+  for (let i = 0; i < k; i++) {
+    windowSum += nums[i];
+  }
+
+  let maxSum = windowSum;
+
+  // Slide the window: remove left, add right
+  for (let i = k; i < nums.length; i++) {
+    windowSum = windowSum - nums[i - k] + nums[i];
+    maxSum = Math.max(maxSum, windowSum);
+  }
+
+  return maxSum / k;
+}`}
+  testCases={[
+    {
+      input: [[1, 12, -5, -6, 50, 3], 4],
+      expected: 12.75,
+      description: 'Mixed positive and negative: [1,12,-5,-6,50,3], k=4'
+    },
+    {
+      input: [[5], 1],
+      expected: 5.0,
+      description: 'Single element: [5], k=1'
+    },
+    {
+      input: [[0, 1, 1, 3, 3], 4],
+      expected: 2.0,
+      description: 'Window at end: [0,1,1,3,3], k=4'
+    },
+    {
+      input: [[-1, -2, -3, -4], 2],
+      expected: -1.5,
+      description: 'All negative numbers: [-1,-2,-3,-4], k=2'
+    },
+    {
+      input: [[1, 2, 3, 4, 5], 5],
+      expected: 3.0,
+      description: 'Full array: [1,2,3,4,5], k=5'
+    },
+    {
+      input: [[8, 1, 2, 3, 4], 3],
+      expected: 3.0,
+      description: 'Maximum window at end: [8,1,2,3,4], k=3'
+    }
+  ]}
+  functionName="findMaxAverage"
+/>
+
+## Solution Explanation
+
+### Approach 1: Brute Force (Not Recommended)
+
+**Time Complexity:** O(n × k)
+**Space Complexity:** O(1)
+
+Calculate the sum of every possible window of size k:
+
+```javascript
+function findMaxAverage(nums, k) {
+  let maxAvg = -Infinity;
+
+  // Try every possible window
+  for (let i = 0; i <= nums.length - k; i++) {
+    let sum = 0;
+    // Calculate sum of current window
+    for (let j = i; j < i + k; j++) {
+      sum += nums[j];
+    }
+    maxAvg = Math.max(maxAvg, sum / k);
+  }
+
+  return maxAvg;
+}
+```
+
+**Why not use this?**
+- Recalculates overlapping elements repeatedly
+- O(n × k) time complexity is inefficient
+- Wastes computation on already-processed elements
+
+### Approach 2: Sliding Window (Optimal) ✅
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1)
+
+Use a sliding window to maintain the sum efficiently:
+
+```javascript
+function findMaxAverage(nums, k) {
+  // Step 1: Calculate initial window sum
+  let windowSum = 0;
+  for (let i = 0; i < k; i++) {
+    windowSum += nums[i];
+  }
+
+  let maxSum = windowSum;
+
+  // Step 2: Slide the window
+  for (let i = k; i < nums.length; i++) {
+    // Remove leftmost element, add rightmost element
+    windowSum = windowSum - nums[i - k] + nums[i];
+    maxSum = Math.max(maxSum, windowSum);
+  }
+
+  // Step 3: Return average
+  return maxSum / k;
+}
+```
+
+**How the Sliding Window works:**
+
+```
+nums = [1, 12, -5, -6, 50, 3], k = 4
+
+Initial window [1, 12, -5, -6]:
+  sum = 1 + 12 - 5 - 6 = 2
+
+Slide to [12, -5, -6, 50]:
+  remove 1, add 50: sum = 2 - 1 + 50 = 51 ✅ (max)
+
+Slide to [-5, -6, 50, 3]:
+  remove 12, add 3: sum = 51 - 12 + 3 = 42
+
+Result: 51 / 4 = 12.75
+```
+
+**Key Sliding Window Technique:**
+1. **Initialize**: Calculate sum of first window
+2. **Slide**: Remove left element, add right element
+3. **Track**: Keep track of maximum sum
+4. **Optimize**: Each element processed only once!
+
+### Key Insights
+
+1. **Fixed-size window**: When window size is constant, use two operations per slide
+2. **Reuse computation**: Don't recalculate entire sum, just adjust it
+3. **O(n) vs O(n×k)**: Sliding window reduces time complexity dramatically
+4. **Space efficiency**: No extra data structures needed
+
+## Common Mistakes
+
+❌ Recalculating the entire window sum each time:
+```javascript
+// Inefficient - O(n × k)
+for (let i = 0; i <= nums.length - k; i++) {
+  let sum = 0;
+  for (let j = i; j < i + k; j++) {
+    sum += nums[j];
+  }
+}
+```
+
+❌ Dividing by k inside the loop:
+```javascript
+// Unnecessary divisions
+for (let i = k; i < nums.length; i++) {
+  windowSum = windowSum - nums[i - k] + nums[i];
+  maxAvg = Math.max(maxAvg, windowSum / k); // Wasteful!
+}
+```
+
+❌ Off-by-one errors in window boundaries:
+```javascript
+// Wrong - accessing out of bounds
+windowSum = windowSum - nums[i - k + 1] + nums[i]; // Wrong offset!
+```
+
+✅ Correct approach - calculate sum once, divide once:
+```javascript
+// Efficient - O(n)
+let windowSum = 0;
+for (let i = 0; i < k; i++) {
+  windowSum += nums[i];
+}
+
+let maxSum = windowSum;
+
+for (let i = k; i < nums.length; i++) {
+  windowSum = windowSum - nums[i - k] + nums[i];
+  maxSum = Math.max(maxSum, windowSum);
+}
+
+return maxSum / k; // Divide only once at the end
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Recognize it's a **fixed-size sliding window** problem
+2. Start by explaining the brute force approach
+3. Identify the optimization: "We're recalculating overlapping elements"
+4. Introduce sliding window: "Instead of recalculating, we can adjust the sum"
+5. Walk through one complete slide operation
+6. Mention time complexity improvement: O(n×k) → O(n)
+
+**Key talking points:**
+- "This is a classic sliding window problem with a fixed window size"
+- "We maintain a running sum and adjust it as the window slides"
+- "Each element is added once and removed once, giving us O(n) time"
+- "We only need to track the sum, so space complexity is O(1)"
+
+**Follow-up questions you might get:**
+- **What if k > n?** Invalid input based on constraints, but could return -Infinity or throw error
+- **Can we use a different data structure?** Not needed - sliding window is optimal
+- **What about variable-size windows?** That's a different pattern (next problems!)
+- **How to handle integer overflow?** Use BigInt or long in other languages

@@ -1,0 +1,9 @@
+{
+  "label": "Linked Lists",
+  "position": 6,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "description": "Practice pointer manipulation with classic linked list problems."
+  }
+}

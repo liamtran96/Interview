@@ -1,0 +1,488 @@
+---
+sidebar_position: 7
+difficulty: Medium
+tags: [backtracking, array, matrix, amazon, google, microsoft]
+leetcode_url: https://leetcode.com/problems/word-search/
+companies: [Amazon, Google, Microsoft, Meta]
+pattern: "Backtracking & Greedy"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Word Search
+
+<AlgorithmProblem
+  title="Word Search"
+  difficulty="Medium"
+  description={`
+<p>Given an <code>m x n</code> grid of characters <code>board</code> and a string <code>word</code>, return <code>true</code> <em>if</em> <code>word</code> <em>exists in the grid</em>.</p>
+<p>The word can be constructed from letters of sequentially adjacent cells, where adjacent cells are horizontally or vertically neighboring. The same letter cell may not be used more than once in a word.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>m &le; board.length &le; 13</li>
+  <li>n &le; board[0].length &le; 13</li>
+  <li>1 &le; word.length &le; 15</li>
+  <li><code>board</code> and <code>word</code> consists of only lower case English letters</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'board = [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], word = "ABCCED"',
+      output: 'true',
+      explanation: 'Path exists: A&rarr;B&rarr;C&rarr;C&rarr;E&rarr;D'
+    },
+    {
+      input: 'board = [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], word = "SEE"',
+      output: 'true',
+      explanation: 'Path exists: S&rarr;E&rarr;E'
+    },
+    {
+      input: 'board = [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], word = "ABCB"',
+      output: 'false',
+      explanation: 'Cannot reuse "C"'
+    }
+  ]}
+  starterCode={`function exist(board, word) {
+  // Write your code here
+
+}`}
+  solution={`function exist(board, word) {
+  // Backtracking with pruning: O(m*n*4^L) time, O(L) space
+  if (!board || !board[0] || !word) return false;
+
+  const rows = board.length;
+  const cols = board[0].length;
+
+  function backtrack(row, col, index, visited) {
+    // Base case: found entire word
+    if (index === word.length) return true;
+
+    // Bounds check and letter check
+    if (row < 0 || row >= rows || col < 0 || col >= cols) return false;
+    if (board[row][col] !== word[index]) return false;
+    if (visited[row][col]) return false;
+
+    // Mark as visited
+    visited[row][col] = true;
+
+    // Try all 4 directions
+    const directions = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+    for (const [dr, dc] of directions) {
+      if (backtrack(row + dr, col + dc, index + 1, visited)) {
+        return true;
+      }
+    }
+
+    // Backtrack: unmark
+    visited[row][col] = false;
+
+    return false;
+  }
+
+  // Try starting from each cell
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
+      if (backtrack(i, j, 0, visited)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}`}
+  testCases={[
+    {
+      input: [[["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], "ABCCED"],
+      expected: true,
+      description: 'Word found in grid'
+    },
+    {
+      input: [[["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], "SEE"],
+      expected: true,
+      description: 'Word with adjacent cells'
+    },
+    {
+      input: [[["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], "ABCB"],
+      expected: false,
+      description: 'Cannot reuse cells'
+    },
+    {
+      input: [[["A"]], "A"],
+      expected: true,
+      description: 'Single cell'
+    },
+    {
+      input: [[["A", "B"], ["C", "D"]], "DCBA"],
+      expected: false,
+      description: 'Wrong path'
+    },
+    {
+      input: [[["A", "A"], ["A", "A"]], "AA"],
+      expected: true,
+      description: 'Multiple same letters'
+    }
+  ]}
+  functionName="exist"
+/>
+
+## Solution Explanation
+
+### Approach 1: Backtracking with DFS (Optimal) ✅
+
+**Time Complexity:** O(m × n × 4^L) where m,n are grid dimensions, L is word length
+**Space Complexity:** O(m × n) for visited array + O(L) recursion depth
+
+Search from each cell using DFS with visited tracking:
+
+```javascript
+function exist(board, word) {
+  if (!board || !board[0] || !word) return false;
+
+  const rows = board.length;
+  const cols = board[0].length;
+
+  function backtrack(row, col, index, visited) {
+    // Found entire word
+    if (index === word.length) return true;
+
+    // Pruning: out of bounds or wrong letter or visited
+    if (row < 0 || row >= rows || col < 0 || col >= cols) return false;
+    if (board[row][col] !== word[index]) return false;
+    if (visited[row][col]) return false;
+
+    // Mark as visited
+    visited[row][col] = true;
+
+    // Try all 4 adjacent cells
+    const directions = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+    for (const [dr, dc] of directions) {
+      if (backtrack(row + dr, col + dc, index + 1, visited)) {
+        return true;
+      }
+    }
+
+    // Backtrack: unmark
+    visited[row][col] = false;
+
+    return false;
+  }
+
+  // Try starting from each cell
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
+      if (backtrack(i, j, 0, visited)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+```
+
+**Key insights:**
+
+1. **Pruning conditions:** Check bounds and letter match before recursing
+2. **Visited tracking:** Mark cells to prevent revisiting in same path
+3. **Backtrack properly:** Unmark when exploring other paths
+4. **Early termination:** Return true as soon as word is found
+
+**Example trace for word = "ABCCED":**
+
+```
+Grid:
+A B C E
+S F C S
+A D E E
+
+Search from (0,0):
+  Word[0] = 'A', Cell[0,0] = 'A' ✓
+  visited[0][0] = true
+
+  Try right (0,1):
+    Word[1] = 'B', Cell[0,1] = 'B' ✓
+    visited[0][1] = true
+
+    Try right (0,2):
+      Word[2] = 'C', Cell[0,2] = 'C' ✓
+      visited[0][2] = true
+
+      Try down (1,2):
+        Word[3] = 'C', Cell[1,2] = 'C' ✓
+        visited[1][2] = true
+
+        Try down (2,2):
+          Word[4] = 'E', Cell[2,2] = 'E' ✓
+          visited[2][2] = true
+
+          Try down (3,2): out of bounds
+          Try up (1,2): visited
+          Try left (2,1):
+            Word[5] = 'D', Cell[2,1] = 'D' ✓
+            index === length → return true ✓
+```
+
+### Approach 2: Using Set for Visited
+
+**Time Complexity:** O(m × n × 4^L)
+**Space Complexity:** O(m × n)
+
+```javascript
+function exist(board, word) {
+  if (!board || !board[0]) return false;
+
+  const rows = board.length;
+  const cols = board[0].length;
+  const visited = new Set();
+
+  function backtrack(row, col, index) {
+    if (index === word.length) return true;
+
+    if (row < 0 || row >= rows || col < 0 || col >= cols) return false;
+    if (board[row][col] !== word[index]) return false;
+
+    const key = `${row},${col}`;
+    if (visited.has(key)) return false;
+
+    visited.add(key);
+
+    const result = [0, 1], [0, -1], [1, 0], [-1, 0]].some(([dr, dc]) =>
+      backtrack(row + dr, col + dc, index + 1)
+    );
+
+    visited.delete(key);
+
+    return result;
+  }
+
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      if (backtrack(i, j, 0)) return true;
+    }
+  }
+
+  return false;
+}
+```
+
+**Advantage:** Single visited Set for all starting positions (more efficient).
+
+### Approach 3: Modify Board In-Place
+
+**Time Complexity:** O(m × n × 4^L)
+**Space Complexity:** O(L) for recursion only
+
+```javascript
+function exist(board, word) {
+  if (!board || !board[0]) return false;
+
+  const rows = board.length;
+  const cols = board[0].length;
+
+  function backtrack(row, col, index) {
+    if (index === word.length) return true;
+
+    if (row < 0 || row >= rows || col < 0 || col >= cols) return false;
+    if (board[row][col] !== word[index]) return false;
+
+    // Mark as visited by changing character
+    const temp = board[row][col];
+    board[row][col] = '#';
+
+    const result = [[0, 1], [0, -1], [1, 0], [-1, 0]].some(([dr, dc]) =>
+      backtrack(row + dr, col + dc, index + 1)
+    );
+
+    // Restore
+    board[row][col] = temp;
+
+    return result;
+  }
+
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      if (backtrack(i, j, 0)) return true;
+    }
+  }
+
+  return false;
+}
+```
+
+**Advantage:** Minimal extra space (modifies input, so be careful).
+
+## Backtracking Template
+
+```javascript
+function exist(board, word) {
+  // 1. Initialize grid dimensions
+  const rows = board.length;
+  const cols = board[0].length;
+
+  // 2. Define helper function with state
+  function backtrack(row, col, index, visited) {
+    // 3. Base case: found entire word
+    if (index === word.length) return true;
+
+    // 4. Pruning: boundary check and letter check
+    if (row < 0 || row >= rows || col < 0 || col >= cols) return false;
+    if (board[row][col] !== word[index]) return false;
+    if (visited[row][col]) return false;
+
+    // 5. Mark as visited
+    visited[row][col] = true;
+
+    // 6. Explore all directions
+    for (const [dr, dc] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+      if (backtrack(row + dr, col + dc, index + 1, visited)) {
+        return true;
+      }
+    }
+
+    // 7. Backtrack: unmark
+    visited[row][col] = false;
+
+    return false;
+  }
+
+  // 8. Try starting from each cell
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
+      if (backtrack(i, j, 0, visited)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+```
+
+## Common Mistakes
+
+❌ **Not checking bounds before accessing board:**
+```javascript
+// Wrong: crashes on out of bounds
+if (board[row][col] !== word[index]) return false;
+
+// Correct: check bounds first
+if (row < 0 || row >= rows || col < 0 || col >= cols) return false;
+if (board[row][col] !== word[index]) return false;
+```
+
+❌ **Not marking visited cells:**
+```javascript
+// Wrong: infinite loops due to revisiting
+function backtrack(row, col, index) {
+  // Try all directions
+  for (const [dr, dc] of directions) {
+    backtrack(row + dr, col + dc, index + 1);
+  }
+}
+
+// Correct: mark before exploring
+visited[row][col] = true;
+for (const [dr, dc] of directions) {
+  if (backtrack(row + dr, col + dc, index + 1)) {
+    return true;
+  }
+}
+visited[row][col] = false;
+```
+
+❌ **Creating new visited array for each starting position:**
+```javascript
+// Less efficient: wastes memory
+for (let i = 0; i < rows; i++) {
+  for (let j = 0; j < cols; j++) {
+    const visited = new Array(rows).fill(null).map(() => new Array(cols).fill(false));
+    if (backtrack(i, j, 0, visited)) return true;
+  }
+}
+
+// Better: use Set that persists across starts
+const visited = new Set();
+for (let i = 0; i < rows; i++) {
+  for (let j = 0; j < cols; j++) {
+    visited.clear();
+    if (backtrack(i, j, 0)) return true;
+  }
+}
+```
+
+❌ **Checking index equality at wrong place:**
+```javascript
+// Wrong: checks before confirming letter match
+if (index === word.length) return true;
+if (board[row][col] !== word[index]) return false;
+
+// Correct: check letter match after bounds
+if (board[row][col] !== word[index]) return false;
+if (index === word.length - 1) return true;
+
+// Better: increment index and check at start
+if (index + 1 === word.length) return true;
+```
+
+## Interview Tips
+
+**What to mention:**
+
+1. **Problem understanding:**
+   - Find word in 2D grid
+   - Can move only horizontally/vertically
+   - Cannot reuse cells in same path
+
+2. **Algorithm explanation:**
+   - DFS from each starting position
+   - Backtracking to explore all paths
+   - Pruning with visited tracking
+
+3. **Key optimizations:**
+   - Early termination when word is found
+   - Bounds checking before letter check
+   - Proper state management (mark/unmark)
+
+4. **Complexity:**
+   - Time: O(m × n × 4^L) - worst case explores all paths
+   - Space: O(m × n) for visited or O(L) with in-place modification
+
+**Follow-up questions:**
+
+**Q: What if you need to find all occurrences?**
+A: Collect all paths instead of returning early.
+
+**Q: How would you handle larger grids?**
+A: Add early termination when letter not in grid, use Set for visited.
+
+**Q: What if word contains repeated characters?**
+A: Algorithm still works, handled by visited tracking.
+
+## Edge Cases
+
+```javascript
+// Single cell
+board = [["A"]], word = "A" → true
+
+// Word longer than grid
+board = [["A"]], word = "AB" → false
+
+// Word not in grid
+board = [["A", "B"]], word = "CD" → false
+
+// Reuse prevention
+board = [["A", "B"], ["C", "D"]], word = "AA" → false
+
+// Adjacent path
+board = [["A", "A"]], word = "AA" → true
+```
+
+## Related Problems
+
+- **Word Search II** (Hard) - Find all words in grid with Trie
+- **Surrounded Regions** (Medium) - Similar grid traversal
+- **Number of Islands** (Medium) - DFS on grid
+- **Path Sum** (Easy) - Tree path search

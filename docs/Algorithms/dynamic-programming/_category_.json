@@ -1,0 +1,9 @@
+{
+  "label": "Dynamic Programming",
+  "position": 9,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "description": "Master optimization problems through memoization and tabulation."
+  }
+}

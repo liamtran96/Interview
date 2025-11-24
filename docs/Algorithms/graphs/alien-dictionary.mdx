@@ -1,0 +1,490 @@
+---
+sidebar_position: 9
+difficulty: Hard
+tags: [graphs, topological-sort, dfs, amazon, google, facebook]
+leetcode_url: https://leetcode.com/problems/alien-dictionary/
+companies: [Amazon, Google, Facebook, Microsoft, Apple]
+pattern: "Graphs"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Alien Dictionary
+
+<AlgorithmProblem
+  title="Alien Dictionary"
+  difficulty="Hard"
+  description={`
+<p>There is a new alien language that uses the English alphabet. However, the order among the letters is unknown to you.</p>
+<p>You are given a list of strings <code>words</code> from the alien language's dictionary. Now you are given another list of words from the same alien language as <code>queries</code>, you need to sort them in <strong>the alien dictionary order</strong>.</p>
+<p><strong>Note:</strong> You may assume all characters in the words are lower-case English letters, and the length of the words are at most 30. The dictionary has at most 26 different letters.</p>
+<h4>Key Insight:</h4>
+<p>Build a graph by comparing adjacent words, then do a topological sort to determine the order.</p>
+<ul>
+  <li>Compare two adjacent words to determine character order</li>
+  <li>The first differing character tells us the ordering</li>
+  <li>Use DFS or Kahn's algorithm to find topological order</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'words = ["wrt","wrf","er","ett","rftt"], queries = [["e","t"],["e","r"],["r","t"],["wrt","wrf"],["wrt","er"]]',
+      output: '[false,false,true,false,false]',
+      explanation: 'From the given words, we can deduce the following alien order: "wertf".'
+    },
+    {
+      input: 'words = ["z","x"], queries = [["z","x"],["x","z"]]',
+      output: '[true,false]',
+      explanation: 'From the given words, we can deduce that z comes before x, so "z" < "x".'
+    },
+    {
+      input: 'words = ["z","x","z"], queries = [["z","x"]]',
+      output: '[false]',
+      explanation: 'This order is invalid, so the answer to all queries is false.'
+    }
+  ]}
+  starterCode={`function alienOrder(words, queries) {
+  // Write your code here
+  return [];
+}`}
+  solution={`function alienOrder(words, queries) {
+  // Build graph of character dependencies via topological sort
+  // Time: O(L + U + Q) where L = length of all words, U = 26 letters, Q = queries
+  // Space: O(1) since at most 26 letters
+
+  // Step 1: Build graph from words
+  const graph = new Map();
+  const inDegree = new Map();
+
+  // Initialize all characters
+  for (const word of words) {
+    for (const char of word) {
+      if (!graph.has(char)) {
+        graph.set(char, []);
+        inDegree.set(char, 0);
+      }
+    }
+  }
+
+  // Step 2: Build edges by comparing adjacent words
+  for (let i = 0; i < words.length - 1; i++) {
+    const word1 = words[i];
+    const word2 = words[i + 1];
+    const minLen = Math.min(word1.length, word2.length);
+
+    // Find first differing character
+    let foundDiff = false;
+    for (let j = 0; j < minLen; j++) {
+      if (word1[j] !== word2[j]) {
+        const from = word1[j];
+        const to = word2[j];
+
+        // Add edge from → to
+        if (!graph.get(from).includes(to)) {
+          graph.get(from).push(to);
+          inDegree.set(to, inDegree.get(to) + 1);
+        }
+
+        foundDiff = true;
+        break;
+      }
+    }
+
+    // Invalid case: word1 is longer and word2 is its prefix
+    if (!foundDiff && word1.length > word2.length) {
+      return Array(queries.length).fill(false);  // Invalid ordering
+    }
+  }
+
+  // Step 3: Topological sort using Kahn's algorithm
+  const queue = [];
+  for (const [char, degree] of inDegree) {
+    if (degree === 0) {
+      queue.push(char);
+    }
+  }
+
+  const order = [];
+  while (queue.length > 0) {
+    const char = queue.shift();
+    order.push(char);
+
+    for (const neighbor of graph.get(char)) {
+      inDegree.set(neighbor, inDegree.get(neighbor) - 1);
+      if (inDegree.get(neighbor) === 0) {
+        queue.push(neighbor);
+      }
+    }
+  }
+
+  // Check for cycle
+  if (order.length !== inDegree.size) {
+    return Array(queries.length).fill(false);  // Cycle detected
+  }
+
+  // Step 4: Create ranking map
+  const ranking = new Map();
+  for (let i = 0; i < order.length; i++) {
+    ranking.set(order[i], i);
+  }
+
+  // Step 5: Answer queries
+  const result = [];
+  for (const [char1, char2] of queries) {
+    const rank1 = ranking.get(char1);
+    const rank2 = ranking.get(char2);
+    result.push(rank1 < rank2);
+  }
+
+  return result;
+}`}
+  testCases={[
+    {
+      input: [["wrt","wrf","er","ett","rftt"], [["e","t"],["e","r"],["r","t"],["wrt","wrf"],["wrt","er"]]],
+      expected: [false, false, true, false, false],
+      description: 'Build order from differences: wertf'
+    },
+    {
+      input: [["z","x"], [["z","x"],["x","z"]]],
+      expected: [true, false],
+      description: 'z comes before x'
+    },
+    {
+      input: [["z","x","z"], [["z","x"]]],
+      expected: [false],
+      description: 'Invalid ordering (cycle or contradiction)'
+    },
+    {
+      input: [["abc","ab"], [["a","b"]]],
+      expected: [false],
+      description: 'Invalid: abc before ab (longer word before prefix)'
+    },
+    {
+      input: [["a","b","a"], [["a","b"]]],
+      expected: [false],
+      description: 'Invalid: contradiction in ordering'
+    },
+    {
+      input: [["a"], [["a","a"]]],
+      expected: [false],
+      description: 'Single word, same character query'
+    }
+  ]}
+  functionName="alienOrder"
+/>
+
+## Solution Explanation
+
+### Approach 1: Topological Sort with Kahn's Algorithm ✅
+
+**Time Complexity:** O(L + U + Q) where L = total characters, U = 26, Q = queries
+**Space Complexity:** O(1) since at most 26 different characters
+
+Build a dependency graph from word ordering, then perform topological sort:
+
+```javascript
+function alienOrder(words, queries) {
+  // Initialize graph with all characters
+  const graph = new Map();
+  const inDegree = new Map();
+
+  for (const word of words) {
+    for (const char of word) {
+      if (!graph.has(char)) {
+        graph.set(char, []);
+        inDegree.set(char, 0);
+      }
+    }
+  }
+
+  // Build edges by comparing adjacent words
+  for (let i = 0; i < words.length - 1; i++) {
+    const word1 = words[i];
+    const word2 = words[i + 1];
+    const minLen = Math.min(word1.length, word2.length);
+
+    let foundDiff = false;
+    for (let j = 0; j < minLen; j++) {
+      if (word1[j] !== word2[j]) {
+        const from = word1[j];
+        const to = word2[j];
+
+        // Add edge: from comes before to
+        if (!graph.get(from).includes(to)) {
+          graph.get(from).push(to);
+          inDegree.set(to, inDegree.get(to) + 1);
+        }
+
+        foundDiff = true;
+        break;
+      }
+    }
+
+    // Invalid: longer word before its prefix
+    if (!foundDiff && word1.length > word2.length) {
+      return Array(queries.length).fill(false);
+    }
+  }
+
+  // Topological sort
+  const queue = [];
+  for (const [char, degree] of inDegree) {
+    if (degree === 0) queue.push(char);
+  }
+
+  const order = [];
+  while (queue.length > 0) {
+    const char = queue.shift();
+    order.push(char);
+
+    for (const neighbor of graph.get(char)) {
+      inDegree.set(neighbor, inDegree.get(neighbor) - 1);
+      if (inDegree.get(neighbor) === 0) {
+        queue.push(neighbor);
+      }
+    }
+  }
+
+  // Check for cycle
+  if (order.length !== inDegree.size) {
+    return Array(queries.length).fill(false);
+  }
+
+  // Create ranking
+  const ranking = new Map();
+  for (let i = 0; i < order.length; i++) {
+    ranking.set(order[i], i);
+  }
+
+  // Answer queries
+  const result = [];
+  for (const [char1, char2] of queries) {
+    const rank1 = ranking.get(char1);
+    const rank2 = ranking.get(char2);
+    result.push(rank1 < rank2);
+  }
+
+  return result;
+}
+```
+
+**How it works:**
+
+```
+words = ["wrt","wrf","er","ett","rftt"]
+
+Step 1: Compare adjacent words
+  "wrt" vs "wrf": First diff at [2]: 't' < 'f' → edge t→f
+  "wrf" vs "er": First diff at [0]: 'w' < 'e' → edge w→e
+  "er" vs "ett": First diff at [1]: 'r' < 't' → edge r→t
+  "ett" vs "rftt": First diff at [0]: 'e' < 'r' → edge e→r
+
+Step 2: Build graph
+  w → [e]
+  e → [r]
+  r → [t]
+  t → [f]
+  f → []
+
+In-degrees:
+  w: 0, e: 1, r: 1, t: 1, f: 1
+
+Step 3: Topological sort
+  queue = [w]
+  Process w: add e, queue = [e]
+  Process e: add r, queue = [r]
+  Process r: add t, queue = [t]
+  Process t: add f, queue = [f]
+  Process f: queue = []
+  order = [w, e, r, t, f]
+
+Step 4: Create ranking
+  w→0, e→1, r→2, t→3, f→4
+
+Step 5: Answer queries
+  ["e","t"]: 1 < 3? false ✓
+  ["r","t"]: 2 < 3? true ✓
+```
+
+### Approach 2: DFS-based Topological Sort
+
+**Time Complexity:** O(L + U + Q)
+**Space Complexity:** O(1)
+
+```javascript
+function alienOrder(words, queries) {
+  const graph = new Map();
+
+  // Initialize
+  for (const word of words) {
+    for (const char of word) {
+      if (!graph.has(char)) {
+        graph.set(char, []);
+      }
+    }
+  }
+
+  // Build edges
+  for (let i = 0; i < words.length - 1; i++) {
+    const word1 = words[i];
+    const word2 = words[i + 1];
+    const minLen = Math.min(word1.length, word2.length);
+
+    let foundDiff = false;
+    for (let j = 0; j < minLen; j++) {
+      if (word1[j] !== word2[j]) {
+        graph.get(word1[j]).push(word2[j]);
+        foundDiff = true;
+        break;
+      }
+    }
+
+    if (!foundDiff && word1.length > word2.length) {
+      return Array(queries.length).fill(false);
+    }
+  }
+
+  // DFS-based topological sort
+  const visited = new Set();
+  const rec = new Set();  // Recursion stack for cycle detection
+  const order = [];
+
+  function hasCycle(char) {
+    if (rec.has(char)) return true;  // Cycle!
+    if (visited.has(char)) return false;  // Already processed
+
+    visited.add(char);
+    rec.add(char);
+
+    for (const neighbor of graph.get(char)) {
+      if (hasCycle(neighbor)) {
+        return true;
+      }
+    }
+
+    rec.delete(char);
+    order.push(char);
+    return false;
+  }
+
+  // Check all characters for cycles
+  for (const char of graph.keys()) {
+    if (!visited.has(char) && hasCycle(char)) {
+      return Array(queries.length).fill(false);
+    }
+  }
+
+  // Reverse order (DFS adds in reverse topological order)
+  order.reverse();
+
+  // Create ranking and answer queries
+  const ranking = new Map();
+  for (let i = 0; i < order.length; i++) {
+    ranking.set(order[i], i);
+  }
+
+  const result = [];
+  for (const [char1, char2] of queries) {
+    const rank1 = ranking.get(char1);
+    const rank2 = ranking.get(char2);
+    result.push(rank1 < rank2);
+  }
+
+  return result;
+}
+```
+
+### Key Concepts
+
+1. **Topological Sort**: Order vertices such that for every edge u→v, u comes before v
+2. **Cycle Detection**: Invalid if ordering creates contradictions (cycles)
+3. **Graph Building**: Compare adjacent words to infer character ordering
+4. **Invalid Cases**:
+   - Longer word before shorter word that is a prefix
+   - Contradictory orderings (cycles)
+
+## Common Mistakes
+
+❌ Not checking if longer word comes before shorter prefix:
+```javascript
+// Wrong - misses invalid ordering
+for (let i = 0; i < words.length - 1; i++) {
+  // Missing check: word1.length > word2.length
+}
+```
+
+❌ Not detecting cycles:
+```javascript
+// Wrong - returns answer even with contradictions
+if (order.length !== inDegree.size) {
+  // Should return all false due to invalid ordering
+}
+```
+
+❌ Duplicate edges:
+```javascript
+// Wrong - adds same edge multiple times
+graph.get(from).push(to);  // No duplicate check
+inDegree.set(to, inDegree.get(to) + 1);  // Counts edge twice!
+```
+
+✅ Correct approach:
+```javascript
+// 1. Check for invalid ordering (longer before prefix)
+if (!foundDiff && word1.length > word2.length) {
+  return Array(queries.length).fill(false);
+}
+
+// 2. Avoid duplicate edges
+if (!graph.get(from).includes(to)) {
+  graph.get(from).push(to);
+  inDegree.set(to, inDegree.get(to) + 1);
+}
+
+// 3. Detect cycles
+if (order.length !== inDegree.size) {
+  return Array(queries.length).fill(false);
+}
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Recognize: "This is a topological sort problem"
+2. Key step: "Compare adjacent words to infer character ordering"
+3. Challenge: "Handle invalid orderings (longer before shorter)"
+4. Approach: "Build graph, then topological sort"
+5. Complexity: "O(L + U + Q) where L=total chars, U=26 letters, Q=queries"
+
+**Key talking points:**
+- "Adjacent word comparison reveals exactly one character ordering"
+- "Topological sort gives a valid ordering respecting all constraints"
+- "Must check for cycles (contradictions in ordering)"
+- "Longer word before its prefix makes ordering impossible"
+
+**Why compare adjacent words:**
+```
+words = ["baa", "abab", "bab", "ba", "aaab", "abaa", "baaa"]
+
+We can ONLY determine order from adjacent words:
+- "baa" vs "abab": 'b' < 'a' (first position differs)
+- "abab" vs "bab": 'a' < 'b'
+- "bab" vs "ba": invalid! "bab" is longer but comes before "ba"
+```
+
+**What if interviewer asks:**
+- **"How to handle cycles?"** - Return all false (invalid ordering)
+- **"What if no difference found?"** - Check which word is longer
+- **"Time complexity?"** - O(L + U + Q) not O(L²)
+- **"Why Kahn's vs DFS?"** - Both work, Kahn's slightly simpler
+
+**Related LeetCode Problems:**
+- Course Schedule (topological sort)
+- Course Schedule II
+- Longest Increasing Path in Matrix
+- Find the Order of Tasks
+
+**Follow-up variations:**
+- Return the alien dictionary order (not just answer queries)
+- Multiple valid orders possible
+- Handle weighted edges (strength of ordering)

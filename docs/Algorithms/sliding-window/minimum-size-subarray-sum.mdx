@@ -1,0 +1,280 @@
+---
+sidebar_position: 3
+difficulty: Easy
+tags: [arrays, sliding-window, two-pointers, amazon, facebook]
+leetcode_url: https://leetcode.com/problems/minimum-size-subarray-sum/
+companies: [Amazon, Facebook, Microsoft, Google]
+pattern: "Sliding Window"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Minimum Size Subarray Sum
+
+<AlgorithmProblem
+  title="Minimum Size Subarray Sum"
+  difficulty="Easy"
+  difficulty_note="Listed as Medium on LeetCode, but Easy for sliding window pattern"
+  description={`
+<p>Given an array of positive integers <code>nums</code> and a positive integer <code>target</code>, return <em>the <strong>minimal length</strong> of a subarray whose sum is <strong>greater than or equal to</strong></em> <code>target</code>. If there is no such subarray, return <code>0</code> instead.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &lt;= target &lt;= 10<sup>9</sup></li>
+  <li>1 &lt;= nums.length &lt;= 10<sup>5</sup></li>
+  <li>1 &lt;= nums[i] &lt;= 10<sup>4</sup></li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'target = 7, nums = [2,3,1,2,4,3]',
+      output: '2',
+      explanation: 'The subarray [4,3] has the minimal length under the problem constraint.'
+    },
+    {
+      input: 'target = 4, nums = [1,4,4]',
+      output: '1',
+      explanation: 'The subarray [4] has the minimal length under the problem constraint.'
+    },
+    {
+      input: 'target = 11, nums = [1,1,1,1,1,1,1,1]',
+      output: '0',
+      explanation: 'No subarray sum is >= 11'
+    }
+  ]}
+  starterCode={`function minSubArrayLen(target, nums) {
+  // Write your code here
+
+}`}
+  solution={`function minSubArrayLen(target, nums) {
+  // Variable-size sliding window: O(n) time, O(1) space
+  let left = 0;
+  let windowSum = 0;
+  let minLength = Infinity;
+
+  for (let right = 0; right < nums.length; right++) {
+    // Expand window: add right element
+    windowSum += nums[right];
+
+    // Shrink window: while sum >= target
+    while (windowSum >= target) {
+      minLength = Math.min(minLength, right - left + 1);
+      windowSum -= nums[left];
+      left++;
+    }
+  }
+
+  return minLength === Infinity ? 0 : minLength;
+}`}
+  testCases={[
+    {
+      input: [7, [2, 3, 1, 2, 4, 3]],
+      expected: 2,
+      description: 'Standard case: target=7, nums=[2,3,1,2,4,3]'
+    },
+    {
+      input: [4, [1, 4, 4]],
+      expected: 1,
+      description: 'Single element sufficient: target=4, nums=[1,4,4]'
+    },
+    {
+      input: [11, [1, 1, 1, 1, 1, 1, 1, 1]],
+      expected: 0,
+      description: 'Impossible target: target=11, nums=[1,1,1,1,1,1,1,1]'
+    },
+    {
+      input: [15, [1, 2, 3, 4, 5]],
+      expected: 5,
+      description: 'Full array needed: target=15, nums=[1,2,3,4,5]'
+    },
+    {
+      input: [3, [1, 1, 1, 1, 7]],
+      expected: 1,
+      description: 'Large element at end: target=3, nums=[1,1,1,1,7]'
+    },
+    {
+      input: [213, [12, 28, 83, 4, 25, 26, 25, 2, 25, 25, 25, 12]],
+      expected: 8,
+      description: 'Complex case: target=213'
+    }
+  ]}
+  functionName="minSubArrayLen"
+/>
+
+## Solution Explanation
+
+### Approach 1: Brute Force (Not Recommended)
+
+**Time Complexity:** O(n²)
+**Space Complexity:** O(1)
+
+Check every possible subarray:
+
+```javascript
+function minSubArrayLen(target, nums) {
+  let minLength = Infinity;
+
+  for (let i = 0; i < nums.length; i++) {
+    let sum = 0;
+    for (let j = i; j < nums.length; j++) {
+      sum += nums[j];
+      if (sum >= target) {
+        minLength = Math.min(minLength, j - i + 1);
+        break; // No need to expand further
+      }
+    }
+  }
+
+  return minLength === Infinity ? 0 : minLength;
+}
+```
+
+**Why not use this?**
+- Nested loops create O(n²) complexity
+- Recalculates sums for overlapping subarrays
+- Inefficient for large inputs
+
+### Approach 2: Variable-Size Sliding Window (Optimal) ✅
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1)
+
+Use two pointers to create a dynamic window:
+
+```javascript
+function minSubArrayLen(target, nums) {
+  let left = 0;
+  let windowSum = 0;
+  let minLength = Infinity;
+
+  // Right pointer expands the window
+  for (let right = 0; right < nums.length; right++) {
+    // Add right element to window
+    windowSum += nums[right];
+
+    // Shrink window from left while sum >= target
+    while (windowSum >= target) {
+      // Update minimum length
+      minLength = Math.min(minLength, right - left + 1);
+
+      // Remove left element and shrink
+      windowSum -= nums[left];
+      left++;
+    }
+  }
+
+  return minLength === Infinity ? 0 : minLength;
+}
+```
+
+**How the Variable-Size Window works:**
+
+```
+nums = [2, 3, 1, 2, 4, 3], target = 7
+
+right=0: [2], sum=2 < 7
+right=1: [2,3], sum=5 < 7
+right=2: [2,3,1], sum=6 < 7
+right=3: [2,3,1,2], sum=8 >= 7 ✅
+  minLength = 4
+  Shrink: [3,1,2], sum=6 < 7 (stop shrinking)
+
+right=4: [3,1,2,4], sum=10 >= 7 ✅
+  minLength = 4
+  Shrink: [1,2,4], sum=7 >= 7 ✅
+    minLength = 3
+    Shrink: [2,4], sum=6 < 7 (stop)
+
+right=5: [2,4,3], sum=9 >= 7 ✅
+  minLength = 3
+  Shrink: [4,3], sum=7 >= 7 ✅
+    minLength = 2 ✅ (answer!)
+    Shrink: [3], sum=3 < 7 (stop)
+
+Result: 2
+```
+
+### Key Sliding Window Technique
+
+This demonstrates a **variable-size sliding window**:
+
+1. **Expand**: Right pointer always moves forward
+2. **Shrink**: Left pointer moves forward when condition met
+3. **Update**: Track minimum when window is valid
+4. **Optimize**: Each element added once, removed once → O(n)
+
+**Difference from fixed-size window:**
+- Fixed size: Both pointers move together
+- Variable size: Pointers move independently based on condition
+
+### Key Insights
+
+1. **Greedy shrinking**: Always try to minimize window when valid
+2. **Two-pointer technique**: Left and right move independently
+3. **Amortized O(n)**: Each element visited at most twice (once by right, once by left)
+4. **Minimum tracking**: Update result while shrinking, not expanding
+
+## Common Mistakes
+
+❌ Not shrinking the window enough:
+```javascript
+// Wrong - only shrinks once
+if (windowSum >= target) {
+  minLength = Math.min(minLength, right - left + 1);
+  windowSum -= nums[left];
+  left++;
+}
+```
+
+❌ Updating result at wrong time:
+```javascript
+// Wrong - updates while expanding
+windowSum += nums[right];
+minLength = Math.min(minLength, right - left + 1);
+```
+
+❌ Wrong loop condition:
+```javascript
+// Wrong - inner for loop instead of while
+for (let i = left; i <= right && windowSum >= target; i++) {
+  // This doesn't shrink optimally
+}
+```
+
+✅ Correct approach - shrink greedily with while loop:
+```javascript
+for (let right = 0; right < nums.length; right++) {
+  windowSum += nums[right];
+
+  // Shrink as much as possible while valid
+  while (windowSum >= target) {
+    minLength = Math.min(minLength, right - left + 1);
+    windowSum -= nums[left];
+    left++;
+  }
+}
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Recognize it's a **variable-size sliding window** problem
+2. Key insight: "We need to shrink the window as much as possible when valid"
+3. Explain why while loop: "We might be able to shrink multiple times"
+4. Walk through the expansion and shrinking phases
+5. Emphasize the O(n) time complexity despite nested loops
+
+**Key talking points:**
+- "This uses a variable-size sliding window with two pointers"
+- "The right pointer expands, and left pointer shrinks when we meet the target"
+- "Even though there's a while loop inside the for loop, it's still O(n)"
+- "Each element is added once and removed once, so amortized O(n) time"
+
+**Complexity analysis:**
+- Time: O(n) - each element processed at most twice
+- Space: O(1) - only using pointers and variables
+
+**Follow-up questions you might get:**
+- **What if array has negative numbers?** This approach won't work - need different algorithm
+- **Can we do better than O(n)?** No, must examine each element at least once
+- **What if we need maximum length instead?** Similar approach, different condition
+- **Binary search approach?** Possible if array is sorted (O(n log n) with prefix sums)

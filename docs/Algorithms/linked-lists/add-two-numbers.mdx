@@ -1,0 +1,420 @@
+---
+sidebar_position: 6
+difficulty: Medium
+tags: [linked-lists, math, addition, amazon, google]
+leetcode_url: https://leetcode.com/problems/add-two-numbers/
+companies: [Amazon, Google, Microsoft, Meta, Bloomberg]
+pattern: "Linked Lists"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Add Two Numbers
+
+<AlgorithmProblem
+  title="Add Two Numbers"
+  difficulty="Medium"
+  description={`
+<p>You are given two <strong>non-empty</strong> linked lists representing two non-negative integers. The digits are stored in <strong>reverse order</strong>, and each of their nodes contains a <strong>single digit</strong>. Add the two numbers and return the sum as a linked list.</p>
+<p>You may assume the two numbers do not contain any leading zero, except the number 0 itself.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>The number of nodes in each linked list is in the range [1, 100]</li>
+  <li>0 ≤ node.val ≤ 9</li>
+  <li>It is guaranteed that the list represents a number that does not have leading zeros</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'l1 = [2,4,3], l2 = [5,6,4]',
+      output: '[7,0,8]',
+      explanation: '342 + 465 = 807, reversed as [7,0,8]'
+    },
+    {
+      input: 'l1 = [0], l2 = [0]',
+      output: '[0]',
+      explanation: '0 + 0 = 0'
+    },
+    {
+      input: 'l1 = [9,9,9,9,9,9,9], l2 = [9,9,9,9]',
+      output: '[8,9,9,9,0,0,0,1]',
+      explanation: 'Handles carry and different lengths'
+    }
+  ]}
+  starterCode={`class ListNode {
+  constructor(val = 0, next = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+function addTwoNumbers(l1, l2) {
+  // TODO: Add two numbers in linked lists
+  return null;
+}`}
+  solution={`class ListNode {
+  constructor(val = 0, next = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+function addTwoNumbers(l1, l2) {
+  // Create dummy node to simplify
+  const dummy = new ListNode(0);
+  let curr = dummy;
+  let carry = 0;
+
+  // Traverse both lists
+  while (l1 !== null || l2 !== null || carry !== 0) {
+    // Get values (0 if node is null)
+    const val1 = l1 !== null ? l1.val : 0;
+    const val2 = l2 !== null ? l2.val : 0;
+
+    // Add and get carry
+    const sum = val1 + val2 + carry;
+    carry = Math.floor(sum / 10);
+    const digit = sum % 10;
+
+    // Create new node
+    curr.next = new ListNode(digit);
+    curr = curr.next;
+
+    // Advance pointers
+    l1 = l1 !== null ? l1.next : null;
+    l2 = l2 !== null ? l2.next : null;
+  }
+
+  return dummy.next;
+}`}
+  testCases={[
+    {
+      input: [[[2, 4, 3], [5, 6, 4]]],
+      expected: [7, 0, 8],
+      description: 'Basic addition: 342 + 465 = 807'
+    },
+    {
+      input: [[[0], [0]]],
+      expected: [0],
+      description: 'Both numbers are zero'
+    },
+    {
+      input: [[[9, 9, 9, 9, 9, 9, 9], [9, 9, 9, 9]]],
+      expected: [8, 9, 9, 9, 0, 0, 0, 1],
+      description: 'Different lengths with multiple carries'
+    },
+    {
+      input: [[[9, 9, 9], [1]]],
+      expected: [0, 0, 0, 1],
+      description: 'Carry propagates: 999 + 1 = 1000'
+    },
+    {
+      input: [[[5], [5]]],
+      expected: [0, 1],
+      description: 'Simple addition with carry: 5 + 5 = 10'
+    },
+    {
+      input: [[[2, 4, 3, 2], [5, 6, 4]]],
+      expected: [7, 0, 8, 2],
+      description: 'First list longer'
+    }
+  ]}
+  functionName="addTwoNumbers"
+/>
+
+## Solution Explanation
+
+### Approach 1: Single Pass with Carry (Optimal) ✅
+
+**Time Complexity:** O(max(m, n)) where m, n are lengths of lists
+**Space Complexity:** O(max(m, n)) - for output list
+
+Simulate elementary addition: traverse both lists simultaneously, keeping track of carry:
+
+```javascript
+function addTwoNumbers(l1, l2) {
+  const dummy = new ListNode(0);
+  let curr = dummy;
+  let carry = 0;
+
+  // Continue while either list has nodes or there's a carry
+  while (l1 !== null || l2 !== null || carry !== 0) {
+    // Get digit from each list (0 if null)
+    const val1 = l1 !== null ? l1.val : 0;
+    const val2 = l2 !== null ? l2.val : 0;
+
+    // Calculate sum and carry
+    const sum = val1 + val2 + carry;
+    carry = Math.floor(sum / 10);
+    const digit = sum % 10;
+
+    // Create new node with digit
+    curr.next = new ListNode(digit);
+    curr = curr.next;
+
+    // Advance pointers (or null if at end)
+    l1 = l1 !== null ? l1.next : null;
+    l2 = l2 !== null ? l2.next : null;
+  }
+
+  return dummy.next;
+}
+```
+
+**How it works:**
+
+```
+l1:    2 → 4 → 3
+l2:    5 → 6 → 4
+      (342) (465)
+
+Step 1: 2 + 5 = 7, carry = 0
+  result: 7
+  l1 → 4, l2 → 6
+
+Step 2: 4 + 6 + 0 = 10, carry = 1, digit = 0
+  result: 7 → 0
+  l1 → 3, l2 → 4
+
+Step 3: 3 + 4 + 1 = 8, carry = 0, digit = 8
+  result: 7 → 0 → 8
+  l1 = null, l2 = null, carry = 0
+
+Final: [7, 0, 8] (which represents 807 reversed)
+```
+
+**Key insights:**
+1. Use `dummy` node to simplify
+2. Continue while ANY condition is true (l1, l2, or carry)
+3. Treat null as 0 for simpler logic
+4. Handle carry at each step
+
+### Approach 2: Recursive
+
+**Time Complexity:** O(max(m, n))
+**Space Complexity:** O(max(m, n)) - recursion stack
+
+Recursively add digits and return result:
+
+```javascript
+function addTwoNumbers(l1, l2) {
+  const addHelper = (l1, l2, carry) => {
+    // Base case: both null and no carry
+    if (l1 === null && l2 === null && carry === 0) {
+      return null;
+    }
+
+    // Get values and calculate sum
+    const val1 = l1 !== null ? l1.val : 0;
+    const val2 = l2 !== null ? l2.val : 0;
+    const sum = val1 + val2 + carry;
+
+    // Create node and recurse
+    const newNode = new ListNode(sum % 10);
+    newNode.next = addHelper(
+      l1 !== null ? l1.next : null,
+      l2 !== null ? l2.next : null,
+      Math.floor(sum / 10)
+    );
+
+    return newNode;
+  };
+
+  return addHelper(l1, l2, 0);
+}
+```
+
+**Advantage:** Elegant and concise
+**Disadvantage:** Uses call stack space
+
+### Approach 3: Reuse Existing Nodes (Space Optimization)
+
+**Time Complexity:** O(max(m, n))
+**Space Complexity:** O(1) - excluding output
+
+Modify l1's nodes to store results (if modifying input is allowed):
+
+```javascript
+function addTwoNumbers(l1, l2) {
+  let curr1 = l1;
+  let curr2 = l2;
+  let carry = 0;
+
+  // Add into l1's nodes
+  while (curr2 !== null || carry !== 0) {
+    const val2 = curr2 !== null ? curr2.val : 0;
+    const sum = curr1.val + val2 + carry;
+    curr1.val = sum % 10;
+    carry = Math.floor(sum / 10);
+
+    // If curr1 at end but more to do, create new node
+    if (curr1.next === null && (curr2.next !== null || carry !== 0)) {
+      curr1.next = new ListNode(0);
+    }
+
+    curr1 = curr1.next;
+    curr2 = curr2 !== null ? curr2.next : null;
+  }
+
+  return l1;
+}
+```
+
+**Advantage:** O(1) space (doesn't count output)
+**Disadvantage:** Modifies input list
+
+## Comparison of Approaches
+
+| Approach | Time | Space | Simplicity | Best For |
+|----------|------|-------|-----------|----------|
+| Iterative | O(max(m,n)) | O(max(m,n)) | Medium | **Recommended** |
+| Recursive | O(max(m,n)) | O(max(m,n)) | Medium | Follow-up |
+| Reuse input | O(max(m,n)) | O(1) | Complex | Space-constrained |
+
+## Common Mistakes
+
+❌ **Not handling different length lists:**
+```javascript
+while (l1 !== null && l2 !== null) {  // ERROR: stops early!
+  const sum = l1.val + l2.val + carry;
+  // What about remaining nodes?
+}
+```
+
+✅ **Check all three conditions:**
+```javascript
+while (l1 !== null || l2 !== null || carry !== 0) {
+  const val1 = l1 !== null ? l1.val : 0;
+  const val2 = l2 !== null ? l2.val : 0;
+  const sum = val1 + val2 + carry;
+}
+```
+
+---
+
+❌ **Forgetting to handle final carry:**
+```javascript
+while (l1 !== null || l2 !== null) {
+  // ...
+}
+// If carry is 1, it's lost!
+if (carry === 1) {
+  curr.next = new ListNode(1);
+}
+```
+
+✅ **Include carry in loop condition:**
+```javascript
+while (l1 !== null || l2 !== null || carry !== 0) {
+  // Handles final carry automatically
+}
+```
+
+---
+
+❌ **Incorrect carry calculation:**
+```javascript
+carry = sum > 9 ? 1 : 0;  // Works but not scalable
+digit = sum - (carry * 10);  // Confusing
+```
+
+✅ **Use modulo and division:**
+```javascript
+carry = Math.floor(sum / 10);  // Clear and correct
+digit = sum % 10;  // Clean
+```
+
+---
+
+❌ **Comparing node values for different lists:**
+```javascript
+if (l1.val + l2.val > 18) {
+  // This assumes max single digit + digit is 18
+  // But carry adds another dimension
+}
+```
+
+✅ **Always use sum directly:**
+```javascript
+const sum = val1 + val2 + carry;  // Sum is max 9 + 9 + 1 = 19
+```
+
+## Interview Tips
+
+**What to mention:**
+1. **Reversed order:** Numbers are stored backwards (units first)
+2. **Dummy node:** Simplifies code, no special case for head
+3. **Carry logic:** Standard addition algorithm
+4. **Different lengths:** Handle gracefully with null checks
+
+**Follow-up questions:**
+
+**Q: What if numbers are stored in forward order?**
+A: More complex - need to reverse, add, and reverse result (or use recursion).
+
+**Q: What if you can't create new nodes?**
+A: Reuse l1's nodes (shown in Approach 3).
+
+**Q: Can you solve this recursively?**
+A: Yes, but uses O(m + n) space for call stack.
+
+**Q: What's the maximum sum possible?**
+A: 9 + 9 + carry(1) = 19, fits in single digit + carry.
+
+**Q: What if lists are not guaranteed non-negative?**
+A: Use two's complement or other methods for negative numbers.
+
+## Edge Cases
+
+```javascript
+// Both single digit
+[2] + [5] = [7]
+
+// Carry at end
+[9] + [1] = [0, 1]
+
+// All nines
+[9, 9, 9] + [1] = [0, 0, 0, 1]
+
+// Different lengths
+[2, 4, 3] + [5, 6, 4, 7] = [7, 0, 8, 7]
+
+// Zeros
+[0] + [0] = [0]
+
+// Large numbers
+[9,9,9,9,9,9,9] + [9,9,9,9] = [8,9,9,9,0,0,0,1]
+```
+
+## Visualization
+
+```
+Think of it as elementary school addition:
+
+    342        reversed input: 2 → 4 → 3
+  + 465                       5 → 6 → 4
+  -----
+
+    2+5=7      position 0:  7
+    4+6=10     position 1:  0, carry 1
+    3+4+1=8    position 2:  8
+
+Output (reversed): 7 → 0 → 8
+
+Represents: 807
+```
+
+## Key Takeaway
+
+This problem elegantly simulates elementary addition:
+- Process digit by digit
+- Carry propagates naturally
+- Different lengths handled by treating null as 0
+- Dummy node simplifies edge cases
+
+## Related Problems
+
+- **Add Two Numbers II** (Medium) - Forward order (harder)
+- **Add Two Polynomials** (Medium) - Similar concept
+- **Multiply Two Linked Lists** (Medium) - More complex arithmetic
+- **Reverse Linked List** (Easy) - Useful for the II variant

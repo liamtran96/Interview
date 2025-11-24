@@ -1,0 +1,423 @@
+---
+sidebar_position: 7
+difficulty: Medium
+tags: [linked-lists, two-pointers, deletion, amazon, google]
+leetcode_url: https://leetcode.com/problems/remove-nth-node-from-end-of-list/
+companies: [Amazon, Google, Microsoft, Meta, Apple]
+pattern: "Linked Lists"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Remove Nth Node From End of List
+
+<AlgorithmProblem
+  title="Remove Nth Node From End of List"
+  difficulty="Medium"
+  description={`
+<p>Given the <code>head</code> of a linked list, remove the n<sup>th</sup> node from the end of the list and return the head of the list.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>The number of nodes in the list is <code>sz</code></li>
+  <li>1 ≤ sz ≤ 100</li>
+  <li>1 ≤ n ≤ sz</li>
+  <li>0 ≤ node.val ≤ 100</li>
+</ul>
+<h4>Follow up:</h4>
+<p>Can you do this in one pass?</p>
+`}
+  examples={[
+    {
+      input: 'head = [1,2,3,4,5], n = 2',
+      output: '[1,2,3,5]',
+      explanation: 'Remove the 2nd node from the end (node with value 4)'
+    },
+    {
+      input: 'head = [1], n = 1',
+      output: '[]',
+      explanation: 'Remove the only node'
+    },
+    {
+      input: 'head = [1,2], n = 1',
+      output: '[1]',
+      explanation: 'Remove the last node'
+    }
+  ]}
+  starterCode={`class ListNode {
+  constructor(val = 0, next = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+function removeNthFromEnd(head, n) {
+  // TODO: Remove nth node from end
+  return head;
+}`}
+  solution={`class ListNode {
+  constructor(val = 0, next = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+function removeNthFromEnd(head, n) {
+  // Create dummy to handle removing head
+  const dummy = new ListNode(0);
+  dummy.next = head;
+
+  let first = dummy;
+  let second = dummy;
+
+  // Create n+1 gap between pointers
+  for (let i = 0; i <= n; i++) {
+    first = first.next;
+  }
+
+  // Move both pointers until first reaches end
+  while (first !== null) {
+    first = first.next;
+    second = second.next;
+  }
+
+  // Remove node
+  second.next = second.next.next;
+
+  return dummy.next;
+}`}
+  testCases={[
+    {
+      input: [[1, 2, 3, 4, 5], 2],
+      expected: [1, 2, 3, 5],
+      description: 'Remove middle node from end'
+    },
+    {
+      input: [[1], 1],
+      expected: [],
+      description: 'Remove only node'
+    },
+    {
+      input: [[1, 2], 1],
+      expected: [1],
+      description: 'Remove last node'
+    },
+    {
+      input: [[1, 2], 2],
+      expected: [2],
+      description: 'Remove first node'
+    },
+    {
+      input: [[1, 2, 3], 3],
+      expected: [2, 3],
+      description: 'Remove node at start'
+    },
+    {
+      input: [[1, 2, 3, 4, 5, 6, 7], 4],
+      expected: [1, 2, 3, 5, 6, 7],
+      description: 'Remove from longer list'
+    }
+  ]}
+  functionName="removeNthFromEnd"
+/>
+
+## Solution Explanation
+
+### Approach 1: Two Pointers with Dummy (One Pass) ✅
+
+**Time Complexity:** O(n) - single pass
+**Space Complexity:** O(1) - only two pointers
+
+Use two pointers with n+1 gap. When first reaches end, second is just before the node to remove:
+
+```javascript
+function removeNthFromEnd(head, n) {
+  // Dummy node handles removing the head
+  const dummy = new ListNode(0);
+  dummy.next = head;
+
+  let first = dummy;
+  let second = dummy;
+
+  // Move first pointer n+1 steps ahead
+  for (let i = 0; i <= n; i++) {
+    first = first.next;
+  }
+
+  // Move both until first reaches end
+  while (first !== null) {
+    first = first.next;
+    second = second.next;
+  }
+
+  // Remove the node
+  second.next = second.next.next;
+
+  return dummy.next;
+}
+```
+
+**Why it works:**
+
+```
+List: 1 → 2 → 3 → 4 → 5,  n=2
+
+Step 1: Create n+1 gap (gap = 3)
+  Move first 3 steps:
+  first: dummy → 1 → 2 → 3
+  second: dummy
+
+Step 2: Move both until first is null
+  Iteration 1: first → 4, second → 1
+  Iteration 2: first → 5, second → 2
+  Iteration 3: first → null, second → 3
+
+Step 3: second is BEFORE node to remove
+  second.next.next (4) becomes second.next
+  Result: 1 → 2 → 3 → 5
+
+Node to remove was at position second.next!
+```
+
+**Key insight:** The dummy node allows us to handle removing the head uniformly with other nodes.
+
+### Approach 2: Two Pass
+
+**Time Complexity:** O(n) - two passes through list
+**Space Complexity:** O(1)
+
+First pass: calculate length. Second pass: remove node:
+
+```javascript
+function removeNthFromEnd(head, n) {
+  // First pass: calculate length
+  let length = 0;
+  let curr = head;
+  while (curr !== null) {
+    length++;
+    curr = curr.next;
+  }
+
+  // Handle removing head
+  if (length === n) {
+    return head.next;
+  }
+
+  // Second pass: find node before target
+  let prev = head;
+  for (let i = 0; i < length - n - 1; i++) {
+    prev = prev.next;
+  }
+
+  prev.next = prev.next.next;
+  return head;
+}
+```
+
+**Process:**
+1. Count total nodes
+2. Find position to remove: length - n
+3. Remove node at that position
+
+### Approach 3: Hash Map (Easy but More Space)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(n)
+
+Store all nodes in a map with indices:
+
+```javascript
+function removeNthFromEnd(head, n) {
+  const nodes = new Map();
+  let index = 0;
+  let curr = head;
+
+  // Map all nodes with their indices
+  while (curr !== null) {
+    nodes.set(index, curr);
+    curr = curr.next;
+    index++;
+  }
+
+  const totalLength = index;
+  const removeIndex = totalLength - n;
+
+  // Handle removing head
+  if (removeIndex === 0) {
+    return head.next;
+  }
+
+  // Remove node
+  const prevNode = nodes.get(removeIndex - 1);
+  prevNode.next = prevNode.next.next;
+
+  return head;
+}
+```
+
+## Comparison of Approaches
+
+| Approach | Time | Space | Passes | Best For |
+|----------|------|-------|--------|----------|
+| Two Pointers | O(n) | O(1) | 1 | **Recommended** |
+| Two Pass | O(n) | O(1) | 2 | Simpler logic |
+| Hash Map | O(n) | O(n) | 1 | Easy to code |
+
+## Common Mistakes
+
+❌ **Incorrect gap size:**
+```javascript
+// Gap of n instead of n+1
+for (let i = 0; i < n; i++) {  // ERROR: gap is only n
+  first = first.next;
+}
+// When first reaches end, second is AT the node to remove, not before!
+```
+
+✅ **Gap should be n+1:**
+```javascript
+for (let i = 0; i <= n; i++) {  // Correct: gap is n+1
+  first = first.next;
+}
+// Now second points to node BEFORE removal target
+```
+
+---
+
+❌ **Forgetting dummy node:**
+```javascript
+let first = head;
+let second = head;
+
+// What if we need to remove the head itself?
+// second stays at dummy area, can't remove head properly
+```
+
+✅ **Always use dummy for head removal:**
+```javascript
+const dummy = new ListNode(0);
+dummy.next = head;
+let first = dummy;
+let second = dummy;
+// Now removing head is just: dummy.next = dummy.next.next
+```
+
+---
+
+❌ **Off-by-one in gap creation:**
+```javascript
+// If we create gap of n:
+for (let i = 0; i < n; i++) {
+  first = first.next;  // Only n steps, gap is n not n+1
+}
+```
+
+✅ **Create proper n+1 gap:**
+```javascript
+for (let i = 0; i <= n; i++) {  // n+1 iterations
+  first = first.next;
+}
+```
+
+---
+
+❌ **Not checking if first reaches null:**
+```javascript
+// What if n is 0 or n > length?
+// Accessing first.next when first is null causes error
+```
+
+✅ **Loop handles it correctly:**
+```javascript
+// The loop: while (first !== null)
+// ensures first never goes beyond list
+```
+
+## Interview Tips
+
+**What to mention:**
+1. **Two pointers:** Create n+1 gap for one-pass solution
+2. **Dummy node:** Simplifies removing head case
+3. **Answer follow-up:** This IS the one-pass solution!
+4. **Edge cases:** Removing head, single node, etc.
+
+**Follow-up questions:**
+
+**Q: Can you do this in one pass?**
+A: Yes! This IS the one-pass solution (two pointers technique).
+
+**Q: What if you don't know the list length?**
+A: This approach doesn't need it - perfect!
+
+**Q: What if n is out of bounds?**
+A: Problem guarantees 1 ≤ n ≤ sz, so guaranteed valid.
+
+**Q: Can you do this without dummy node?**
+A: Yes, but need special handling for removing head (shown in two-pass approach).
+
+## Edge Cases
+
+```javascript
+// Remove head
+[1, 2, 3], n=3 → [2, 3]
+
+// Remove only node
+[1], n=1 → []
+
+// Remove last node
+[1, 2, 3], n=1 → [1, 2]
+
+// Single pair, remove second
+[1, 2], n=1 → [1]
+
+// Single pair, remove first
+[1, 2], n=2 → [2]
+
+// Long list
+[1,2,3,4,5,6,7,8,9,10], n=5 → [1,2,3,4,5,7,8,9,10]
+```
+
+## Visualization of Pointer Movement
+
+```
+Initial state (n=2, gap needed = 3):
+dummy → 1 → 2 → 3 → 4 → 5 → null
+first    second
+
+After creating gap:
+dummy → 1 → 2 → 3 → 4 → 5 → null
+               first
+second at dummy
+
+Moving both pointers:
+dummy → 1 → 2 → 3 → 4 → 5 → null
+                    first
+                 second
+
+dummy → 1 → 2 → 3 → 4 → 5 → null
+                         first
+                       second
+
+first reaches null, second is before node to remove (4)
+second.next = second.next.next removes node 4
+```
+
+## Why Dummy Node is Important
+
+Without dummy, special case for removing head:
+```javascript
+if (n === length) return head.next;  // Special case!
+```
+
+With dummy, removing head is just:
+```javascript
+return dummy.next;  // Unified logic!
+```
+
+This is why dummy node is preferred in linked list problems.
+
+## Related Problems
+
+- **Remove Linked List Elements** (Easy) - Remove all nodes with specific value
+- **Remove All Duplicates in Sorted List II** (Medium) - Remove all duplicates
+- **Delete Node in a Linked List** (Medium) - Delete a specific node
+- **Partition List** (Medium) - Rearrange by value

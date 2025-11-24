@@ -1,0 +1,421 @@
+---
+sidebar_position: 10
+difficulty: Hard
+tags: [graphs, union-find, hash-set, amazon, google, facebook]
+leetcode_url: https://leetcode.com/problems/longest-consecutive-elements/
+companies: [Amazon, Google, Facebook, Microsoft, Apple]
+pattern: "Graphs"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Longest Consecutive Sequence
+
+<AlgorithmProblem
+  title="Longest Consecutive Sequence"
+  difficulty="Hard"
+  description={`
+<p>Given an unsorted array of integers <code>nums</code>, return <em>the length of the longest consecutive elements sequence</em>.</p>
+<p>You must write an algorithm that runs in <code>O(n)</code> time.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>0 &lt;= nums.length &lt;= 10<sup>5</sup></li>
+  <li>-10<sup>9</sup> &lt;= nums[i] &lt;= 10<sup>9</sup></li>
+  <li>Must solve in O(n) time complexity</li>
+</ul>
+<h4>Examples:</h4>
+<ul>
+  <li>Input: nums = [100,4,200,1,3,2]<br/>Output: 4<br/>Explanation: The longest consecutive sequence is [1,2,3,4] with length 4.</li>
+  <li>Input: nums = [0,3,7,2,5,8,6,4,1,9]<br/>Output: 10<br/>Explanation: The longest consecutive sequence is [0,1,2,3,4,5,6,7,8,9] with length 10.</li>
+</ul>
+`}
+  examples={[
+    {
+      input: '[100,4,200,1,3,2]',
+      output: '4',
+      explanation: 'The longest consecutive sequence is [1,2,3,4]'
+    },
+    {
+      input: '[0,3,7,2,5,8,6,4,1,9]',
+      output: '10',
+      explanation: 'The entire sequence [0,1,2,3,4,5,6,7,8,9]'
+    },
+    {
+      input: '[]',
+      output: '0',
+      explanation: 'Empty array has no consecutive sequence'
+    }
+  ]}
+  starterCode={`function longestConsecutive(nums) {
+  // Write your code here
+  return 0;
+}`}
+  solution={`function longestConsecutive(nums) {
+  // Hash set approach: O(n) time, O(n) space
+  // Key idea: only start counting from sequence beginnings
+
+  if (nums.length === 0) return 0;
+
+  const numSet = new Set(nums);
+  let maxLen = 0;
+
+  for (const num of numSet) {
+    // Only count if this is the start of a sequence
+    if (!numSet.has(num - 1)) {
+      let currentLen = 1;
+      let currentNum = num;
+
+      // Count consecutive sequence length
+      while (numSet.has(currentNum + 1)) {
+        currentNum++;
+        currentLen++;
+      }
+
+      maxLen = Math.max(maxLen, currentLen);
+    }
+  }
+
+  return maxLen;
+}`}
+  testCases={[
+    {
+      input: [[100,4,200,1,3,2]],
+      expected: 4,
+      description: 'Longest sequence [1,2,3,4]'
+    },
+    {
+      input: [[0,3,7,2,5,8,6,4,1,9]],
+      expected: 10,
+      description: 'Complete sequence [0,1,2,3,4,5,6,7,8,9]'
+    },
+    {
+      input: [[]],
+      expected: 0,
+      description: 'Empty array'
+    },
+    {
+      input: [[1]],
+      expected: 1,
+      description: 'Single element'
+    },
+    {
+      input: [[9,1,4,7,3,2,8,5,6]],
+      expected: 9,
+      description: 'Unsorted consecutive sequence'
+    },
+    {
+      input: [[1,2,0,1]],
+      expected: 3,
+      description: 'Duplicates ignored: [0,1,2]'
+    }
+  ]}
+  functionName="longestConsecutive"
+/>
+
+## Solution Explanation
+
+### Approach 1: Smart Hash Set Traversal ✅
+
+**Time Complexity:** O(n) - each element visited at most twice
+**Space Complexity:** O(n) for set storage
+
+The key insight is to only start counting from the **beginning** of sequences:
+
+```javascript
+function longestConsecutive(nums) {
+  if (nums.length === 0) return 0;
+
+  const numSet = new Set(nums);
+  let maxLen = 0;
+
+  for (const num of numSet) {
+    // Only start counting from sequence starts (num-1 doesn't exist)
+    if (!numSet.has(num - 1)) {
+      let currentLen = 1;
+      let currentNum = num;
+
+      // Count consecutive sequence
+      while (numSet.has(currentNum + 1)) {
+        currentNum++;
+        currentLen++;
+      }
+
+      maxLen = Math.max(maxLen, currentLen);
+    }
+  }
+
+  return maxLen;
+}
+```
+
+**Why this is O(n):**
+
+```
+nums = [100, 4, 200, 1, 3, 2]
+numSet = {100, 4, 200, 1, 3, 2}
+
+Iteration (set iteration order may vary):
+num=100: 99 not in set → start sequence
+  100 → no 101 in set → length=1
+
+num=4: 3 in set → skip (not a start)
+
+num=200: 199 not in set → start sequence
+  200 → no 201 in set → length=1
+
+num=1: 0 not in set → start sequence
+  1 → 2 in set → currentNum=2, length=2
+  2 → 3 in set → currentNum=3, length=3
+  3 → 4 in set → currentNum=4, length=4
+  4 → 5 NOT in set → stop
+  length=4, maxLen=4
+
+num=3: 2 in set → skip (not a start)
+
+num=2: 1 in set → skip (not a start)
+
+Result: maxLen = 4
+
+---
+
+KEY INSIGHT:
+Each number is visited exactly once when:
+1. Checking if (num-1) exists → O(1)
+2. Counting forward from sequence start → O(1) per element
+
+Total: O(n)
+```
+
+### Approach 2: Union-Find ✅
+
+**Time Complexity:** O(n × α(n)) ≈ O(n) where α is inverse Ackermann
+**Space Complexity:** O(n)
+
+```javascript
+class UnionFind {
+  constructor(n) {
+    this.parent = Array.from({ length: n }, (_, i) => i);
+    this.rank = Array(n).fill(0);
+    this.size = Array(n).fill(1);
+  }
+
+  find(x) {
+    if (this.parent[x] !== x) {
+      this.parent[x] = this.find(this.parent[x]);
+    }
+    return this.parent[x];
+  }
+
+  union(x, y) {
+    const rootX = this.find(x);
+    const rootY = this.find(y);
+
+    if (rootX === rootY) return;
+
+    if (this.rank[rootX] < this.rank[rootY]) {
+      this.parent[rootX] = rootY;
+      this.size[rootY] += this.size[rootX];
+    } else if (this.rank[rootX] > this.rank[rootY]) {
+      this.parent[rootY] = rootX;
+      this.size[rootX] += this.size[rootY];
+    } else {
+      this.parent[rootY] = rootX;
+      this.size[rootX] += this.size[rootY];
+      this.rank[rootX]++;
+    }
+  }
+
+  getSize(x) {
+    return this.size[this.find(x)];
+  }
+}
+
+function longestConsecutive(nums) {
+  if (nums.length === 0) return 0;
+
+  const numSet = new Set(nums);
+  const numArray = Array.from(numSet);
+  const numIndex = new Map();
+
+  for (let i = 0; i < numArray.length; i++) {
+    numIndex.set(numArray[i], i);
+  }
+
+  const uf = new UnionFind(numArray.length);
+
+  for (const num of numArray) {
+    if (numIndex.has(num + 1)) {
+      const idx1 = numIndex.get(num);
+      const idx2 = numIndex.get(num + 1);
+      uf.union(idx1, idx2);
+    }
+  }
+
+  let maxLen = 0;
+  for (let i = 0; i < numArray.length; i++) {
+    maxLen = Math.max(maxLen, uf.getSize(i));
+  }
+
+  return maxLen;
+}
+```
+
+**Union-Find approach:**
+- Create node for each unique number
+- Union consecutive numbers together
+- Find maximum component size
+
+### Approach 3: Sorting (Not Optimal)
+
+**Time Complexity:** O(n log n) - slower than required
+**Space Complexity:** O(1) if not counting sort space
+
+```javascript
+function longestConsecutive(nums) {
+  if (nums.length === 0) return 0;
+
+  // Remove duplicates and sort
+  const sorted = Array.from(new Set(nums)).sort((a, b) => a - b);
+
+  let maxLen = 1;
+  let currentLen = 1;
+
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i] === sorted[i - 1] + 1) {
+      currentLen++;
+    } else if (sorted[i] !== sorted[i - 1]) {
+      maxLen = Math.max(maxLen, currentLen);
+      currentLen = 1;
+    }
+  }
+
+  return Math.max(maxLen, currentLen);
+}
+```
+
+**Why not this?** Problem requires O(n) time, sorting is O(n log n).
+
+### Why O(n) is Possible
+
+The trick is understanding that even though we have a nested loop:
+
+```javascript
+for (const num of numSet) {          // O(n)
+  while (numSet.has(currentNum + 1)) { // O(?)
+    currentNum++;
+  }
+}
+```
+
+The while loop is O(1) on average because:
+- We **only start** from sequence beginnings
+- Each element is counted at most once
+- Total iterations across all loops = O(n)
+
+```
+Example:
+numSet = {1, 2, 3, 4, 100}
+
+num=1: check 0? no → count 1→2→3→4 (4 iterations)
+num=2: check 1? yes → skip
+num=3: check 2? yes → skip
+num=4: check 3? yes → skip
+num=100: check 99? no → count 100 (1 iteration)
+
+Total iterations: 5 = n
+```
+
+## Common Mistakes
+
+❌ Sorting approach (violates O(n) requirement):
+```javascript
+// Wrong - O(n log n) time complexity
+const sorted = nums.sort((a, b) => a - b);
+```
+
+❌ Checking every number as a start:
+```javascript
+// Wrong - O(n²) worst case
+for (const num of numSet) {
+  let count = 1;
+  while (numSet.has(num + count)) {
+    count++;  // O(n) per starting point = O(n²)
+  }
+}
+```
+
+❌ Not using hash set:
+```javascript
+// Wrong - O(n log n) due to array search
+for (const num of nums) {
+  while (nums.includes(num + 1)) { // O(n) per check
+    // ...
+  }
+}
+```
+
+✅ Correct approach:
+```javascript
+// Only start from sequence beginnings
+if (!numSet.has(num - 1)) {
+  // Count forward using set lookups (O(1) each)
+  while (numSet.has(currentNum + 1)) {
+    currentNum++;
+    currentLen++;
+  }
+}
+// Total: O(n)
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Recognize: "Must achieve O(n) time - sorting won't work"
+2. Key insight: "Only count from sequence beginnings"
+3. Approach: "Use hash set for O(1) lookups"
+4. Optimization: "Skip middle elements (already counted)"
+5. Complexity: "O(n) time, O(n) space"
+
+**Key talking points:**
+- "Sorting violates O(n) requirement - must use hash set"
+- "Only iterate from the start of each consecutive sequence"
+- "Each element counted exactly once across all sequences"
+- "Union-Find also works but more complex"
+
+**Why only count from starts:**
+```
+nums = [1, 2, 3, 4]
+numSet = {1, 2, 3, 4}
+
+WRONG approach:
+  Start at 1: count 1→2→3→4 (4 ops)
+  Start at 2: count 2→3→4 (3 ops)
+  Start at 3: count 3→4 (2 ops)
+  Start at 4: count 4 (1 op)
+  Total: 10 ops = O(n²)
+
+RIGHT approach:
+  Start at 1 (no 0): count 1→2→3→4 (4 ops)
+  2 (skip, 1 exists)
+  3 (skip, 2 exists)
+  4 (skip, 3 exists)
+  Total: 4 ops = O(n)
+```
+
+**What if interviewer asks:**
+- **"Why can't we sort?"** - Problem explicitly requires O(n)
+- **"Can we use Union-Find?"** - Yes, but hash set is simpler
+- **"What about negative numbers?"** - Hash set handles them fine
+- **"Duplicates?"** - Set automatically removes them
+
+**Related LeetCode Problems:**
+- Longest Substring Without Repeating Characters
+- Longest Increasing Subsequence
+- Longest Common Subsequence
+- Number of Islands
+
+**Follow-up variations:**
+- Return the actual consecutive sequence (not just length)
+- Find all consecutive sequences
+- Find k-th longest consecutive sequence
+- With missing elements allowed (gaps < k)

@@ -1,0 +1,330 @@
+---
+sidebar_position: 2
+difficulty: Easy
+tags: [binary-search, arrays, google, amazon, microsoft]
+leetcode_url: https://leetcode.com/problems/search-insert-position/
+companies: [Google, Amazon, Microsoft, Facebook, Apple]
+pattern: "Binary Search"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Search Insert Position
+
+<AlgorithmProblem
+  title="Search Insert Position"
+  difficulty="Easy"
+  description={`
+<p>Given a sorted array of distinct integers and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.</p>
+<p>You must write an algorithm with <strong>O(log n)</strong> runtime complexity.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &lt;= nums.length &lt;= 10<sup>4</sup></li>
+  <li>-10<sup>4</sup> &lt;= nums[i] &lt;= 10<sup>4</sup></li>
+  <li><code>nums</code> contains <strong>distinct</strong> values sorted in <strong>ascending</strong> order.</li>
+  <li>-10<sup>4</sup> &lt;= target &lt;= 10<sup>4</sup></li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'nums = [1,3,5,6], target = 5',
+      output: '2',
+      explanation: '5 is found at index 2'
+    },
+    {
+      input: 'nums = [1,3,5,6], target = 2',
+      output: '1',
+      explanation: '2 should be inserted at index 1'
+    },
+    {
+      input: 'nums = [1,3,5,6], target = 7',
+      output: '4',
+      explanation: '7 should be inserted at the end (index 4)'
+    }
+  ]}
+  starterCode={`function searchInsert(nums, target) {
+  // Write your code here
+
+}`}
+  solution={`function searchInsert(nums, target) {
+  // Binary search: O(log n) time, O(1) space
+  let left = 0;
+  let right = nums.length - 1;
+
+  while (left <= right) {
+    const mid = Math.floor(left + (right - left) / 2);
+
+    if (nums[mid] === target) {
+      return mid; // Target found
+    } else if (nums[mid] < target) {
+      left = mid + 1; // Search right half
+    } else {
+      right = mid - 1; // Search left half
+    }
+  }
+
+  // When loop ends, left is the insertion position
+  return left;
+}`}
+  testCases={[
+    {
+      input: [[1, 3, 5, 6], 5],
+      expected: 2,
+      description: 'Target found: nums=[1,3,5,6], target=5'
+    },
+    {
+      input: [[1, 3, 5, 6], 2],
+      expected: 1,
+      description: 'Insert in middle: nums=[1,3,5,6], target=2'
+    },
+    {
+      input: [[1, 3, 5, 6], 7],
+      expected: 4,
+      description: 'Insert at end: nums=[1,3,5,6], target=7'
+    },
+    {
+      input: [[1, 3, 5, 6], 0],
+      expected: 0,
+      description: 'Insert at start: nums=[1,3,5,6], target=0'
+    },
+    {
+      input: [[1], 0],
+      expected: 0,
+      description: 'Single element, insert before: nums=[1], target=0'
+    },
+    {
+      input: [[1, 3], 2],
+      expected: 1,
+      description: 'Two elements, insert between: nums=[1,3], target=2'
+    }
+  ]}
+  functionName="searchInsert"
+/>
+
+## Solution Explanation
+
+### Approach 1: Linear Search (Not Optimal)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1)
+
+Simply iterate and find the insertion point:
+
+```javascript
+function searchInsert(nums, target) {
+  for (let i = 0; i < nums.length; i++) {
+    if (nums[i] >= target) {
+      return i;
+    }
+  }
+  return nums.length; // Insert at end
+}
+```
+
+**Why not use this?**
+- Doesn't meet O(log n) requirement
+- Doesn't utilize sorted array property
+- Inefficient for large arrays
+
+### Approach 2: Binary Search (Optimal) ✅
+
+**Time Complexity:** O(log n)
+**Space Complexity:** O(1)
+
+Use binary search, with the key insight that when the loop ends, `left` points to the insertion position:
+
+```javascript
+function searchInsert(nums, target) {
+  let left = 0;
+  let right = nums.length - 1;
+
+  while (left <= right) {
+    const mid = Math.floor(left + (right - left) / 2);
+
+    if (nums[mid] === target) {
+      return mid; // Found exact match
+    } else if (nums[mid] < target) {
+      left = mid + 1; // Target is larger, search right
+    } else {
+      right = mid - 1; // Target is smaller, search left
+    }
+  }
+
+  // Key insight: left is the insertion position!
+  return left;
+}
+```
+
+**How the Insertion Position Works:**
+
+```
+nums = [1, 3, 5, 6], target = 2
+
+Step 1: left=0, right=3, mid=1
+  nums[1]=3 > 2
+  Search left: right=0
+
+Step 2: left=0, right=0, mid=0
+  nums[0]=1 < 2
+  Search right: left=1
+
+Step 3: left=1, right=0
+  Loop ends (left > right)
+  Return left=1 ✅
+
+Result: Insert 2 at index 1 → [1, 2, 3, 5, 6]
+```
+
+**Why `left` is the Insertion Position:**
+
+```
+When loop ends with left > right:
+- right points to the last element < target
+- left points to the first element > target
+- Therefore, left is where target should be inserted!
+
+Example: [1, 3, 5, 6], target = 2
+After search:
+  right=0 (nums[0]=1 < 2)
+  left=1  (nums[1]=3 > 2)
+  Insert position = 1 ✅
+```
+
+### Approach 3: Binary Search with Explicit Cases
+
+**Time Complexity:** O(log n)
+**Space Complexity:** O(1)
+
+More verbose but clearer logic:
+
+```javascript
+function searchInsert(nums, target) {
+  let left = 0;
+  let right = nums.length - 1;
+
+  // Edge case: target smaller than all elements
+  if (target < nums[0]) return 0;
+
+  // Edge case: target larger than all elements
+  if (target > nums[nums.length - 1]) return nums.length;
+
+  while (left <= right) {
+    const mid = Math.floor(left + (right - left) / 2);
+
+    if (nums[mid] === target) {
+      return mid;
+    } else if (nums[mid] < target) {
+      // Check if we should insert here
+      if (mid === nums.length - 1 || nums[mid + 1] > target) {
+        return mid + 1;
+      }
+      left = mid + 1;
+    } else {
+      // Check if we should insert here
+      if (mid === 0 || nums[mid - 1] < target) {
+        return mid;
+      }
+      right = mid - 1;
+    }
+  }
+
+  return left;
+}
+```
+
+**Note:** Approach 2 is cleaner and preferred!
+
+### Key Insights
+
+1. **Binary search works for both finding AND inserting**: Same algorithm, different interpretation
+2. **Left pointer magic**: When loop ends, `left` always points to insertion position
+3. **Invariant**: After each iteration, insertion position is within `[left, right]`
+4. **Edge cases handled automatically**: Insert at start (left=0) or end (left=length)
+
+## Common Mistakes
+
+❌ **Returning wrong value when not found:**
+```javascript
+return -1; // Wrong! Should return insertion position
+```
+
+❌ **Forgetting to return left:**
+```javascript
+while (left <= right) {
+  // ...
+}
+// Missing: return left;
+return -1; // Wrong!
+```
+
+❌ **Manually checking edge cases:**
+```javascript
+// Unnecessary - binary search handles these!
+if (target < nums[0]) return 0;
+if (target > nums[nums.length - 1]) return nums.length;
+```
+
+❌ **Using right instead of left:**
+```javascript
+return right; // Wrong! Off by one
+```
+
+✅ **Correct implementation:**
+```javascript
+function searchInsert(nums, target) {
+  let left = 0;
+  let right = nums.length - 1;
+
+  while (left <= right) {
+    const mid = Math.floor(left + (right - left) / 2);
+
+    if (nums[mid] === target) {
+      return mid;
+    } else if (nums[mid] < target) {
+      left = mid + 1;
+    } else {
+      right = mid - 1;
+    }
+  }
+
+  return left; // The insertion position
+}
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. State: "This is a binary search problem with a twist"
+2. Explain: "Instead of returning -1 when not found, we return the insertion position"
+3. Key insight: "When binary search ends, `left` points to where the element should be"
+4. Walk through an example showing how left moves to the insertion point
+
+**Key talking points:**
+- "Binary search maintains an invariant: the insertion position is always between left and right"
+- "When the loop ends with left > right, left is exactly where we should insert"
+- "This works for all edge cases: insert at start, middle, or end"
+- "Same O(log n) efficiency as standard binary search"
+
+**Why does `left` give the insertion position?**
+
+```
+At each step, we maintain:
+- Everything at indices < left is < target
+- Everything at indices > right is > target
+
+When left > right:
+- left points to the first element >= target
+- This is exactly the insertion position!
+```
+
+**Follow-up questions you might get:**
+- **What if there are duplicates?** This problem states distinct values, but we could insert before or after duplicates
+- **Can you modify the array in-place?** Yes, use array.splice(insertPos, 0, target)
+- **How is this different from regular binary search?** Only the final return: `left` instead of `-1`
+- **What if we want to insert after existing elements?** Modify to return `right + 1` or adjust the comparison
+
+**Real-world applications:**
+- Inserting into sorted databases
+- Maintaining sorted data structures
+- Finding lower_bound/upper_bound in C++
+- Implementing Java's Collections.binarySearch()

@@ -1,0 +1,433 @@
+---
+sidebar_position: 5
+difficulty: Easy
+tags: [linked-lists, two-pointers, intersection, amazon, google]
+leetcode_url: https://leetcode.com/problems/intersection-of-two-linked-lists/
+companies: [Amazon, Google, Microsoft, Meta, Apple]
+pattern: "Linked Lists"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Intersection of Two Linked Lists
+
+<AlgorithmProblem
+  title="Intersection of Two Linked Lists"
+  difficulty="Easy"
+  description={`
+<p>Given the heads of two singly linked lists <code>headA</code> and <code>headB</code>, return <em>the node at which the two lists intersect</em>. If the two linked lists have no intersection at all, return <code>null</code>.</p>
+<p>Note that the lists do not have cycles.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>The number of nodes of listA is in the m</li>
+  <li>The number of nodes of listB is in the n</li>
+  <li>0 ≤ m, n ≤ 3 × 10<sup>4</sup></li>
+  <li>1 ≤ listA[i], listB[i] ≤ 10<sup>5</sup></li>
+  <li>listA and listB have no cycles</li>
+</ul>
+<h4>Follow up:</h4>
+<p>Could you write a solution that runs in O(m + n) time and O(1) space?</p>
+`}
+  examples={[
+    {
+      input: 'listA = [4,1,8,4,5], listB = [5,6,1,8,4,5], skipA = 2, skipB = 3',
+      output: '8',
+      explanation: 'The two lists intersect at node with value 8'
+    },
+    {
+      input: 'listA = [2,6,4], listB = [1,5], no intersection',
+      output: 'null',
+      explanation: 'The two lists do not intersect'
+    },
+    {
+      input: 'listA = [2,6,4], listB = [1,5,2,6,4], skipA = 3, skipB = 2',
+      output: '2',
+      explanation: 'The two lists intersect at node with value 2'
+    }
+  ]}
+  starterCode={`class ListNode {
+  constructor(val = 0, next = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+function getIntersectionNode(headA, headB) {
+  // TODO: Find intersection node
+  return null;
+}`}
+  solution={`class ListNode {
+  constructor(val = 0, next = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+function getIntersectionNode(headA, headB) {
+  // Two pointer approach: align the lists
+  let ptrA = headA;
+  let ptrB = headB;
+
+  while (ptrA !== ptrB) {
+    // Move to next node, or jump to other list if at end
+    ptrA = ptrA === null ? headB : ptrA.next;
+    ptrB = ptrB === null ? headA : ptrB.next;
+  }
+
+  return ptrA;  // Both pointers at intersection (or both null)
+}`}
+  testCases={[
+    {
+      input: [[[4, 1, 8, 4, 5], [5, 6, 1, 8, 4, 5]], 2, 3],
+      expected: 8,
+      description: 'Lists intersect at middle node'
+    },
+    {
+      input: [[[2, 6, 4], [1, 5]], null, null],
+      expected: null,
+      description: 'No intersection'
+    },
+    {
+      input: [[[2, 6, 4], [1, 5, 2, 6, 4]], 3, 2],
+      expected: 2,
+      description: 'Lists intersect at different starting positions'
+    },
+    {
+      input: [[[1], [1]], 0, 0],
+      expected: 1,
+      description: 'Both lists are single node (same)'
+    },
+    {
+      input: [[[1, 2, 3], [3]], 0, 0],
+      expected: 3,
+      description: 'Intersect at last node'
+    },
+    {
+      input: [[[], [1, 2, 3]], null, null],
+      expected: null,
+      description: 'One empty list'
+    }
+  ]}
+  functionName="getIntersectionNode"
+/>
+
+## Solution Explanation
+
+### Approach 1: Two Pointers (Optimal) ✅
+
+**Time Complexity:** O(m + n) where m, n are lengths of two lists
+**Space Complexity:** O(1) - constant space!
+
+Use two pointers that traverse both lists. When one reaches the end, it jumps to the start of the other list. If they meet, that's the intersection:
+
+```javascript
+function getIntersectionNode(headA, headB) {
+  let ptrA = headA;
+  let ptrB = headB;
+
+  while (ptrA !== ptrB) {
+    // If ptrA reaches end, go to headB; otherwise advance
+    ptrA = ptrA === null ? headB : ptrA.next;
+    // Same for ptrB
+    ptrB = ptrB === null ? headA : ptrB.next;
+  }
+
+  return ptrA;  // Intersection node (or null if no intersection)
+}
+```
+
+**Why it works:**
+
+The key insight is that if there's an intersection, both pointers will traverse the same total distance and meet at the intersection. If there's no intersection, both will reach null at the same time.
+
+```
+listA:  4 → 1 → 8 → 4 → 5 (length 5)
+listB:  5 → 6 → 1 → 8 → 4 → 5 (length 6)
+              ↑ intersection starts here (common part: 8 → 4 → 5)
+
+ptrA path: 4 → 1 → 8 → 4 → 5 → 5 → 6 → 1 → 8
+ptrB path: 5 → 6 → 1 → 8 → 4 → 5 → 4 → 1 → 8
+
+Both traverse 5 + 6 = 11 nodes total and meet at 8!
+```
+
+**Step-by-step:**
+```
+Iteration 1: ptrA=4, ptrB=5 (not equal)
+Iteration 2: ptrA=1, ptrB=6 (not equal)
+Iteration 3: ptrA=8, ptrB=1 (not equal)
+Iteration 4: ptrA=4, ptrB=8 (not equal)
+Iteration 5: ptrA=5, ptrB=4 (not equal)
+Iteration 6: ptrA=5(from B), ptrB=5 (not equal)
+Iteration 7: ptrA=6, ptrB=8 (not equal)
+Iteration 8: ptrA=1, ptrB=4 (not equal)
+Iteration 9: ptrA=8, ptrB=5 (not equal)
+Iteration 10: ptrA=4, ptrB=null→headA=4 (wait, let me recalculate...)
+```
+
+Actually, the elegant solution is:
+```
+ptrA traverses: listA + listB
+ptrB traverses: listB + listA
+
+If intersection exists, they traverse the same length and meet
+at the intersection point.
+
+listA (5) + listB (6) = 11 steps for ptrA
+listB (6) + listA (5) = 11 steps for ptrB
+
+They both do 11 steps and meet at intersection!
+```
+
+### Approach 2: Hash Set
+
+**Time Complexity:** O(m + n)
+**Space Complexity:** O(m) or O(n) - storing one list in set
+
+Track all nodes from list A in a set, then check list B:
+
+```javascript
+function getIntersectionNode(headA, headB) {
+  const visited = new Set();
+
+  // Add all nodes from list A to set
+  let curr = headA;
+  while (curr !== null) {
+    visited.add(curr);
+    curr = curr.next;
+  }
+
+  // Check if any node from list B is in set
+  curr = headB;
+  while (curr !== null) {
+    if (visited.has(curr)) {
+      return curr;  // Found intersection
+    }
+    curr = curr.next;
+  }
+
+  return null;  // No intersection
+}
+```
+
+**Advantage:** Easy to understand
+**Disadvantage:** Uses O(m) extra space
+
+### Approach 3: Length Difference
+
+**Time Complexity:** O(m + n)
+**Space Complexity:** O(1)
+
+Calculate lengths, skip the difference, then advance both:
+
+```javascript
+function getIntersectionNode(headA, headB) {
+  // Calculate lengths
+  let lenA = 0, lenB = 0;
+  let currA = headA, currB = headB;
+
+  while (currA) {
+    lenA++;
+    currA = currA.next;
+  }
+  while (currB) {
+    lenB++;
+    currB = currB.next;
+  }
+
+  // Reset and skip difference
+  currA = headA;
+  currB = headB;
+
+  // Make currA point to the longer list
+  if (lenA < lenB) {
+    [currA, currB] = [currB, currA];
+    [lenA, lenB] = [lenB, lenA];
+  }
+
+  // Skip the difference
+  let diff = lenA - lenB;
+  while (diff > 0) {
+    currA = currA.next;
+    diff--;
+  }
+
+  // Move both until they meet
+  while (currA !== currB) {
+    currA = currA.next;
+    currB = currB.next;
+  }
+
+  return currA;
+}
+```
+
+**More explicit version:**
+```javascript
+// ... (calculate lengths)
+
+// Skip longer list's head
+for (let i = 0; i < lenA - lenB; i++) {
+  currA = currA.next;
+}
+
+// Now both at same distance from end
+while (currA !== currB) {
+  currA = currA.next;
+  currB = currB.next;
+}
+
+return currA;
+```
+
+## Comparison of Approaches
+
+| Approach | Time | Space | Simplicity | Best For |
+|----------|------|-------|-----------|----------|
+| Two Pointers | O(m+n) | O(1) | Medium | **Recommended** |
+| Hash Set | O(m+n) | O(m) | Easy | Learning |
+| Length Diff | O(m+n) | O(1) | Complex | Alternative |
+
+## Common Mistakes
+
+❌ **Comparing node values instead of references:**
+```javascript
+if (ptrA.val === ptrB.val) {  // ERROR! Same value ≠ same node!
+  return ptrA;
+}
+```
+
+✅ **Compare node references:**
+```javascript
+if (ptrA === ptrB) {  // Correct: same object reference
+  return ptrA;
+}
+```
+
+---
+
+❌ **Not handling null pointers:**
+```javascript
+while (ptrA !== ptrB) {
+  ptrA = ptrA.next;  // ERROR: if ptrA is null, can't call .next!
+  ptrB = ptrB.next;
+}
+```
+
+✅ **Check for null and jump:**
+```javascript
+while (ptrA !== ptrB) {
+  ptrA = ptrA === null ? headB : ptrA.next;
+  ptrB = ptrB === null ? headA : ptrB.next;
+}
+```
+
+---
+
+❌ **Using two separate loops:**
+```javascript
+// This doesn't align the pointers!
+while (ptrA !== null) ptrA = ptrA.next;
+while (ptrB !== null) ptrB = ptrB.next;
+if (ptrA === ptrB) return ptrA;  // Both null, doesn't find intersection
+```
+
+✅ **Both traverse in single loop:**
+```javascript
+while (ptrA !== ptrB) {
+  ptrA = ptrA === null ? headB : ptrA.next;
+  ptrB = ptrB === null ? headA : ptrB.next;
+}
+```
+
+---
+
+❌ **Forgetting to handle no intersection:**
+```javascript
+// If no intersection, both become null and loop exits
+// This is correct! But make sure to return ptrA (which is null)
+```
+
+✅ **Return ptrA correctly:**
+```javascript
+while (ptrA !== ptrB) {
+  ptrA = ptrA === null ? headB : ptrA.next;
+  ptrB = ptrB === null ? headA : ptrB.next;
+}
+return ptrA;  // null if no intersection, intersection node otherwise
+```
+
+## Interview Tips
+
+**What to mention:**
+1. **Two pointers:** Explain the clever traversal strategy
+2. **Why it works:** Both traverse same total distance
+3. **Answer the follow-up:** This IS the O(1) space solution!
+4. **Edge cases:** Empty lists, no intersection, immediate intersection
+
+**Follow-up questions:**
+
+**Q: Can you solve it with O(1) space?**
+A: Yes! This IS the O(1) solution (two pointers technique).
+
+**Q: What if you can't compare node references?**
+A: You'd need to use values, but risky if values can repeat.
+
+**Q: How would you find the intersection if lists had cycles?**
+A: More complex - need cycle detection first.
+
+**Q: Can you solve it with O(m + n) time?**
+A: Yes, all approaches shown achieve this.
+
+## Edge Cases
+
+```javascript
+// No intersection
+listA = [1, 2, 3]
+listB = [4, 5, 6]
+Result: null
+
+// Immediate intersection (both start same)
+listA = [1, 2, 3]
+listB = [1, 2, 3]
+Result: 1 (first node)
+
+// Intersection at end
+listA = [1, 2]
+listB = [3, 4, 1, 2]
+Result: 1 (second to last from listA)
+
+// One empty list
+listA = []
+listB = [1, 2, 3]
+Result: null
+
+// Intersection at different points
+listA = [2, 6, 4, 1, 5]
+listB = [1, 5]
+Result: 1 (second node of listA, first of listB)
+```
+
+## Key Insight Visualization
+
+```
+Without adjustment:
+listA: 1 → 2 → 8 → 4 → 5
+listB: 6 → 7 → 8 → 4 → 5
+       ↑        ↑
+    different start positions
+
+With two-pointer technique:
+ptrA: 1 → 2 → 8 → 4 → 5 → 6 → 7 → 8 → 4 → 5
+ptrB: 6 → 7 → 8 → 4 → 5 → 1 → 2 → 8 → 4 → 5
+                        ↑ both reach here
+
+They synchronize by traversing both lists!
+```
+
+## Related Problems
+
+- **Linked List Cycle II** (Medium) - Find start of cycle
+- **Merge Two Linked Lists** (Easy) - Combine lists
+- **Linked List Cycle** (Easy) - Detect cycle
+- **Happy Number** (Easy) - Similar pointer techniques

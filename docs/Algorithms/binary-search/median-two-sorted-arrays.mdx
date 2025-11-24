@@ -1,0 +1,489 @@
+---
+sidebar_position: 8
+difficulty: Hard
+tags: [binary-search, arrays, divide-and-conquer, google, amazon, facebook]
+leetcode_url: https://leetcode.com/problems/median-of-two-sorted-arrays/
+companies: [Google, Amazon, Facebook, Microsoft, Apple]
+pattern: "Binary Search"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Median of Two Sorted Arrays
+
+<AlgorithmProblem
+  title="Median of Two Sorted Arrays"
+  difficulty="Hard"
+  description={`
+<p>Given two sorted arrays <code>nums1</code> and <code>nums2</code> of size <code>m</code> and <code>n</code> respectively, return <strong>the median</strong> of the two sorted arrays.</p>
+<p>The overall run time complexity should be <strong>O(log (m+n))</strong>.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>nums1.length == m</li>
+  <li>nums2.length == n</li>
+  <li>0 &lt;= m &lt;= 1000</li>
+  <li>0 &lt;= n &lt;= 1000</li>
+  <li>1 &lt;= m + n &lt;= 2000</li>
+  <li>-10<sup>6</sup> &lt;= nums1[i], nums2[i] &lt;= 10<sup>6</sup></li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'nums1 = [1,3], nums2 = [2]',
+      output: '2.00000',
+      explanation: 'Merged array = [1,2,3] and median is 2.'
+    },
+    {
+      input: 'nums1 = [1,2], nums2 = [3,4]',
+      output: '2.50000',
+      explanation: 'Merged array = [1,2,3,4] and median is (2 + 3) / 2 = 2.5.'
+    },
+    {
+      input: 'nums1 = [], nums2 = [1]',
+      output: '1.00000',
+      explanation: 'Merged array = [1] and median is 1.'
+    }
+  ]}
+  starterCode={`function findMedianSortedArrays(nums1, nums2) {
+  // Write your code here
+
+}`}
+  solution={`function findMedianSortedArrays(nums1, nums2) {
+  // Binary search on smaller array: O(log(min(m,n))) time, O(1) space
+
+  // Ensure nums1 is the smaller array
+  if (nums1.length > nums2.length) {
+    [nums1, nums2] = [nums2, nums1];
+  }
+
+  const m = nums1.length;
+  const n = nums2.length;
+  const totalLeft = Math.floor((m + n + 1) / 2);
+
+  let left = 0;
+  let right = m;
+
+  while (left <= right) {
+    // Partition nums1 at i, nums2 at j
+    const i = Math.floor((left + right) / 2);
+    const j = totalLeft - i;
+
+    // Get boundary values
+    const nums1LeftMax = i === 0 ? -Infinity : nums1[i - 1];
+    const nums1RightMin = i === m ? Infinity : nums1[i];
+    const nums2LeftMax = j === 0 ? -Infinity : nums2[j - 1];
+    const nums2RightMin = j === n ? Infinity : nums2[j];
+
+    // Check if we found correct partition
+    if (nums1LeftMax <= nums2RightMin && nums2LeftMax <= nums1RightMin) {
+      // Found the correct partition!
+      if ((m + n) % 2 === 0) {
+        // Even length: average of two middle elements
+        return (
+          (Math.max(nums1LeftMax, nums2LeftMax) +
+            Math.min(nums1RightMin, nums2RightMin)) /
+          2
+        );
+      } else {
+        // Odd length: max of left partition
+        return Math.max(nums1LeftMax, nums2LeftMax);
+      }
+    } else if (nums1LeftMax > nums2RightMin) {
+      // nums1 partition too far right, move left
+      right = i - 1;
+    } else {
+      // nums1 partition too far left, move right
+      left = i + 1;
+    }
+  }
+
+  // Should never reach here with valid input
+  return 0;
+}`}
+  testCases={[
+    {
+      input: [[1, 3], [2]],
+      expected: 2.0,
+      description: 'Odd total length: nums1=[1,3], nums2=[2]'
+    },
+    {
+      input: [[1, 2], [3, 4]],
+      expected: 2.5,
+      description: 'Even total length: nums1=[1,2], nums2=[3,4]'
+    },
+    {
+      input: [[], [1]],
+      expected: 1.0,
+      description: 'Empty first array: nums1=[], nums2=[1]'
+    },
+    {
+      input: [[2], []],
+      expected: 2.0,
+      description: 'Empty second array: nums1=[2], nums2=[]'
+    },
+    {
+      input: [[1, 3, 5, 7], [2, 4, 6]],
+      expected: 4.0,
+      description: 'Interleaved arrays: nums1=[1,3,5,7], nums2=[2,4,6]'
+    },
+    {
+      input: [[1, 2], [1, 2]],
+      expected: 1.5,
+      description: 'Duplicate values: nums1=[1,2], nums2=[1,2]'
+    }
+  ]}
+  functionName="findMedianSortedArrays"
+/>
+
+## Solution Explanation
+
+### Approach 1: Merge Arrays (Not Optimal)
+
+**Time Complexity:** O(m + n)
+**Space Complexity:** O(m + n)
+
+Merge both arrays and find median:
+
+```javascript
+function findMedianSortedArrays(nums1, nums2) {
+  const merged = [];
+  let i = 0, j = 0;
+
+  // Merge two sorted arrays
+  while (i < nums1.length && j < nums2.length) {
+    if (nums1[i] <= nums2[j]) {
+      merged.push(nums1[i++]);
+    } else {
+      merged.push(nums2[j++]);
+    }
+  }
+
+  // Add remaining elements
+  while (i < nums1.length) merged.push(nums1[i++]);
+  while (j < nums2.length) merged.push(nums2[j++]);
+
+  // Find median
+  const len = merged.length;
+  if (len % 2 === 0) {
+    return (merged[len / 2 - 1] + merged[len / 2]) / 2;
+  } else {
+    return merged[Math.floor(len / 2)];
+  }
+}
+```
+
+**Why not use this?**
+- O(m + n) time doesn't meet O(log(m+n)) requirement
+- Uses O(m + n) extra space
+- Actually creates the merged array (not needed)
+
+### Approach 2: Binary Search on Partition (Optimal) ✅
+
+**Time Complexity:** O(log(min(m, n)))
+**Space Complexity:** O(1)
+
+Use binary search to find the correct partition:
+
+```javascript
+function findMedianSortedArrays(nums1, nums2) {
+  // Binary search on the smaller array
+  if (nums1.length > nums2.length) {
+    [nums1, nums2] = [nums2, nums1];
+  }
+
+  const m = nums1.length;
+  const n = nums2.length;
+  const totalLeft = Math.floor((m + n + 1) / 2);
+
+  let left = 0;
+  let right = m;
+
+  while (left <= right) {
+    // Partition point in nums1
+    const i = Math.floor((left + right) / 2);
+    // Corresponding partition in nums2
+    const j = totalLeft - i;
+
+    // Get max of left side and min of right side for both arrays
+    const nums1LeftMax = i === 0 ? -Infinity : nums1[i - 1];
+    const nums1RightMin = i === m ? Infinity : nums1[i];
+    const nums2LeftMax = j === 0 ? -Infinity : nums2[j - 1];
+    const nums2RightMin = j === n ? Infinity : nums2[j];
+
+    // Check if partition is correct
+    if (nums1LeftMax <= nums2RightMin && nums2LeftMax <= nums1RightMin) {
+      // Perfect partition found!
+      if ((m + n) % 2 === 0) {
+        // Even: average of max(left) and min(right)
+        return (
+          (Math.max(nums1LeftMax, nums2LeftMax) +
+            Math.min(nums1RightMin, nums2RightMin)) /
+          2
+        );
+      } else {
+        // Odd: max of left partition
+        return Math.max(nums1LeftMax, nums2LeftMax);
+      }
+    } else if (nums1LeftMax > nums2RightMin) {
+      // nums1 left partition too large, move partition left
+      right = i - 1;
+    } else {
+      // nums1 left partition too small, move partition right
+      left = i + 1;
+    }
+  }
+
+  return 0;
+}
+```
+
+**How Binary Search on Partition Works:**
+
+```
+nums1 = [1, 3, 5, 7]
+nums2 = [2, 4, 6, 8, 9]
+
+Total length = 9, so median is at position 5 (0-indexed: 4)
+We need 5 elements on the left side: totalLeft = floor((9+1)/2) = 5
+
+Try partition i=2 in nums1:
+  nums1: [1, 3 | 5, 7]         (2 elements on left)
+  nums2: [2, 4, 6 | 8, 9]      (3 elements on left, j=5-2=3)
+
+  Left side: [1, 3] + [2, 4, 6] = 5 elements ✓
+  Right side: [5, 7] + [8, 9] = 4 elements ✓
+
+  Check: max(left) <= min(right)?
+    nums1LeftMax = 3
+    nums1RightMin = 5
+    nums2LeftMax = 6
+    nums2RightMin = 8
+
+    Is 3 <= 8? Yes ✓
+    Is 6 <= 5? No ✗
+
+  nums2LeftMax (6) > nums1RightMin (5)
+  Need to move nums1 partition right
+
+Try partition i=3 in nums1:
+  nums1: [1, 3, 5 | 7]         (3 elements on left)
+  nums2: [2, 4 | 6, 8, 9]      (2 elements on left, j=5-3=2)
+
+  Left side: [1, 3, 5] + [2, 4] = 5 elements ✓
+  Right side: [7] + [6, 8, 9] = 4 elements ✓
+
+  Check: max(left) <= min(right)?
+    nums1LeftMax = 5
+    nums1RightMin = 7
+    nums2LeftMax = 4
+    nums2RightMin = 6
+
+    Is 5 <= 6? Yes ✓
+    Is 4 <= 7? Yes ✓
+
+  Perfect partition! ✓
+
+  Odd total length, return max(5, 4) = 5 ✓
+```
+
+**Key Insight - Partition Concept:**
+
+```
+For median, we need to partition arrays such that:
+1. Left partition has (m+n+1)/2 elements
+2. max(left partition) <= min(right partition)
+
+Example with even length:
+nums1: [1, 2 | 3, 4]
+nums2: [5, 6 | 7, 8]
+
+If partitioned correctly:
+  max(left) = 6
+  min(right) = 3
+  6 <= 3? NO! Wrong partition
+
+Correct partition:
+nums1: [1, 2, 3 | 4]
+nums2: [5 | 6, 7, 8]
+
+  max(left) = max(3, 5) = 5
+  min(right) = min(4, 6) = 4
+  5 <= 4? NO! Still wrong
+
+Try:
+nums1: [1, 2, 3, 4 | ]
+nums2: [ | 5, 6, 7, 8]
+
+  max(left) = max(4, -∞) = 4
+  min(right) = min(∞, 5) = 5
+  4 <= 5? YES! ✓
+
+  Median = (4 + 5) / 2 = 4.5
+```
+
+**Why Binary Search on Smaller Array:**
+
+```
+If m < n (m is smaller):
+- Binary search on nums1: O(log m)
+- For each partition in nums1, partition in nums2 is determined
+- Total: O(log m) = O(log(min(m,n)))
+
+If we searched on larger array:
+- Would be O(log n) which is slower when n > m
+- Always search on smaller for best performance
+```
+
+### Key Insights
+
+1. **Partition, don't merge**: Find partition point, don't create merged array
+2. **Binary search on smaller**: Search space is size of smaller array
+3. **Partition constraint**: Left partition has exactly ⌊(m+n+1)/2⌋ elements
+4. **Validity check**: max(left) ≤ min(right) for both arrays
+5. **Handle edge cases**: Use Infinity/-Infinity for boundaries
+
+## Common Mistakes
+
+❌ **Binary search on merged array length:**
+```javascript
+// Wrong approach - can't binary search on merged position directly
+let left = 0, right = m + n - 1;
+```
+
+❌ **Not ensuring nums1 is smaller:**
+```javascript
+// Inefficient - should search on smaller array
+// Might search O(log n) when O(log m) possible
+```
+
+❌ **Wrong partition size calculation:**
+```javascript
+const totalLeft = Math.floor((m + n) / 2); // Wrong!
+// Should be: Math.floor((m + n + 1) / 2)
+// The +1 handles both odd and even cases correctly
+```
+
+❌ **Forgetting edge cases:**
+```javascript
+const nums1LeftMax = nums1[i - 1]; // Crashes when i === 0!
+// Should use: i === 0 ? -Infinity : nums1[i - 1]
+```
+
+❌ **Wrong median calculation for even length:**
+```javascript
+return (nums1LeftMax + nums2RightMin) / 2; // Wrong!
+// Should be: (max(left) + min(right)) / 2
+```
+
+✅ **Correct implementation:**
+```javascript
+function findMedianSortedArrays(nums1, nums2) {
+  // Always binary search on smaller array
+  if (nums1.length > nums2.length) {
+    [nums1, nums2] = [nums2, nums1];
+  }
+
+  const m = nums1.length;
+  const n = nums2.length;
+  const totalLeft = Math.floor((m + n + 1) / 2); // +1 is key!
+
+  let left = 0;
+  let right = m;
+
+  while (left <= right) {
+    const i = Math.floor((left + right) / 2);
+    const j = totalLeft - i;
+
+    // Handle edge cases with Infinity
+    const nums1LeftMax = i === 0 ? -Infinity : nums1[i - 1];
+    const nums1RightMin = i === m ? Infinity : nums1[i];
+    const nums2LeftMax = j === 0 ? -Infinity : nums2[j - 1];
+    const nums2RightMin = j === n ? Infinity : nums2[j];
+
+    // Check partition validity
+    if (nums1LeftMax <= nums2RightMin && nums2LeftMax <= nums1RightMin) {
+      // Correct partition!
+      if ((m + n) % 2 === 0) {
+        return (
+          (Math.max(nums1LeftMax, nums2LeftMax) +
+            Math.min(nums1RightMin, nums2RightMin)) /
+          2
+        );
+      } else {
+        return Math.max(nums1LeftMax, nums2LeftMax);
+      }
+    } else if (nums1LeftMax > nums2RightMin) {
+      right = i - 1;
+    } else {
+      left = i + 1;
+    }
+  }
+
+  return 0;
+}
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Start simple: "We could merge both arrays in O(m+n) but need O(log(m+n))"
+2. Key insight: "We don't need to merge - just find the correct partition"
+3. Explain: "Binary search on partition point of smaller array"
+4. Validate: "Check if max(left) ≤ min(right) for correct partition"
+5. Edge cases: "Handle empty arrays and boundaries with Infinity/-Infinity"
+
+**Key talking points:**
+- "This is a partition problem, not a search problem"
+- "We binary search on where to partition, not what to find"
+- "For each partition in nums1, partition in nums2 is determined"
+- "We validate partition by checking boundary elements"
+- "Binary search on smaller array gives O(log(min(m,n))) complexity"
+
+**Visual explanation to give:**
+
+```
+Finding median = Finding the partition point
+
+nums1: [1, 2, 3, 4]
+nums2: [5, 6, 7, 8]
+
+We need 4 elements on left, 4 on right
+
+Try partitioning:
+nums1: [1, 2, 3, 4 | ]
+nums2: [ | 5, 6, 7, 8]
+
+Left: {1,2,3,4}  max=4
+Right: {5,6,7,8}  min=5
+
+max(left) <= min(right)? 4 <= 5? YES!
+Median = (4 + 5) / 2 = 4.5 ✓
+```
+
+**Why this problem is HARD:**
+1. **Non-obvious approach**: Not standard binary search
+2. **Complex partition logic**: Need to think about two arrays simultaneously
+3. **Edge cases**: Empty arrays, different sizes, odd/even lengths
+4. **Mathematical insight**: Understanding partition constraint
+5. **Implementation details**: Infinity handling, correct median calculation
+
+**Follow-up questions you might get:**
+- **What if arrays aren't sorted?** Would need to sort first, changing complexity
+- **Can you find kth element instead?** Yes, similar approach with different partition size
+- **What about 3+ arrays?** Generalize but becomes more complex
+- **Space optimization?** Already O(1) space
+- **What if arrays have different sizes of order of magnitude?** Still efficient due to log(min(m,n))
+
+**Real-world applications:**
+- Database query optimization (merge joins)
+- Statistics on distributed datasets
+- Finding percentiles in split data
+- Load balancing across sorted queues
+- Merging time series from multiple sources
+
+**Connection to fundamentals:**
+- This problem tests deep understanding of:
+  - Binary search on answer space (partition point)
+  - Median properties (partition into equal halves)
+  - Edge case handling (boundaries)
+  - Complexity analysis (why log(min) not log(m+n))
