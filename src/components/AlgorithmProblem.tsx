@@ -46,6 +46,7 @@ export default function AlgorithmProblem({
   const [showSolution, setShowSolution] = useState(false);
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [isRunning, setIsRunning] = useState(false);
+  const [showDescription, setShowDescription] = useState(true);
   const editorRef = useRef<any>(null);
 
   const difficultyColor = {
@@ -168,6 +169,22 @@ export default function AlgorithmProblem({
 
         {/* Action Buttons */}
         <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <button
+            onClick={() => setShowDescription(!showDescription)}
+            style={{
+              padding: '0.5rem 1rem',
+              backgroundColor: '#6c757d',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              fontSize: '0.875rem'
+            }}
+            title={showDescription ? 'Hide description (full-width editor)' : 'Show description'}
+          >
+            {showDescription ? '◀ Hide' : '▶ Show'}
+          </button>
           {solution && (
             <button
               onClick={handleShowSolution}
@@ -210,7 +227,7 @@ export default function AlgorithmProblem({
       {/* Two Column Layout: Problem Description | Code Editor */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
+        gridTemplateColumns: showDescription ? '1fr 1fr' : '1fr',
         gap: 0,
         border: '1px solid var(--ifm-color-emphasis-300)',
         borderRadius: '0 0 8px 8px',
@@ -218,37 +235,39 @@ export default function AlgorithmProblem({
         minHeight: '600px'
       }}>
         {/* Left Column: Problem Description */}
-        <div style={{
-          padding: '1.5rem',
-          backgroundColor: 'var(--ifm-background-surface-color)',
-          overflowY: 'auto',
-          maxHeight: '600px',
-          borderRight: '1px solid var(--ifm-color-emphasis-300)'
-        }}>
-          {/* Description */}
-          <div dangerouslySetInnerHTML={{ __html: description }} />
+        {showDescription && (
+          <div style={{
+            padding: '1.5rem',
+            backgroundColor: 'var(--ifm-background-surface-color)',
+            overflowY: 'auto',
+            maxHeight: '600px',
+            borderRight: '1px solid var(--ifm-color-emphasis-300)'
+          }}>
+            {/* Description */}
+            <div dangerouslySetInnerHTML={{ __html: description }} />
 
-          {/* Examples */}
-          {examples.length > 0 && (
-            <div style={{ marginTop: '1.5rem' }}>
-              <h3>Examples:</h3>
-              {examples.map((example, idx) => (
-                <div key={idx} style={{
-                  marginBottom: '1rem',
-                  padding: '1rem',
-                  backgroundColor: 'var(--ifm-code-background)',
-                  borderRadius: '4px',
-                  fontFamily: 'monospace',
-                  fontSize: '0.875rem'
-                }}>
-                  <div><strong>Input:</strong> {example.input}</div>
-                  <div><strong>Output:</strong> {example.output}</div>
-                  {example.explanation && <div style={{ marginTop: '0.5rem' }}><strong>Explanation:</strong> {example.explanation}</div>}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+            {/* Examples */}
+            {examples.length > 0 && (
+              <div style={{ marginTop: '1.5rem' }}>
+                <h3>Examples:</h3>
+                {examples.map((example, idx) => (
+                  <div key={idx} style={{
+                    marginBottom: '1rem',
+                    padding: '1rem',
+                    backgroundColor: 'var(--ifm-code-background)',
+                    borderRadius: '4px',
+                    fontFamily: 'monospace',
+                    fontSize: '0.875rem'
+                  }}>
+                    <div><strong>Input:</strong> {example.input}</div>
+                    <div><strong>Output:</strong> {example.output}</div>
+                    {example.explanation && <div style={{ marginTop: '0.5rem' }}><strong>Explanation:</strong> {example.explanation}</div>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Right Column: Code Editor */}
         <div style={{
