@@ -146,7 +146,13 @@ export default function AlgorithmProblem({
   const totalCount = testResults.length;
 
   return (
-    <div style={{ marginTop: '2rem' }}>
+    <div style={{
+      marginTop: '2rem',
+      width: shouldExpandEditor ? '100vw' : 'auto',
+      marginLeft: shouldExpandEditor ? 'calc(-50vw + 50%)' : '0',
+      marginRight: shouldExpandEditor ? 'calc(-50vw + 50%)' : '0',
+      transition: 'all 0.3s ease'
+    }}>
       {/* Sidebar Toggle Buttons */}
       <SidebarToggle />
 

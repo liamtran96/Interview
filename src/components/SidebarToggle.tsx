@@ -37,17 +37,28 @@ export default function SidebarToggle(): JSX.Element | null {
     if (docItemWrapper) {
       if (hideLeftSidebar || hideRightSidebar) {
         docItemWrapper.style.maxWidth = '100%';
+        docItemWrapper.style.width = '100%';
       } else {
         docItemWrapper.style.maxWidth = '';
+        docItemWrapper.style.width = '';
       }
     }
 
     if (docItemContainer) {
       if (hideLeftSidebar || hideRightSidebar) {
         docItemContainer.style.maxWidth = '100%';
+        docItemContainer.style.width = '100%';
       } else {
         docItemContainer.style.maxWidth = '';
+        docItemContainer.style.width = '';
       }
+    }
+
+    // Also expand the main wrapper
+    if (docContainer && (hideLeftSidebar || hideRightSidebar)) {
+      docContainer.style.setProperty('--ifm-container-width-xl', '100%');
+    } else if (docContainer) {
+      docContainer.style.removeProperty('--ifm-container-width-xl');
     }
   }, [hideLeftSidebar, hideRightSidebar]);
 
