@@ -223,7 +223,7 @@ export default function AlgorithmProblem({
       {/* Two Column Layout: Problem Description | Code Editor */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: shouldExpandEditor ? '1fr' : '1fr 1fr',
+        gridTemplateColumns: shouldExpandEditor ? '300px 1fr' : '1fr 1fr',
         gap: 0,
         border: '1px solid var(--ifm-color-emphasis-300)',
         borderRadius: '0 0 8px 8px',
@@ -233,7 +233,6 @@ export default function AlgorithmProblem({
         transition: 'grid-template-columns 0.3s ease'
       }}>
         {/* Left Column: Problem Description */}
-        {!shouldExpandEditor && (
         <div style={{
           padding: '1.5rem',
           backgroundColor: 'var(--ifm-background-surface-color)',
@@ -265,7 +264,6 @@ export default function AlgorithmProblem({
             </div>
           )}
         </div>
-        )}
 
         {/* Right Column: Code Editor */}
         <div style={{
