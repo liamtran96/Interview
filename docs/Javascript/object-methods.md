@@ -209,19 +209,112 @@ const dog = new Animal();
 console.log(dog.eats); // true (own property)
 ```
 
-### Q2: How do you create a deep clone?
+### Q2: What's the difference between shallow clone and deep clone?
 
 **Answer:**
 
+**Shallow Clone:**
+- Copies only the first level of properties
+- Nested objects/arrays are still referenced (not copied)
+- Mutating nested objects affects the original
+
+**Deep Clone:**
+- Recursively copies all levels
+- Creates completely independent copy
+- Mutating nested objects doesn't affect the original
+
 ```javascript
-const original = { a: 1, nested: { b: 2 } };
+const original = {
+  name: 'John',
+  age: 30,
+  address: {
+    city: 'NYC',
+    zip: '10001'
+  },
+  hobbies: ['reading', 'gaming']
+};
 
-// ❌ Shallow (mutates nested)
+// ========== SHALLOW CLONE ==========
 const shallow = Object.assign({}, original);
+// or: const shallow = { ...original };
 
-// ✅ Deep clone
+// Top-level changes DON'T affect original ✓
+shallow.name = 'Jane';
+console.log(original.name); // 'John' (unchanged)
+
+// Nested changes DO affect original ✗
+shallow.address.city = 'LA';
+console.log(original.address.city); // 'LA' (mutated!)
+
+shallow.hobbies.push('cooking');
+console.log(original.hobbies); // ['reading', 'gaming', 'cooking'] (mutated!)
+
+// ========== DEEP CLONE ==========
+
+// Method 1: JSON (most common)
 const deep1 = JSON.parse(JSON.stringify(original));
-const deep2 = structuredClone(original); // Modern
+
+// Method 2: structuredClone (modern, recommended)
+const deep2 = structuredClone(original);
+
+// Nested changes DON'T affect original ✓
+deep1.address.city = 'SF';
+console.log(original.address.city); // 'NYC' (unchanged)
+
+deep1.hobbies.push('swimming');
+console.log(original.hobbies); // ['reading', 'gaming'] (unchanged)
+```
+
+**Comparison:**
+
+| Feature | Shallow Clone | Deep Clone |
+|---------|--------------|------------|
+| **Top-level copy** | ✅ Independent | ✅ Independent |
+| **Nested objects** | ❌ Referenced | ✅ Copied |
+| **Performance** | Fast | Slower |
+| **Use case** | Simple objects | Nested structures |
+| **Methods** | `{...obj}`, `Object.assign()` | `JSON.parse(JSON.stringify())`, `structuredClone()` |
+
+**When to use each:**
+
+```javascript
+// Use SHALLOW clone when:
+// - Object has no nested structures
+// - You only need to modify top-level properties
+const user = { name: 'John', age: 30 };
+const copy = { ...user }; // Shallow is fine
+
+// Use DEEP clone when:
+// - Object has nested objects/arrays
+// - You need complete independence
+const config = {
+  server: { host: 'localhost', port: 3000 },
+  database: { url: 'mongodb://...', options: {} }
+};
+const copy = structuredClone(config); // Need deep clone
+```
+
+**Deep Clone Limitations:**
+
+```javascript
+// JSON.parse(JSON.stringify()) loses:
+const obj = {
+  func: () => {},           // ❌ Functions removed
+  date: new Date(),         // ❌ Becomes string
+  undefined: undefined,     // ❌ Property removed
+  symbol: Symbol('id'),     // ❌ Property removed
+  circular: obj             // ❌ Error: circular reference
+};
+
+// structuredClone() is better but still doesn't copy:
+const obj2 = {
+  func: () => {},           // ❌ Error: functions not cloneable
+  // But handles: Date, RegExp, Map, Set, ArrayBuffer, etc. ✅
+};
+
+// For complete cloning (including functions), use libraries:
+// - Lodash: _.cloneDeep(obj)
+// - Ramda: R.clone(obj)
 ```
 
 ### Q3: When to use Object.create(null)?
