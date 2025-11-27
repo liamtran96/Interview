@@ -148,10 +148,8 @@ export default function AlgorithmProblem({
   return (
     <div style={{
       marginTop: '2rem',
-      width: shouldExpandEditor ? '100vw' : 'auto',
-      marginLeft: shouldExpandEditor ? 'calc(-50vw + 50%)' : '0',
-      marginRight: shouldExpandEditor ? 'calc(-50vw + 50%)' : '0',
-      transition: 'all 0.3s ease'
+      width: '100%',
+      maxWidth: '100%'
     }}>
       {/* Sidebar Toggle Buttons */}
       <SidebarToggle />
@@ -225,25 +223,23 @@ export default function AlgorithmProblem({
       {/* Two Column Layout: Problem Description | Code Editor */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: shouldExpandEditor ? '0fr 1fr' : '1fr 1fr',
+        gridTemplateColumns: shouldExpandEditor ? '1fr' : '1fr 1fr',
         gap: 0,
         border: '1px solid var(--ifm-color-emphasis-300)',
         borderRadius: '0 0 8px 8px',
         overflow: 'hidden',
         minHeight: '600px',
+        width: '100%',
         transition: 'grid-template-columns 0.3s ease'
       }}>
         {/* Left Column: Problem Description */}
+        {!shouldExpandEditor && (
         <div style={{
-          padding: shouldExpandEditor ? '0' : '1.5rem',
+          padding: '1.5rem',
           backgroundColor: 'var(--ifm-background-surface-color)',
           overflowY: 'auto',
           maxHeight: '600px',
-          borderRight: shouldExpandEditor ? 'none' : '1px solid var(--ifm-color-emphasis-300)',
-          opacity: shouldExpandEditor ? 0 : 1,
-          width: shouldExpandEditor ? '0' : 'auto',
-          overflow: shouldExpandEditor ? 'hidden' : 'auto',
-          transition: 'opacity 0.3s ease, padding 0.3s ease'
+          borderRight: '1px solid var(--ifm-color-emphasis-300)'
         }}>
           {/* Description */}
           <div dangerouslySetInnerHTML={{ __html: description }} />
@@ -269,12 +265,14 @@ export default function AlgorithmProblem({
             </div>
           )}
         </div>
+        )}
 
         {/* Right Column: Code Editor */}
         <div style={{
           backgroundColor: '#1e1e1e',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          width: '100%'
         }}>
           <Editor
             height="600px"
