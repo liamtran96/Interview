@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import ExecutionEnvironment from '@docusaurus/ExecutionEnvironment';
+import { useSidebar } from '../contexts/SidebarContext';
 
 export default function SidebarToggle(): JSX.Element | null {
-  const [hideLeftSidebar, setHideLeftSidebar] = useState(false);
-  const [hideRightSidebar, setHideRightSidebar] = useState(false);
+  const { hideLeftSidebar, hideRightSidebar, setHideLeftSidebar, setHideRightSidebar } = useSidebar();
 
   useEffect(() => {
     if (!ExecutionEnvironment.canUseDOM) return;

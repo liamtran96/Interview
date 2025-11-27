@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import SidebarToggle from './SidebarToggle';
+import { useSidebar } from '../contexts/SidebarContext';
 
 interface TestCase {
   input: any[];
@@ -48,6 +49,10 @@ export default function AlgorithmProblem({
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const editorRef = useRef<any>(null);
+  const { hideLeftSidebar, hideRightSidebar } = useSidebar();
+
+  // Determine if editor should take full width
+  const shouldExpandEditor = hideLeftSidebar || hideRightSidebar;
 
   const difficultyColor = {
     Easy: '#00b8a3',
@@ -214,20 +219,25 @@ export default function AlgorithmProblem({
       {/* Two Column Layout: Problem Description | Code Editor */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
+        gridTemplateColumns: shouldExpandEditor ? '0fr 1fr' : '1fr 1fr',
         gap: 0,
         border: '1px solid var(--ifm-color-emphasis-300)',
         borderRadius: '0 0 8px 8px',
         overflow: 'hidden',
-        minHeight: '600px'
+        minHeight: '600px',
+        transition: 'grid-template-columns 0.3s ease'
       }}>
         {/* Left Column: Problem Description */}
         <div style={{
-          padding: '1.5rem',
+          padding: shouldExpandEditor ? '0' : '1.5rem',
           backgroundColor: 'var(--ifm-background-surface-color)',
           overflowY: 'auto',
           maxHeight: '600px',
-          borderRight: '1px solid var(--ifm-color-emphasis-300)'
+          borderRight: shouldExpandEditor ? 'none' : '1px solid var(--ifm-color-emphasis-300)',
+          opacity: shouldExpandEditor ? 0 : 1,
+          width: shouldExpandEditor ? '0' : 'auto',
+          overflow: shouldExpandEditor ? 'hidden' : 'auto',
+          transition: 'opacity 0.3s ease, padding 0.3s ease'
         }}>
           {/* Description */}
           <div dangerouslySetInnerHTML={{ __html: description }} />
