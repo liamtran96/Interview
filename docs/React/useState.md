@@ -199,6 +199,326 @@ function Component() {
 }
 ```
 
+## State Batching and Queueing
+
+### How React Batches State Updates
+
+React **batches multiple state updates** in event handlers to prevent unnecessary re-renders and improve performance.
+
+```javascript
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  function handleClick() {
+    setCount(count + 1);  // Doesn't re-render yet
+    setCount(count + 1);  // Doesn't re-render yet
+    setCount(count + 1);  // Batched - only 1 re-render after handler completes
+    console.log(count);   // Still 0! Updates happen after handler
+  }
+
+  // Result: count is still 1, not 3!
+  // All three updates use the same count value (0)
+  return <button onClick={handleClick}>Count: {count}</button>;
+}
+```
+
+**Why batching matters:**
+- **Performance** - One re-render instead of three
+- **Consistency** - No partial UI states
+- **Predictability** - All state updates complete together
+
+### The Update Queue
+
+React processes state updates **sequentially** in a queue during the next render.
+
+#### Direct Values (Replaces Queue)
+
+```javascript
+function handleClick() {
+  setNumber(number + 5);  // Replace with number + 5
+  setNumber(number + 5);  // Replace with number + 5
+  setNumber(number + 5);  // Replace with number + 5
+}
+// Result: number + 5 (not number + 15)
+// Each update uses the same snapshot value
+```
+
+**What happens:**
+1. Start with `number = 0`
+2. Queue: "replace with 0 + 5"
+3. Queue: "replace with 0 + 5"
+4. Queue: "replace with 0 + 5"
+5. React processes queue → Final value: `5`
+
+#### Updater Functions (Updates Queue)
+
+```javascript
+function handleClick() {
+  setNumber(n => n + 5);  // Update: take prev, add 5
+  setNumber(n => n + 5);  // Update: take prev, add 5
+  setNumber(n => n + 5);  // Update: take prev, add 5
+}
+// Result: number + 15 (each update builds on previous)
+```
+
+**What happens:**
+1. Start with `number = 0`
+2. Queue: `n => n + 5` (0 + 5 = 5)
+3. Queue: `n => n + 5` (5 + 5 = 10)
+4. Queue: `n => n + 5` (10 + 5 = 15)
+5. React processes queue → Final value: `15`
+
+### Mixing Direct Values and Updater Functions
+
+**Order matters** when mixing update types:
+
+```javascript
+function handleClick() {
+  setNumber(number + 5);     // Replace: 0 + 5 = 5
+  setNumber(n => n + 1);     // Update: 5 + 1 = 6
+  setNumber(42);             // Replace: 42
+  setNumber(n => n + 1);     // Update: 42 + 1 = 43
+}
+// Result: 43
+```
+
+**Step-by-step queue processing:**
+
+| Update | Queue Instruction | Result |
+|--------|------------------|--------|
+| `setNumber(number + 5)` | "replace with 5" | 5 |
+| `setNumber(n => n + 1)` | "n + 1" | 6 |
+| `setNumber(42)` | "replace with 42" | 42 |
+| `setNumber(n => n + 1)` | "n + 1" | 43 |
+
+### Practical Examples
+
+#### Example 1: Multiple Increments
+
+```javascript
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  function handleClick() {
+    // ❌ WRONG - Only increments by 1
+    setCount(count + 1);
+    setCount(count + 1);
+    setCount(count + 1);
+    // All use same count value (0)
+  }
+
+  function handleClickCorrect() {
+    // ✅ CORRECT - Increments by 3
+    setCount(c => c + 1);
+    setCount(c => c + 1);
+    setCount(c => c + 1);
+    // Each uses result of previous
+  }
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={handleClick}>Wrong (+1)</button>
+      <button onClick={handleClickCorrect}>Correct (+3)</button>
+    </div>
+  );
+}
+```
+
+#### Example 2: Mixed Updates
+
+```javascript
+function NumberGame() {
+  const [number, setNumber] = useState(0);
+
+  function processNumber() {
+    setNumber(number + 5);     // 0 + 5 = 5
+    setNumber(n => n * 2);     // 5 * 2 = 10
+    setNumber(100);            // Replace with 100
+    setNumber(n => n - 50);    // 100 - 50 = 50
+  }
+
+  return (
+    <div>
+      <p>Number: {number}</p>
+      <button onClick={processNumber}>Process</button>
+    </div>
+  );
+}
+```
+
+#### Example 3: Form Submission
+
+```javascript
+function Form() {
+  const [data, setData] = useState({ name: '', submitted: false });
+
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    // ❌ WRONG - submitted might be false during API call
+    setData({ ...data, submitted: true });
+    api.submit(data);
+
+    // ✅ CORRECT - Ensure using latest data
+    setData(prev => ({ ...prev, submitted: true }));
+    setData(prev => {
+      api.submit(prev);
+      return prev;
+    });
+  }
+}
+```
+
+### React 18: Automatic Batching Everywhere
+
+Before React 18, batching only worked in event handlers. React 18 enables **automatic batching everywhere**:
+
+```javascript
+// React 17: NOT batched (2 re-renders)
+setTimeout(() => {
+  setCount(c => c + 1);
+  setFlag(f => !f);
+}, 1000);
+
+// React 18: Batched (1 re-render)
+setTimeout(() => {
+  setCount(c => c + 1);  // Batched
+  setFlag(f => !f);      // Batched
+}, 1000);
+```
+
+**Now batched in:**
+- ✅ Event handlers (always batched)
+- ✅ Promises
+- ✅ setTimeout/setInterval
+- ✅ Native event handlers
+- ✅ Any other async code
+
+**Opt-out of batching (rare):**
+
+```javascript
+import { flushSync } from 'react-dom';
+
+flushSync(() => {
+  setCount(c => c + 1);
+}); // Re-renders immediately
+
+flushSync(() => {
+  setFlag(f => !f);
+}); // Re-renders immediately
+// Total: 2 re-renders
+```
+
+### Common Interview Questions
+
+#### Q: Why use updater functions?
+
+**Answer:**
+
+**Use updater functions when:**
+1. New state depends on previous state
+2. Multiple updates in one handler
+3. Updates in async code (timers, promises)
+
+```javascript
+// ❌ Don't - Relies on stale value
+setCount(count + 1);
+
+// ✅ Do - Always uses latest value
+setCount(c => c + 1);
+```
+
+#### Q: What's the difference between these?
+
+```javascript
+// Version A
+setNumber(number + 1);
+setNumber(number + 1);
+
+// Version B
+setNumber(n => n + 1);
+setNumber(n => n + 1);
+```
+
+**Answer:**
+
+- **Version A**: Both use same `number` value → Increments by 1
+- **Version B**: Second uses result of first → Increments by 2
+
+**Version A queue:**
+```
+number = 0
+Replace with 0 + 1 = 1
+Replace with 0 + 1 = 1
+Final: 1
+```
+
+**Version B queue:**
+```
+number = 0
+n => n + 1: 0 → 1
+n => n + 1: 1 → 2
+Final: 2
+```
+
+#### Q: When does React process the update queue?
+
+**Answer:**
+
+React processes the queue **after your event handler completes**:
+
+```javascript
+function handleClick() {
+  console.log('Before:', count);  // 0
+
+  setCount(c => c + 1);
+  setCount(c => c + 1);
+  setCount(c => c + 1);
+
+  console.log('After:', count);   // Still 0!
+  // State hasn't updated yet
+}
+
+// After handleClick completes:
+// React processes queue → count becomes 3
+// Component re-renders with new value
+```
+
+### Rules for Updater Functions
+
+1. **Must be pure** - No side effects
+2. **Only return new state** - Don't mutate
+3. **Can't call setState inside** - Infinite loop
+
+```javascript
+// ✅ CORRECT - Pure function
+setCount(c => c + 1);
+
+// ❌ WRONG - Side effect
+setCount(c => {
+  console.log(c);  // Side effect!
+  return c + 1;
+});
+
+// ❌ WRONG - Calling setState inside
+setCount(c => {
+  setOtherState(c);  // Don't do this!
+  return c + 1;
+});
+```
+
+### When to Use Each Approach
+
+| Scenario | Use | Example |
+|----------|-----|---------|
+| Single update with current value | Direct value | `setCount(5)` |
+| Update based on previous | Updater function | `setCount(c => c + 1)` |
+| Multiple updates in handler | Updater function | See examples above |
+| Independent updates | Direct value | `setName('John')` |
+| Computed from props | Direct value | `setTotal(price * quantity)` |
+| Toggle boolean | Updater function | `setOn(prev => !prev)` |
+
 ## Common Pitfalls
 
 ### 1. Stale State in Callbacks
