@@ -29,11 +29,20 @@ export default function SidebarToggle(): JSX.Element | null {
 
     if (hideRightSidebar && rightSidebar) {
       rightSidebar.style.display = 'none';
+      if (docContainer) {
+        // Set TOC sidebar width to 0 to reclaim the space
+        docContainer.style.setProperty('--doc-sidebar-hidden-width', '0rem');
+      }
     } else if (rightSidebar) {
       rightSidebar.style.display = '';
+      if (docContainer) {
+        docContainer.style.removeProperty('--doc-sidebar-hidden-width');
+      }
     }
 
     // Expand content area when sidebars are hidden
+    const mainContent = document.querySelector('main.docMainContainer') as HTMLElement;
+
     if (docItemWrapper) {
       if (hideLeftSidebar || hideRightSidebar) {
         docItemWrapper.style.maxWidth = '100%';
@@ -54,11 +63,24 @@ export default function SidebarToggle(): JSX.Element | null {
       }
     }
 
+    // Expand the main content container
+    if (mainContent) {
+      if (hideLeftSidebar || hideRightSidebar) {
+        mainContent.style.maxWidth = '100%';
+        mainContent.style.width = '100%';
+      } else {
+        mainContent.style.maxWidth = '';
+        mainContent.style.width = '';
+      }
+    }
+
     // Also expand the main wrapper
     if (docContainer && (hideLeftSidebar || hideRightSidebar)) {
       docContainer.style.setProperty('--ifm-container-width-xl', '100%');
+      docContainer.style.setProperty('--ifm-container-width', '100%');
     } else if (docContainer) {
       docContainer.style.removeProperty('--ifm-container-width-xl');
+      docContainer.style.removeProperty('--ifm-container-width');
     }
   }, [hideLeftSidebar, hideRightSidebar]);
 
