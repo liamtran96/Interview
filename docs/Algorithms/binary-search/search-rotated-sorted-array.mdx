@@ -1,0 +1,415 @@
+---
+sidebar_position: 6
+difficulty: Medium
+tags: [binary-search, arrays, facebook, google, amazon]
+leetcode_url: https://leetcode.com/problems/search-in-rotated-sorted-array/
+companies: [Facebook, Google, Amazon, Microsoft, Apple]
+pattern: "Binary Search"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Search in Rotated Sorted Array
+
+<AlgorithmProblem
+  title="Search in Rotated Sorted Array"
+  difficulty="Medium"
+  description={`
+<p>There is an integer array <code>nums</code> sorted in ascending order (with <strong>distinct</strong> values).</p>
+<p>Prior to being passed to your function, <code>nums</code> is <strong>possibly rotated</strong> at an unknown pivot index <code>k</code> (<code>1 &lt;= k &lt; nums.length</code>) such that the resulting array is <code>[nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]]</code> (<strong>0-indexed</strong>). For example, <code>[0,1,2,4,5,6,7]</code> might be rotated at pivot index <code>3</code> and become <code>[4,5,6,7,0,1,2]</code>.</p>
+<p>Given the array <code>nums</code> <strong>after</strong> the possible rotation and an integer <code>target</code>, return <em>the index of</em> <code>target</code> if it is in <code>nums</code>, or <code>-1</code> if it is not in <code>nums</code>.</p>
+<p>You must write an algorithm with <strong>O(log n)</strong> runtime complexity.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &lt;= nums.length &lt;= 5000</li>
+  <li>-10<sup>4</sup> &lt;= nums[i] &lt;= 10<sup>4</sup></li>
+  <li>All values of <code>nums</code> are <strong>unique</strong>.</li>
+  <li><code>nums</code> is an ascending array that is possibly rotated.</li>
+  <li>-10<sup>4</sup> &lt;= target &lt;= 10<sup>4</sup></li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'nums = [4,5,6,7,0,1,2], target = 0',
+      output: '4',
+      explanation: 'Target 0 is at index 4'
+    },
+    {
+      input: 'nums = [4,5,6,7,0,1,2], target = 3',
+      output: '-1',
+      explanation: 'Target 3 does not exist in the array'
+    },
+    {
+      input: 'nums = [1], target = 0',
+      output: '-1',
+      explanation: 'Single element array, target not found'
+    }
+  ]}
+  starterCode={`function search(nums, target) {
+  // Write your code here
+
+}`}
+  solution={`function search(nums, target) {
+  // Modified binary search: O(log n) time, O(1) space
+  let left = 0;
+  let right = nums.length - 1;
+
+  while (left <= right) {
+    const mid = Math.floor(left + (right - left) / 2);
+
+    if (nums[mid] === target) {
+      return mid; // Found target
+    }
+
+    // Determine which half is sorted
+    if (nums[left] <= nums[mid]) {
+      // Left half is sorted
+      if (nums[left] <= target && target < nums[mid]) {
+        // Target is in sorted left half
+        right = mid - 1;
+      } else {
+        // Target is in right half
+        left = mid + 1;
+      }
+    } else {
+      // Right half is sorted
+      if (nums[mid] < target && target <= nums[right]) {
+        // Target is in sorted right half
+        left = mid + 1;
+      } else {
+        // Target is in left half
+        right = mid - 1;
+      }
+    }
+  }
+
+  return -1; // Target not found
+}`}
+  testCases={[
+    {
+      input: [[4, 5, 6, 7, 0, 1, 2], 0],
+      expected: 4,
+      description: 'Rotated array, target in right half: nums=[4,5,6,7,0,1,2], target=0'
+    },
+    {
+      input: [[4, 5, 6, 7, 0, 1, 2], 3],
+      expected: -1,
+      description: 'Target not found: nums=[4,5,6,7,0,1,2], target=3'
+    },
+    {
+      input: [[1], 0],
+      expected: -1,
+      description: 'Single element, not found: nums=[1], target=0'
+    },
+    {
+      input: [[1, 3], 3],
+      expected: 1,
+      description: 'No rotation: nums=[1,3], target=3'
+    },
+    {
+      input: [[3, 1], 1],
+      expected: 1,
+      description: 'Rotated once: nums=[3,1], target=1'
+    },
+    {
+      input: [[4, 5, 6, 7, 8, 1, 2, 3], 8],
+      expected: 4,
+      description: 'Target in left sorted half: nums=[4,5,6,7,8,1,2,3], target=8'
+    }
+  ]}
+  functionName="search"
+/>
+
+## Solution Explanation
+
+### Approach 1: Find Pivot + Two Binary Searches (Suboptimal)
+
+**Time Complexity:** O(log n)
+**Space Complexity:** O(1)
+
+Find rotation point, then search appropriate half:
+
+```javascript
+function search(nums, target) {
+  // Find pivot (minimum element)
+  let left = 0;
+  let right = nums.length - 1;
+
+  while (left < right) {
+    const mid = Math.floor(left + (right - left) / 2);
+    if (nums[mid] > nums[right]) {
+      left = mid + 1;
+    } else {
+      right = mid;
+    }
+  }
+
+  const pivot = left;
+
+  // Binary search in appropriate half
+  left = 0;
+  right = nums.length - 1;
+
+  if (target >= nums[pivot] && target <= nums[right]) {
+    left = pivot; // Search right side
+  } else {
+    right = pivot - 1; // Search left side
+  }
+
+  // Standard binary search
+  while (left <= right) {
+    const mid = Math.floor(left + (right - left) / 2);
+    if (nums[mid] === target) return mid;
+    else if (nums[mid] < target) left = mid + 1;
+    else right = mid - 1;
+  }
+
+  return -1;
+}
+```
+
+**Why not use this?**
+- Requires two passes (find pivot, then search)
+- More code and complexity
+- Can be done in single pass!
+
+### Approach 2: Modified Binary Search - Single Pass (Optimal) ✅
+
+**Time Complexity:** O(log n)
+**Space Complexity:** O(1)
+
+Determine which half is sorted and decide which way to search:
+
+```javascript
+function search(nums, target) {
+  let left = 0;
+  let right = nums.length - 1;
+
+  while (left <= right) {
+    const mid = Math.floor(left + (right - left) / 2);
+
+    if (nums[mid] === target) {
+      return mid;
+    }
+
+    // Key insight: At least one half must be sorted
+    if (nums[left] <= nums[mid]) {
+      // Left half is sorted: [left...mid] is in order
+      if (nums[left] <= target && target < nums[mid]) {
+        // Target is in the sorted left half
+        right = mid - 1;
+      } else {
+        // Target is in the right half (sorted or not)
+        left = mid + 1;
+      }
+    } else {
+      // Right half is sorted: [mid...right] is in order
+      if (nums[mid] < target && target <= nums[right]) {
+        // Target is in the sorted right half
+        left = mid + 1;
+      } else {
+        // Target is in the left half (sorted or not)
+        right = mid - 1;
+      }
+    }
+  }
+
+  return -1;
+}
+```
+
+**How the Modified Binary Search Works:**
+
+```
+nums = [4, 5, 6, 7, 0, 1, 2], target = 0
+         0  1  2  3  4  5  6
+
+Step 1: left=0, right=6, mid=3
+  nums[3]=7, nums[0]=4 <= nums[3]=7
+  Left half [4,5,6,7] is sorted
+  target=0 not in [4,7], search right
+  left=4
+
+Step 2: left=4, right=6, mid=5
+  nums[5]=1, nums[4]=0 > nums[5]=1
+  Right half [1,2] is sorted
+  target=0 not in [1,2], search left
+  right=4
+
+Step 3: left=4, right=4, mid=4
+  nums[4]=0 = target
+  Found! Return 4 ✅
+
+nums = [4, 5, 6, 7, 0, 1, 2], target = 6
+         0  1  2  3  4  5  6
+
+Step 1: left=0, right=6, mid=3
+  nums[3]=7, nums[0]=4 <= nums[3]=7
+  Left half [4,5,6,7] is sorted
+  target=6 in [4,7], search left
+  right=2
+
+Step 2: left=0, right=2, mid=1
+  nums[1]=5, nums[0]=4 <= nums[1]=5
+  Left half [4,5] is sorted
+  target=6 not in [4,5], search right
+  left=2
+
+Step 3: left=2, right=2, mid=2
+  nums[2]=6 = target
+  Found! Return 2 ✅
+```
+
+**Key Insight - Why This Works:**
+
+```
+In a rotated sorted array, one key property holds:
+AT LEAST ONE HALF IS ALWAYS SORTED
+
+Examples:
+[4, 5, 6, 7, 0, 1, 2]
+ ←sorted→   ←sorted→
+
+[7, 0, 1, 2, 4, 5, 6]
+    ←sorted→
+
+[5, 6, 7, 0, 1, 2, 4]
+ ←sorted→
+
+How to identify which half is sorted?
+if (nums[left] <= nums[mid]):
+  Left half is sorted
+else:
+  Right half is sorted
+
+Once we know which half is sorted:
+- Check if target is in the sorted half
+- If yes, search that half
+- If no, search the other half
+```
+
+### Key Insights
+
+1. **At least one half is always sorted**: This is the crucial observation
+2. **Identify sorted half**: Compare `nums[left]` with `nums[mid]`
+3. **Range check on sorted half**: Only the sorted half has predictable ordering
+4. **Eliminate half each iteration**: Maintains O(log n) complexity
+5. **Single pass solution**: No need to find pivot first
+
+## Common Mistakes
+
+❌ **Not handling edge case nums[left] === nums[mid]:**
+```javascript
+if (nums[left] < nums[mid]) { // Wrong! Misses when left === mid
+  // Left half sorted
+}
+// Should be: nums[left] <= nums[mid]
+```
+
+❌ **Wrong range check for target:**
+```javascript
+if (nums[left] <= target && target <= nums[mid]) {
+  // Wrong! Should be target < nums[mid] (not <=)
+  // Because if target === nums[mid], we already returned!
+}
+```
+
+❌ **Checking wrong half first:**
+```javascript
+// Some solutions check right half first - works but confusing
+// Better to consistently check left half first
+```
+
+❌ **Forgetting the boundary condition:**
+```javascript
+if (nums[left] <= target && target < nums[mid]) {
+  right = mid - 1;
+}
+// Make sure all conditions are tight - no overlap or gaps
+```
+
+✅ **Correct implementation:**
+```javascript
+function search(nums, target) {
+  let left = 0;
+  let right = nums.length - 1;
+
+  while (left <= right) {
+    const mid = Math.floor(left + (right - left) / 2);
+
+    if (nums[mid] === target) {
+      return mid;
+    }
+
+    // Check if left half is sorted
+    if (nums[left] <= nums[mid]) {
+      // Target in sorted left half?
+      if (nums[left] <= target && target < nums[mid]) {
+        right = mid - 1;
+      } else {
+        left = mid + 1;
+      }
+    } else {
+      // Right half is sorted
+      // Target in sorted right half?
+      if (nums[mid] < target && target <= nums[right]) {
+        left = mid + 1;
+      } else {
+        right = mid - 1;
+      }
+    }
+  }
+
+  return -1;
+}
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Recognize: "This is binary search on a rotated sorted array"
+2. Key insight: "At least one half is always sorted"
+3. Strategy: "Identify which half is sorted, then check if target is in that half"
+4. Highlight: "We eliminate half the array at each step - still O(log n)"
+5. Complexity: "Single pass binary search, no need to find pivot first"
+
+**Key talking points:**
+- "The rotation doesn't break the sorted property completely - one half is always sorted"
+- "We identify the sorted half by comparing left, mid values"
+- "Once we know which half is sorted, we can do range check on that half"
+- "If target is in sorted half, search there; otherwise search the other half"
+
+**Visual explanation to give:**
+
+```
+Original: [0, 1, 2, 4, 5, 6, 7]
+Rotated:  [4, 5, 6, 7, 0, 1, 2]
+                    ↑ rotation point
+
+After picking mid:
+[4, 5, 6, 7 | 0, 1, 2]
+ ←sorted→   not sorted
+
+The sorted half has predictable ordering!
+We can check if target falls in that range.
+```
+
+**Follow-up questions you might get:**
+- **What if there are duplicates?** Problem guarantees unique values; duplicates make it harder (O(n) worst case)
+- **Can you find the minimum element?** Yes, related problem (next problem!)
+- **How many rotations occurred?** Same as finding index of minimum element
+- **Can you restore the original array?** Yes, by identifying rotation point
+- **What if not rotated at all?** Algorithm handles it - one half is entire array
+
+**Real-world applications:**
+- Searching in circular buffers
+- Time series data with wraparound
+- Log files across midnight boundary
+- Ring buffers in operating systems
+- Circular arrays in data structures
+
+**Why this problem is important:**
+- Tests understanding of binary search variants
+- Requires careful case analysis
+- Common in system design (circular data structures)
+- Builds toward more complex binary search problems

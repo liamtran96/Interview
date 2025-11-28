@@ -1,0 +1,354 @@
+---
+sidebar_position: 7
+difficulty: Medium
+tags: [two-pointers, array, sorting, amazon, microsoft, facebook]
+leetcode_url: https://leetcode.com/problems/sort-colors/
+companies: [Amazon, Microsoft, Facebook, Google, Apple]
+pattern: "Two Pointers"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Sort Colors
+
+<AlgorithmProblem
+  title="Sort Colors"
+  difficulty="Medium"
+  description={`
+<p>Given an array <code>nums</code> with <code>n</code> objects colored red, white, or blue, sort them <strong>in-place</strong> so that objects of the same color are adjacent, with the colors in the order red, white, and blue.</p>
+<p>We will use the integers <code>0</code>, <code>1</code>, and <code>2</code> to represent the color red, white, and blue, respectively.</p>
+<p>You must solve this problem without using the library's sort function.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>n == nums.length</li>
+  <li>1 ≤ n ≤ 300</li>
+  <li>nums[i] is either <code>0</code>, <code>1</code>, or <code>2</code></li>
+</ul>
+<p><strong>Follow up:</strong> Could you come up with a one-pass algorithm using only constant space?</p>
+`}
+  examples={[
+    {
+      input: 'nums = [2,0,2,1,1,0]',
+      output: '[0,0,1,1,2,2]'
+    },
+    {
+      input: 'nums = [2,0,1]',
+      output: '[0,1,2]'
+    },
+    {
+      input: 'nums = [0]',
+      output: '[0]'
+    }
+  ]}
+  starterCode={`function sortColors(nums) {
+  // Write your code here
+
+}`}
+  solution={`function sortColors(nums) {
+  // Dutch National Flag algorithm: O(n) time, O(1) space
+  let low = 0;    // Boundary for 0s
+  let mid = 0;    // Current element
+  let high = nums.length - 1;  // Boundary for 2s
+
+  while (mid <= high) {
+    if (nums[mid] === 0) {
+      // Swap with low boundary and move both forward
+      [nums[low], nums[mid]] = [nums[mid], nums[low]];
+      low++;
+      mid++;
+    } else if (nums[mid] === 1) {
+      // Already in correct position, just move forward
+      mid++;
+    } else {
+      // nums[mid] === 2
+      // Swap with high boundary and move high back
+      [nums[mid], nums[high]] = [nums[high], nums[mid]];
+      high--;
+      // Don't increment mid - need to check swapped value
+    }
+  }
+}`}
+  testCases={[
+    {
+      input: [[2, 0, 2, 1, 1, 0]],
+      expected: [0, 0, 1, 1, 2, 2],
+      description: 'Mixed colors needing full sort'
+    },
+    {
+      input: [[2, 0, 1]],
+      expected: [0, 1, 2],
+      description: 'One of each color in reverse order'
+    },
+    {
+      input: [[0]],
+      expected: [0],
+      description: 'Single element'
+    },
+    {
+      input: [[1, 2, 0]],
+      expected: [0, 1, 2],
+      description: 'Three elements needing sort'
+    },
+    {
+      input: [[2, 2, 2, 1, 1, 0, 0]],
+      expected: [0, 0, 1, 1, 2, 2, 2],
+      description: 'Multiple of each color'
+    },
+    {
+      input: [[1, 1, 1, 1]],
+      expected: [1, 1, 1, 1],
+      description: 'All same color (middle)'
+    }
+  ]}
+  functionName="sortColors"
+/>
+
+## Solution Explanation
+
+### Approach 1: Built-in Sort (Not Allowed)
+
+**Time Complexity:** O(n log n)
+**Space Complexity:** O(1)
+
+```javascript
+function sortColors(nums) {
+  nums.sort((a, b) => a - b);
+}
+```
+
+**Why not use this?**
+- Problem explicitly forbids using library sort
+- O(n log n) is slower than necessary
+- Doesn't demonstrate algorithmic thinking
+
+### Approach 2: Counting Sort (Two Pass)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1)
+
+Count each color, then overwrite array:
+
+```javascript
+function sortColors(nums) {
+  let count0 = 0, count1 = 0, count2 = 0;
+
+  // First pass: count colors
+  for (let num of nums) {
+    if (num === 0) count0++;
+    else if (num === 1) count1++;
+    else count2++;
+  }
+
+  // Second pass: overwrite array
+  let i = 0;
+  while (count0-- > 0) nums[i++] = 0;
+  while (count1-- > 0) nums[i++] = 1;
+  while (count2-- > 0) nums[i++] = 2;
+}
+```
+
+**Good, but:**
+- Two passes through the array
+- Follow-up asks for one-pass solution
+- Can be optimized further
+
+### Approach 3: Dutch National Flag (One Pass) ✅
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1)
+
+Three pointers to partition array in one pass:
+
+```javascript
+function sortColors(nums) {
+  let low = 0;    // Next position for 0
+  let mid = 0;    // Current element being examined
+  let high = nums.length - 1;  // Next position for 2
+
+  while (mid <= high) {
+    if (nums[mid] === 0) {
+      // Swap 0 to low section
+      [nums[low], nums[mid]] = [nums[mid], nums[low]];
+      low++;
+      mid++;
+    } else if (nums[mid] === 1) {
+      // 1 is already in correct section
+      mid++;
+    } else {
+      // nums[mid] === 2
+      // Swap 2 to high section
+      [nums[mid], nums[high]] = [nums[high], nums[mid]];
+      high--;
+      // Don't increment mid - check swapped element
+    }
+  }
+}
+```
+
+**How it works:**
+
+1. **Three pointers**:
+   - `low`: Boundary between 0s and 1s
+   - `mid`: Current element being examined
+   - `high`: Boundary between 1s and 2s
+
+2. **Invariants**:
+   - [0, low): All 0s
+   - [low, mid): All 1s
+   - (high, end]: All 2s
+   - [mid, high]: Unexplored
+
+3. **Actions based on nums[mid]**:
+   - If 0: Swap with low, advance both low and mid
+   - If 1: Already correct, advance mid only
+   - If 2: Swap with high, decrement high (don't advance mid!)
+
+**Example walkthrough:**
+
+```
+nums = [2, 0, 2, 1, 1, 0]
+
+Initial:
+[2, 0, 2, 1, 1, 0]
+ L,M              H
+low=0, mid=0, high=5
+
+Step 1: nums[mid]=2 → swap with high
+[0, 0, 2, 1, 1, 2]
+ L,M           H
+low=0, mid=0, high=4
+
+Step 2: nums[mid]=0 → swap with low
+[0, 0, 2, 1, 1, 2]
+    L,M        H
+low=1, mid=1, high=4
+
+Step 3: nums[mid]=0 → swap with low
+[0, 0, 2, 1, 1, 2]
+       L,M     H
+low=2, mid=2, high=4
+
+Step 4: nums[mid]=2 → swap with high
+[0, 0, 1, 1, 2, 2]
+       L,M  H
+low=2, mid=2, high=3
+
+Step 5: nums[mid]=1 → just advance mid
+[0, 0, 1, 1, 2, 2]
+       L  M  H
+low=2, mid=3, high=3
+
+Step 6: nums[mid]=1 → just advance mid
+[0, 0, 1, 1, 2, 2]
+       L    M,H
+low=2, mid=4, high=3
+
+mid > high → stop ✅
+Result: [0, 0, 1, 1, 2, 2]
+```
+
+### Why It's Called Dutch National Flag
+
+Named after the Dutch flag (🇳🇱) which has three horizontal bands:
+- Red (top) → 0s
+- White (middle) → 1s
+- Blue (bottom) → 2s
+
+Invented by Edsger Dijkstra, a Dutch computer scientist.
+
+### Key Insights
+
+**Why don't we increment mid when swapping with high?**
+- The element swapped from high is unexplored
+- We need to check if it's 0, 1, or 2
+- If we skip it, we might place it incorrectly
+
+**Why can we increment mid when swapping with low?**
+- Elements before mid have been examined
+- They're guaranteed to be 1s (in the [low, mid) region)
+- Safe to move past them
+
+## Common Mistakes
+
+❌ **Incrementing mid after swapping with high:**
+```javascript
+if (nums[mid] === 2) {
+  [nums[mid], nums[high]] = [nums[high], nums[mid]];
+  high--;
+  mid++;  // Wrong! Must check swapped element
+}
+```
+
+❌ **Using mid < high instead of mid ≤ high:**
+```javascript
+while (mid < high) // Should be mid <= high
+```
+
+❌ **Not swapping, just assigning:**
+```javascript
+if (nums[mid] === 0) {
+  nums[low] = 0;  // Wrong! Loses value at low
+  low++;
+  mid++;
+}
+```
+
+❌ **Using wrong pointers for swap:**
+```javascript
+if (nums[mid] === 0) {
+  [nums[mid], nums[high]] = [nums[high], nums[mid]]; // Should swap with low!
+}
+```
+
+❌ **Forgetting to increment/decrement pointers:**
+```javascript
+if (nums[mid] === 0) {
+  [nums[low], nums[mid]] = [nums[mid], nums[low]];
+  // Missing: low++; mid++;
+}
+```
+
+## Interview Tips
+
+**Discussion points:**
+1. Start with simple solutions (built-in sort, counting sort)
+2. Explain why they don't meet requirements
+3. Introduce Dutch National Flag algorithm
+4. Walk through example showing pointer movements
+5. Explain why mid doesn't advance when swapping with high
+
+**Follow-up questions:**
+- Why is it called Dutch National Flag? → Named after Dutch flag colors
+- Can we extend this to k colors? → Yes, but more complex
+- What if colors weren't 0,1,2? → Same algorithm, just adjust comparisons
+- How would you test this? → Edge cases: all same color, already sorted, reverse sorted
+
+**Key insights to mention:**
+- One pass through array
+- Three pointers partition into three regions
+- Maintain invariants about explored regions
+- Careful about when to advance mid pointer
+
+**Common variations:**
+- Sort array into even/odd
+- Partition around pivot (QuickSort partition step)
+- Separate positive/negative numbers
+
+**What makes this problem interesting:**
+- Multiple valid approaches (counting vs partitioning)
+- Tricky pointer management (when to advance mid)
+- Real-world application (three-way partitioning)
+- Foundation for QuickSort's partition
+
+**Optimization notes:**
+- Already optimal: O(n) time, O(1) space
+- Single pass through array
+- Only constant extra space for pointers
+
+## Related Problems
+
+- **Move Zeroes** (Easy) - Two-partition version
+- **Sort List** (Medium) - Sorting with different constraints
+- **Partition Array** (Easy) - Two-way partitioning
+- **QuickSort** - Uses similar partitioning logic
+- **K-th Largest Element** (Medium) - Uses partitioning

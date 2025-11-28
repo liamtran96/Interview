@@ -1,0 +1,365 @@
+---
+sidebar_position: 3
+difficulty: Easy
+tags: [linked-lists, two-pointers, cycle-detection, amazon, google]
+leetcode_url: https://leetcode.com/problems/linked-list-cycle/
+companies: [Amazon, Google, Microsoft, Meta, Apple]
+pattern: "Linked Lists"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Linked List Cycle
+
+<AlgorithmProblem
+  title="Linked List Cycle"
+  difficulty="Easy"
+  description={`
+<p>Given <code>head</code>, the head of a linked list, determine if the linked list has a cycle in it.</p>
+<p>There is a cycle in a linked list if there is some node in the list that can be reached again by continuously following the <code>next</code> pointer. Internally, <code>pos</code> is used to denote the index of the node that the tail connects to. <strong>Note that <strong>pos</strong> is not passed as a parameter</strong>.</p>
+<p>Return <code>true</code> if there is a cycle in the linked list. Otherwise, return <code>false</code>.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>The number of the nodes in the list is in the range [0, 10<sup>4</sup>]</li>
+  <li>-10<sup>5</sup> ≤ node.val ≤ 10<sup>5</sup></li>
+  <li><code>pos</code> is -1 or a valid index in the linked-list</li>
+</ul>
+<h4>Follow up:</h4>
+<p>Can you solve it using O(1) (i.e. constant) memory?</p>
+`}
+  examples={[
+    {
+      input: 'head = [3,2,0,-4], pos = 1',
+      output: 'true',
+      explanation: 'There is a cycle in the linked list, where tail connects to the 1st node (0-indexed)'
+    },
+    {
+      input: 'head = [1,2], pos = 0',
+      output: 'true',
+      explanation: 'There is a cycle in the linked list, where tail connects to the 0th node'
+    },
+    {
+      input: 'head = [1], pos = -1',
+      output: 'false',
+      explanation: 'There is no cycle in the linked list'
+    }
+  ]}
+  starterCode={`class ListNode {
+  constructor(val = 0, next = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+function hasCycle(head) {
+  // TODO: Detect if linked list has a cycle
+  return false;
+}`}
+  solution={`class ListNode {
+  constructor(val = 0, next = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+function hasCycle(head) {
+  // Floyd's Cycle Detection (Tortoise and Hare)
+  let slow = head;
+  let fast = head;
+
+  while (fast !== null && fast.next !== null) {
+    slow = slow.next;           // Move 1 step
+    fast = fast.next.next;      // Move 2 steps
+
+    if (slow === fast) {
+      return true;  // Cycle detected!
+    }
+  }
+
+  return false;  // No cycle
+}`}
+  testCases={[
+    {
+      input: [[3, 2, 0, -4], 1],
+      expected: true,
+      description: 'Cycle where tail connects to middle node'
+    },
+    {
+      input: [[1, 2], 0],
+      expected: true,
+      description: 'Cycle where tail connects to head'
+    },
+    {
+      input: [[1], -1],
+      expected: false,
+      description: 'Single node without cycle'
+    },
+    {
+      input: [[1, 2, 3, 4, 5], -1],
+      expected: false,
+      description: 'No cycle in longer list'
+    },
+    {
+      input: [[], -1],
+      expected: false,
+      description: 'Empty list has no cycle'
+    },
+    {
+      input: [[1, 2, 3, 4, 5], 4],
+      expected: true,
+      description: 'Cycle at the end'
+    }
+  ]}
+  functionName="hasCycle"
+/>
+
+## Solution Explanation
+
+### Approach 1: Floyd's Cycle Detection (Optimal) ✅
+
+**Time Complexity:** O(n) where n is number of nodes
+**Space Complexity:** O(1) - constant space!
+
+Use two pointers at different speeds (tortoise and hare). If there's a cycle, they will eventually meet:
+
+```javascript
+function hasCycle(head) {
+  let slow = head;   // Moves 1 step at a time
+  let fast = head;   // Moves 2 steps at a time
+
+  while (fast !== null && fast.next !== null) {
+    slow = slow.next;        // 1 step
+    fast = fast.next.next;   // 2 steps
+
+    if (slow === fast) {
+      return true;  // They met - cycle exists!
+    }
+  }
+
+  return false;  // fast reached end - no cycle
+}
+```
+
+**Why it works:**
+
+```
+No cycle:
+1 → 2 → 3 → 4 → 5 → null
+slow: 1 → 2 → 3 → 4 → 5 (stops)
+fast: 1 → 3 → 5 → null (stops)
+Never meet! Return false ✓
+
+With cycle:
+1 → 2 → 3 → 4 → 5 ↓
+↑______________|
+
+Iteration 1: slow = 1 → 2, fast = 1 → 3 → 5
+Iteration 2: slow = 2 → 3, fast = 5 → 4 → 2
+Iteration 3: slow = 3 → 4, fast = 2 → 5 → 3
+Iteration 4: slow = 4 → 5, fast = 3 → 2 → 4
+Iteration 5: slow = 5 → 3, fast = 4 → 5 → 2
+
+Eventually they meet! Return true ✓
+```
+
+**Key insight:** In a cycle, the fast pointer "laps" the slow pointer eventually because they're in a finite circular space.
+
+### Approach 2: Hash Set (Simple but Uses Space)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(n) - need to store visited nodes
+
+Track visited nodes in a Set:
+
+```javascript
+function hasCycle(head) {
+  const visited = new Set();
+
+  let curr = head;
+  while (curr !== null) {
+    if (visited.has(curr)) {
+      return true;  // Revisited a node - cycle!
+    }
+    visited.add(curr);
+    curr = curr.next;
+  }
+
+  return false;  // Reached end - no cycle
+}
+```
+
+**Advantage:** Easy to understand
+**Disadvantage:** Uses O(n) extra space
+
+### Approach 3: Mark Visited (Destructive)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1)
+
+Mark nodes as visited by modifying them (not recommended in interviews):
+
+```javascript
+function hasCycle(head) {
+  let curr = head;
+
+  while (curr !== null) {
+    if (curr.visited) {
+      return true;  // Already visited - cycle!
+    }
+    curr.visited = true;  // Mark as visited
+    curr = curr.next;
+  }
+
+  return false;
+}
+```
+
+**Disadvantage:** Modifies the input, bad practice
+
+## Comparison of Approaches
+
+| Approach | Time | Space | Follow Up | Best For |
+|----------|------|-------|-----------|----------|
+| Floyd's | O(n) | O(1) | ✅ Answers follow-up | **Recommended** |
+| Hash Set | O(n) | O(n) | ❌ Doesn't answer follow-up | Learning |
+| Marking | O(n) | O(1) | ✅ Answers follow-up | Not recommended |
+
+## Common Mistakes
+
+❌ **Checking only fast for null:**
+```javascript
+while (fast !== null) {
+  slow = slow.next;
+  fast = fast.next.next;  // ERROR: fast.next might be null!
+}
+```
+
+✅ **Check both fast and fast.next:**
+```javascript
+while (fast !== null && fast.next !== null) {
+  slow = slow.next;
+  fast = fast.next.next;  // Safe now
+}
+```
+
+---
+
+❌ **Comparing node values instead of references:**
+```javascript
+if (slow.val === fast.val) {  // ERROR: same values ≠ same node!
+  return true;
+}
+```
+
+✅ **Compare actual node objects:**
+```javascript
+if (slow === fast) {  // Correct: same reference
+  return true;
+}
+```
+
+---
+
+❌ **Not handling single node cycle:**
+```javascript
+// If a single node points to itself, this might miss it
+while (fast.next !== null) {  // Exits when fast.next is null
+  // ...
+}
+```
+
+✅ **Check fast and fast.next:**
+```javascript
+while (fast !== null && fast.next !== null) {
+  // Handles single node pointing to itself
+}
+```
+
+---
+
+❌ **Starting fast and slow at different positions:**
+```javascript
+let slow = head;
+let fast = head.next.next;  // Starting ahead is fine but confusing
+```
+
+✅ **Start both at head:**
+```javascript
+let slow = head;
+let fast = head;  // Clear and works perfectly
+```
+
+## Interview Tips
+
+**What to mention:**
+1. **Floyd's algorithm:** Explain the tortoise and hare concept
+2. **Why it works:** In a cycle, faster pointer will lap slower pointer
+3. **Space complexity:** This is the O(1) solution they're asking for
+4. **Answer the follow-up:** Use this approach, not hash set!
+
+**Follow-up questions:**
+
+**Q: Can you solve it with O(1) space?**
+A: Yes, use Floyd's cycle detection. This IS the O(1) solution!
+
+**Q: Can you find the start of the cycle?**
+A: Yes! When they meet, reset one pointer to head and move both 1 step at a time. They'll meet at cycle start.
+```javascript
+// After detecting cycle at meeting point
+let ptr1 = head;
+let ptr2 = meetingPoint;
+while (ptr1 !== ptr2) {
+  ptr1 = ptr1.next;
+  ptr2 = ptr2.next;
+}
+return ptr1;  // Start of cycle
+```
+
+**Q: What if list is very large?**
+A: Floyd's algorithm is still O(n) and O(1) space - best approach for any size.
+
+## Edge Cases
+
+```javascript
+// Single node pointing to itself
+1 → 1 (cycle)
+
+// Two nodes in cycle
+1 → 2 → 1 (cycle)
+
+// Linear list with no cycle
+1 → 2 → 3 → 4 → null
+
+// Cycle at the end
+1 → 2 → 3 → 4 → 5 → 4 (cycle)
+
+// Cycle from second node
+1 → 2 → 3 → 2 (cycle)
+
+// Empty list
+null (no cycle)
+
+// Single element no cycle
+1 → null
+```
+
+## Visualizing Floyd's Algorithm
+
+```
+Cycle example: 1 → 2 → 3 → 4 → 5 ↓
+               ↑________________|
+
+Step 0: slow=1, fast=1
+Step 1: slow=2, fast=3 (1 step, 2 steps)
+Step 2: slow=3, fast=5 (3 and 5)
+Step 3: slow=4, fast=2 (4 and 2 - fast wrapped around)
+Step 4: slow=5, fast=4
+Step 5: slow=3, fast=3 (MATCH! Cycle detected)
+```
+
+## Related Problems
+
+- **Linked List Cycle II** (Medium) - Find the start of cycle
+- **Happy Number** (Easy) - Detect cycle in number sequence
+- **Find the Duplicate Number** (Medium) - Similar cycle detection
+- **Detect Cycle in Graph** (Medium) - Similar to linked lists

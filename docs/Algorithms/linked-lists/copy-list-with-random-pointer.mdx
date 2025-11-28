@@ -1,0 +1,436 @@
+---
+sidebar_position: 9
+difficulty: Medium
+tags: [linked-lists, hash-map, deep-copy, amazon, google]
+leetcode_url: https://leetcode.com/problems/copy-list-with-random-pointer/
+companies: [Amazon, Google, Microsoft, Meta, Apple]
+pattern: "Linked Lists"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Copy List with Random Pointer
+
+<AlgorithmProblem
+  title="Copy List with Random Pointer"
+  difficulty="Medium"
+  description={`
+<p>A linked list of length <code>n</code> is given such that each node contains an additional random pointer, which could point to <strong>any node</strong> in the list, or <strong>null</strong>.</p>
+<p>Construct a <strong>deep copy</strong> of the list. The deep copy should consist of exactly <code>n</code> <strong>brand new</strong> nodes, where each new node has its value set to the value of its corresponding original node. Both the <code>next</code> and <code>random</code> pointer of the new nodes should point to new nodes in the copied list such that the pointers in the copied list have the same relative order as the pointers in the original list.</p>
+<p>Return <em>the head of the copied linked list</em>.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>0 ≤ n ≤ 100</li>
+  <li>-100 ≤ node.val ≤ 100</li>
+  <li>node.random is null or points to some node in the linked list</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'head = [[7,null],[13,0],[11,4],[10,2],[1,0]]',
+      output: '[[7,null],[13,0],[11,4],[10,2],[1,0]]',
+      explanation: 'Deep copy with same structure and random pointers'
+    },
+    {
+      input: 'head = [[1,1],[2,1]]',
+      output: '[[1,1],[2,1]]',
+      explanation: 'Both nodes point to first node'
+    },
+    {
+      input: 'head = [[3,null],[3,0],[3,null]]',
+      output: '[[3,null],[3,0],[3,null]]',
+      explanation: 'Middle node points to first'
+    }
+  ]}
+  starterCode={`class Node {
+  constructor(val = 0, next = null, random = null) {
+    this.val = val;
+    this.next = next;
+    this.random = random;
+  }
+}
+
+function copyRandomList(head) {
+  // TODO: Create deep copy of list with random pointers
+  return null;
+}`}
+  solution={`class Node {
+  constructor(val = 0, next = null, random = null) {
+    this.val = val;
+    this.next = next;
+    this.random = random;
+  }
+}
+
+function copyRandomList(head) {
+  if (!head) return null;
+
+  // Map original nodes to copied nodes
+  const map = new Map();
+
+  // First pass: create all nodes
+  let curr = head;
+  while (curr) {
+    map.set(curr, new Node(curr.val));
+    curr = curr.next;
+  }
+
+  // Second pass: set pointers
+  curr = head;
+  while (curr) {
+    const copy = map.get(curr);
+    copy.next = curr.next ? map.get(curr.next) : null;
+    copy.random = curr.random ? map.get(curr.random) : null;
+    curr = curr.next;
+  }
+
+  return map.get(head);
+}`}
+  testCases={[
+    {
+      input: [[[7, null], [13, 0], [11, 4], [10, 2], [1, 0]]],
+      expected: [[7, null], [13, 0], [11, 4], [10, 2], [1, 0]],
+      description: 'Copy complex list with random pointers'
+    },
+    {
+      input: [[[1, 1], [2, 1]]],
+      expected: [[1, 1], [2, 1]],
+      description: 'Multiple nodes with same random target'
+    },
+    {
+      input: [[[3, null], [3, 0], [3, null]]],
+      expected: [[3, null], [3, 0], [3, null]],
+      description: 'Partial random pointers'
+    },
+    {
+      input: [[]],
+      expected: [],
+      description: 'Empty list'
+    },
+    {
+      input: [[[1, null]]],
+      expected: [[1, null]],
+      description: 'Single node with null random'
+    },
+    {
+      input: [[[1, 0]]],
+      expected: [[1, 0]],
+      description: 'Single node pointing to itself'
+    }
+  ]}
+  functionName="copyRandomList"
+/>
+
+## Solution Explanation
+
+### Approach 1: Hash Map (Most Intuitive) ✅
+
+**Time Complexity:** O(n) - two passes through the list
+**Space Complexity:** O(n) - hash map stores all nodes
+
+Use a hash map to track the mapping between original and copied nodes:
+
+```javascript
+function copyRandomList(head) {
+  if (!head) return null;
+
+  const map = new Map();
+
+  // First pass: create all new nodes without pointers
+  let curr = head;
+  while (curr) {
+    map.set(curr, new Node(curr.val));
+    curr = curr.next;
+  }
+
+  // Second pass: set the pointers using the map
+  curr = head;
+  while (curr) {
+    const copy = map.get(curr);
+    // Point to mapped next node (or null)
+    copy.next = curr.next ? map.get(curr.next) : null;
+    // Point to mapped random node (or null)
+    copy.random = curr.random ? map.get(curr.random) : null;
+    curr = curr.next;
+  }
+
+  return map.get(head);
+}
+```
+
+**How it works:**
+
+```
+Original:  7(rand=null) → 13(rand→0) → 11(rand→4) → ...
+           node_0         node_1        node_2
+
+Pass 1: Create copied nodes
+  Map: {
+    node_0 → Node(7),
+    node_1 → Node(13),
+    node_2 → Node(11),
+    ...
+  }
+
+Pass 2: Set pointers
+  For Node(13):
+    next = map[node_1.next] = map[node_2]
+    random = map[node_1.random] = map[node_0]
+
+Result:
+  Copy(7, rand=null) → Copy(13, rand→Copy(7)) → Copy(11, rand→Copy(4)) → ...
+```
+
+**Key insight:** The hash map allows us to map any original node to its copy, so setting random pointers becomes straightforward.
+
+### Approach 2: Interweaving (Space Optimization)
+
+**Time Complexity:** O(n) - three passes
+**Space Complexity:** O(1) - excluding output
+
+Create copies and interleave them in the original list, then separate:
+
+```javascript
+function copyRandomList(head) {
+  if (!head) return null;
+
+  // Pass 1: Create copies and interweave
+  // Original: 1 → 2 → 3
+  // After:    1 → 1' → 2 → 2' → 3 → 3'
+  let curr = head;
+  while (curr) {
+    const copy = new Node(curr.val);
+    copy.next = curr.next;
+    curr.next = copy;
+    curr = copy.next;
+  }
+
+  // Pass 2: Set random pointers
+  curr = head;
+  while (curr) {
+    const copy = curr.next;
+    copy.random = curr.random ? curr.random.next : null;
+    curr = copy.next;
+  }
+
+  // Pass 3: Separate the lists
+  const copiedHead = head.next;
+  curr = head;
+  let copyCurr = copiedHead;
+
+  while (curr) {
+    curr.next = copyCurr.next;
+    curr = curr.next;
+    if (curr) {
+      copyCurr.next = curr.next;
+      copyCurr = copyCurr.next;
+    }
+  }
+
+  return copiedHead;
+}
+```
+
+**Process:**
+1. Create copies and insert after each original
+2. Set random pointers using the interweaved structure
+3. Separate the two lists
+
+**Advantage:** O(1) space (clever but complex)
+
+### Approach 3: DFS with Memoization
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(n) - recursion stack + hash map
+
+Recursively copy nodes with memoization:
+
+```javascript
+function copyRandomList(head) {
+  const map = new Map();
+
+  const dfs = (node) => {
+    if (!node) return null;
+
+    // Already copied
+    if (map.has(node)) {
+      return map.get(node);
+    }
+
+    // Create copy
+    const copy = new Node(node.val);
+    map.set(node, copy);
+
+    // Recursively copy next and random
+    copy.next = dfs(node.next);
+    copy.random = dfs(node.random);
+
+    return copy;
+  };
+
+  return dfs(head);
+}
+```
+
+**Advantage:** Elegant recursive solution
+**Disadvantage:** Uses call stack space
+
+## Comparison of Approaches
+
+| Approach | Time | Space | Simplicity | Best For |
+|----------|------|-------|-----------|----------|
+| Hash Map | O(n) | O(n) | Easy | **Recommended** |
+| Interweaving | O(n) | O(1) | Hard | Space-limited |
+| DFS | O(n) | O(n) | Medium | Follow-up |
+
+## Common Mistakes
+
+❌ **Shallow copy instead of deep copy:**
+```javascript
+function copyRandomList(head) {
+  return head;  // ERROR: This is the same list!
+}
+
+function copyRandomList(head) {
+  const copy = head;  // ERROR: Still the same object!
+  return copy;
+}
+```
+
+✅ **Create new nodes explicitly:**
+```javascript
+const copy = new Node(curr.val);  // Create NEW node
+map.set(curr, copy);
+```
+
+---
+
+❌ **Setting pointers before all nodes exist:**
+```javascript
+// If you set copy.random before copy target exists
+// You can't map it to the copied version!
+```
+
+✅ **Two-pass approach:**
+```javascript
+// Pass 1: Create all nodes
+while (curr) {
+  map.set(curr, new Node(curr.val));
+  curr = curr.next;
+}
+
+// Pass 2: Set pointers (all targets exist now)
+while (curr) {
+  const copy = map.get(curr);
+  copy.next = curr.next ? map.get(curr.next) : null;
+  copy.random = curr.random ? map.get(curr.random) : null;
+  curr = curr.next;
+}
+```
+
+---
+
+❌ **Forgetting null checks:**
+```javascript
+// What if curr.random is null?
+copy.random = map.get(curr.random);  // ERROR: null key!
+```
+
+✅ **Check before accessing:**
+```javascript
+copy.random = curr.random ? map.get(curr.random) : null;
+```
+
+---
+
+❌ **Not handling empty list:**
+```javascript
+const map = new Map();
+let curr = head;  // ERROR: if head is null!
+```
+
+✅ **Check at start:**
+```javascript
+if (!head) return null;
+const map = new Map();
+```
+
+## Interview Tips
+
+**What to mention:**
+1. **Deep copy:** Explain the difference from shallow copy
+2. **Two-pass approach:** Why we can't set pointers first pass
+3. **Hash map:** Maps original nodes to copied nodes
+4. **Random pointers:** Can point anywhere, including itself or null
+
+**Follow-up questions:**
+
+**Q: Can you do this with O(1) space?**
+A: Yes! Use interweaving approach (much harder).
+
+**Q: What if the random pointer points to the node itself?**
+A: Our solution handles this: `map.get(curr.random)` still works.
+
+**Q: What about cycles in random pointers?**
+A: Hash map prevents revisiting; both approaches handle this.
+
+**Q: Can you do this recursively?**
+A: Yes, with DFS and memoization, shown in Approach 3.
+
+## Edge Cases
+
+```javascript
+// Empty list
+null → null
+
+// Single node with null random
+[Node(1, null)] → [Node(1, null)]
+
+// Single node pointing to itself
+[Node(1, points to self)] → [Node(1, points to self)]
+
+// Two nodes
+[Node(1, random→2), Node(2, random→1)] → deep copy with swapped randoms
+
+// Random points backward
+[Node(1), Node(2, random→1), Node(3)] → respects backward pointer
+
+// Multiple nodes same random
+[Node(1), Node(2, random→1), Node(3, random→1)] → both copy nodes point to same copy node
+```
+
+## Verification Strategy
+
+To verify deep copy is correct:
+1. Same node values ✓
+2. Same list structure (next pointers) ✓
+3. Same random pointer structure ✓
+4. No shared references between original and copy ✓
+
+```javascript
+// Original and copy should be different objects
+original !== copy  // true
+original.next !== copy.next  // true
+original.random !== copy.random  // true
+
+// But structure is same
+original.val === copy.val  // true
+original.next.val === copy.next.val  // true
+```
+
+## Why This Problem is Hard
+
+1. **Random pointers everywhere** - Can point to any node, including null
+2. **Dependency:** Can't set pointer until target node exists
+3. **Reverse pointers:** Random might point backward
+4. **Self-loops:** Node might point to itself
+5. **Deep copy requirement:** Must create new objects, not reference original
+
+These characteristics make it a great interview problem!
+
+## Related Problems
+
+- **Clone Graph** (Medium) - Similar deep copy, but for graphs
+- **Linked List Copy** (Easy) - Simple copy without random
+- **Deep Clone Array** (Medium) - Similar concept for arrays
+- **Serialize and Deserialize Linked List** (Hard) - Related technique

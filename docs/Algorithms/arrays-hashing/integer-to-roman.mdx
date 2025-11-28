@@ -1,0 +1,337 @@
+---
+sidebar_position: 14
+difficulty: Medium
+tags: [string, hash-table, math, amazon, meta]
+leetcode_url: https://leetcode.com/problems/integer-to-roman/
+companies: [Amazon, Meta, Google, Microsoft, Apple]
+pattern: "Arrays & Hashing"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Integer to Roman
+
+<AlgorithmProblem
+  title="Integer to Roman"
+  difficulty="Medium"
+  description={`
+<p>Roman numerals are represented by seven different symbols: <code>I</code>, <code>V</code>, <code>X</code>, <code>L</code>, <code>C</code>, <code>D</code> and <code>M</code>.</p>
+<table>
+  <thead>
+    <tr><th>Symbol</th><th>Value</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>I</td><td>1</td></tr>
+    <tr><td>V</td><td>5</td></tr>
+    <tr><td>X</td><td>10</td></tr>
+    <tr><td>L</td><td>50</td></tr>
+    <tr><td>C</td><td>100</td></tr>
+    <tr><td>D</td><td>500</td></tr>
+    <tr><td>M</td><td>1000</td></tr>
+  </tbody>
+</table>
+<p>For example, <code>2</code> is written as <code>II</code> in Roman numeral, just two ones added together. <code>12</code> is written as <code>XII</code>, which is simply <code>X + II</code>. The number <code>27</code> is written as <code>XXVII</code>, which is <code>XX + V + II</code>.</p>
+<p>Roman numerals are usually written largest to smallest from left to right. However, the numeral for four is not <code>IIII</code>. Instead, the number four is written as <code>IV</code>. Because the one is before the five we subtract it making four. The same principle applies to the number nine, which is written as <code>IX</code>. There are six instances where subtraction is used:</p>
+<ul>
+  <li><code>I</code> can be placed before <code>V</code> (5) and <code>X</code> (10) to make 4 and 9.</li>
+  <li><code>X</code> can be placed before <code>L</code> (50) and <code>C</code> (100) to make 40 and 90.</li>
+  <li><code>C</code> can be placed before <code>D</code> (500) and <code>M</code> (1000) to make 400 and 900.</li>
+</ul>
+<p>Given an integer, convert it to a roman numeral.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 ≤ num ≤ 3999</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'num = 3',
+      output: '"III"',
+      explanation: '3 is represented as 3 ones.'
+    },
+    {
+      input: 'num = 58',
+      output: '"LVIII"',
+      explanation: 'L = 50, V = 5, III = 3.'
+    },
+    {
+      input: 'num = 1994',
+      output: '"MCMXCIV"',
+      explanation: 'M = 1000, CM = 900, XC = 90 and IV = 4.'
+    }
+  ]}
+  starterCode={`function intToRoman(num) {
+  // Write your code here
+
+}`}
+  solution={`function intToRoman(num) {
+  // Include subtraction cases (4, 9, 40, 90, 400, 900)
+  const values = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
+  const symbols = ["M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"];
+
+  let result = "";
+
+  for (let i = 0; i < values.length; i++) {
+    // Add symbol while num >= value
+    while (num >= values[i]) {
+      result += symbols[i];
+      num -= values[i];
+    }
+  }
+
+  return result;
+}`}
+  testCases={[
+    {
+      input: [3],
+      expected: "III",
+      description: 'Basic case with ones'
+    },
+    {
+      input: [58],
+      expected: "LVIII",
+      description: 'Combination of symbols'
+    },
+    {
+      input: [1994],
+      expected: "MCMXCIV",
+      description: 'Complex with subtraction cases'
+    },
+    {
+      input: [4],
+      expected: "IV",
+      description: 'Subtraction case'
+    },
+    {
+      input: [9],
+      expected: "IX",
+      description: 'Subtraction case'
+    },
+    {
+      input: [1],
+      expected: "I",
+      description: 'Minimum value'
+    },
+    {
+      input: [3999],
+      expected: "MMMCMXCIX",
+      description: 'Maximum value'
+    }
+  ]}
+  functionName="intToRoman"
+/>
+
+## Solution Explanation
+
+### Approach 1: Digit-by-Digit Conversion
+
+**Time:** O(1) - bounded by 13 symbols max
+**Space:** O(1)
+
+```javascript
+function intToRoman(num) {
+  const thousands = ["", "M", "MM", "MMM"];
+  const hundreds = ["", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM"];
+  const tens = ["", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"];
+  const ones = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"];
+
+  return thousands[Math.floor(num / 1000)] +
+         hundreds[Math.floor((num % 1000) / 100)] +
+         tens[Math.floor((num % 100) / 10)] +
+         ones[num % 10];
+}
+```
+
+**How it works:** Pre-define all possible representations for each digit position.
+
+### Approach 2: Greedy with Value Table (Optimal) ✅
+
+**Time:** O(1) - max 13 values to check
+**Space:** O(1)
+
+```javascript
+function intToRoman(num) {
+  // Ordered from largest to smallest
+  // Include subtraction cases: 900, 400, 90, 40, 9, 4
+  const values = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
+  const symbols = ["M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"];
+
+  let result = "";
+
+  for (let i = 0; i < values.length; i++) {
+    // Use as many of this symbol as possible
+    while (num >= values[i]) {
+      result += symbols[i];
+      num -= values[i];
+    }
+  }
+
+  return result;
+}
+```
+
+**How it works:**
+
+1. **Create value-symbol pairs** including subtraction cases
+2. **Sort from largest to smallest**
+3. **Greedy approach**: Use largest possible symbol repeatedly
+4. **Subtract value** and continue until num becomes 0
+
+**Key insight:** Include subtraction cases (IV, IX, XL, XC, CD, CM) as separate entries in the table.
+
+**Example walkthrough:**
+
+```
+num = 1994
+
+i=0, value=1000, symbol="M": 1994 >= 1000
+  result = "M", num = 994
+
+i=1, value=900, symbol="CM": 994 >= 900
+  result = "MCM", num = 94
+
+i=2, value=500, symbol="D": 94 < 500, skip
+
+i=3, value=400, symbol="CD": 94 < 400, skip
+
+i=4, value=100, symbol="C": 94 < 100, skip
+
+i=5, value=90, symbol="XC": 94 >= 90
+  result = "MCMXC", num = 4
+
+i=6-10: skip (all > 4)
+
+i=11, value=4, symbol="IV": 4 >= 4
+  result = "MCMXCIV", num = 0
+
+Result: "MCMXCIV"
+```
+
+**Why greedy works:**
+
+Roman numerals have no ambiguity - using the largest possible symbol first always gives the correct (and shortest) representation.
+
+```
+Example: 58
+  50 (L) + 5 (V) + 3 (III) = "LVIII" ✓
+
+Not:
+  10 (X) repeated? No, we use L for 50
+```
+
+### Alternative: Using Map/Object
+
+```javascript
+function intToRoman(num) {
+  const valueMap = [
+    [1000, "M"],
+    [900, "CM"],
+    [500, "D"],
+    [400, "CD"],
+    [100, "C"],
+    [90, "XC"],
+    [50, "L"],
+    [40, "XL"],
+    [10, "X"],
+    [9, "IX"],
+    [5, "V"],
+    [4, "IV"],
+    [1, "I"]
+  ];
+
+  let result = "";
+
+  for (const [value, symbol] of valueMap) {
+    const count = Math.floor(num / value);
+    if (count > 0) {
+      result += symbol.repeat(count);
+      num %= value;
+    }
+  }
+
+  return result;
+}
+```
+
+## Common Mistakes
+
+❌ Forgetting subtraction cases
+```javascript
+// Missing 900, 400, 90, 40, 9, 4
+// Would produce wrong output for 4, 9, etc.
+```
+
+✅ Include all subtraction cases
+```javascript
+const values = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
+```
+
+❌ Wrong order (not largest to smallest)
+```javascript
+const values = [1, 5, 10, 50, 100, 500, 1000]; // Wrong order!
+```
+
+✅ Largest to smallest for greedy
+```javascript
+const values = [1000, 900, 500, 400, ...]; // Correct
+```
+
+❌ Complex conditional logic
+```javascript
+if (num >= 1000) {
+  // lots of if-else branches
+}
+```
+
+✅ Simple greedy loop
+```javascript
+for (let i = 0; i < values.length; i++) {
+  while (num >= values[i]) { ... }
+}
+```
+
+❌ Not understanding subtraction rules
+```javascript
+// 4 is "IV" not "IIII"
+// 9 is "IX" not "VIIII"
+```
+
+✅ Include subtraction cases in table
+```javascript
+[9, "IX"], [4, "IV"], [90, "XC"], [40, "XL"], ...
+```
+
+## Interview Tips
+
+**When discussing:**
+1. Explain Roman numeral rules (basic symbols + subtraction)
+2. Show the value-symbol table approach
+3. Explain why greedy works (no ambiguity)
+4. Walk through example (especially with subtraction cases)
+5. Mention alternative digit-by-digit approach
+
+**Follow-up questions:**
+- What about Roman to Integer? → Reverse process, scan right-to-left
+- Why does greedy work? → No ambiguity in Roman numerals
+- What's the time complexity? → O(1), bounded by input range
+- Can you optimize further? → Already optimal
+- What about numbers > 3999? → Would need different notation (bars, etc.)
+
+**Key insights:**
+- Greedy approach works because of Roman numeral properties
+- Including subtraction cases as separate entries simplifies logic
+- Time complexity is O(1) - max 13 iterations regardless of input
+- Space complexity O(1) - output length bounded by ~15 characters
+- Alternative approaches: digit-by-digit, hash map, recursion
+
+**Pattern recognition:**
+This is a greedy algorithm problem:
+- Similar to making change with coins
+- Always use largest denomination first
+- Works because of problem structure (no overlapping)
+
+**Test case categories:**
+- Simple: 3 → "III"
+- Subtraction: 4, 9, 40, 90, 400, 900
+- Complex: 1994 → "MCMXCIV"
+- Edge: 1 (minimum), 3999 (maximum)

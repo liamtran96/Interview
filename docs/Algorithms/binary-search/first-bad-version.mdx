@@ -1,0 +1,333 @@
+---
+sidebar_position: 3
+difficulty: Easy
+tags: [binary-search, interactive, facebook, google, amazon]
+leetcode_url: https://leetcode.com/problems/first-bad-version/
+companies: [Facebook, Google, Amazon, Microsoft, Apple]
+pattern: "Binary Search"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# First Bad Version
+
+<AlgorithmProblem
+  title="First Bad Version"
+  difficulty="Easy"
+  description={`
+<p>You are a product manager and currently leading a team to develop a new product. Unfortunately, the latest version of your product fails the quality check. Since each version is developed based on the previous version, all the versions after a bad version are also bad.</p>
+<p>Suppose you have <code>n</code> versions <code>[1, 2, ..., n]</code> and you want to find out the first bad one, which causes all the following ones to be bad.</p>
+<p>You are given an API <code>bool isBadVersion(version)</code> which returns whether <code>version</code> is bad. Implement a function to find the first bad version. You should minimize the number of calls to the API.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &lt;= bad &lt;= n &lt;= 2<sup>31</sup> - 1</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'n = 5, bad = 4',
+      output: '4',
+      explanation: 'isBadVersion(3) -> false, isBadVersion(4) -> true, isBadVersion(5) -> true. Therefore, 4 is the first bad version.'
+    },
+    {
+      input: 'n = 1, bad = 1',
+      output: '1',
+      explanation: 'The only version is bad'
+    },
+    {
+      input: 'n = 10, bad = 6',
+      output: '6',
+      explanation: 'Versions 6-10 are bad, version 6 is the first'
+    }
+  ]}
+  starterCode={`// The isBadVersion API is defined for you.
+// isBadVersion(version) returns true if version is bad
+
+function solution(isBadVersion) {
+  return function(n) {
+    // Write your code here
+
+  };
+}`}
+  solution={`// The isBadVersion API is defined for you.
+// isBadVersion(version) returns true if version is bad
+
+function solution(isBadVersion) {
+  return function(n) {
+    // Binary search: O(log n) time, O(1) space
+    let left = 1;
+    let right = n;
+
+    while (left < right) {
+      const mid = Math.floor(left + (right - left) / 2);
+
+      if (isBadVersion(mid)) {
+        // mid is bad, first bad could be mid or earlier
+        right = mid;
+      } else {
+        // mid is good, first bad must be after mid
+        left = mid + 1;
+      }
+    }
+
+    // When left === right, we found the first bad version
+    return left;
+  };
+}`}
+  testCases={[
+    {
+      input: [5, 4],
+      expected: 4,
+      description: 'First bad in latter half: n=5, bad=4'
+    },
+    {
+      input: [1, 1],
+      expected: 1,
+      description: 'Single version is bad: n=1, bad=1'
+    },
+    {
+      input: [10, 6],
+      expected: 6,
+      description: 'First bad in middle: n=10, bad=6'
+    },
+    {
+      input: [100, 1],
+      expected: 1,
+      description: 'All versions bad: n=100, bad=1'
+    },
+    {
+      input: [100, 100],
+      expected: 100,
+      description: 'Only last version bad: n=100, bad=100'
+    },
+    {
+      input: [2147483647, 1],
+      expected: 1,
+      description: 'Large n, first version bad: n=2^31-1, bad=1'
+    }
+  ]}
+  functionName="solution"
+/>
+
+## Solution Explanation
+
+### Approach 1: Linear Search (Not Optimal)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1)
+
+Check each version sequentially:
+
+```javascript
+function solution(isBadVersion) {
+  return function(n) {
+    for (let i = 1; i <= n; i++) {
+      if (isBadVersion(i)) {
+        return i;
+      }
+    }
+    return n;
+  };
+}
+```
+
+**Why not use this?**
+- Makes up to n API calls (very slow for large n)
+- Doesn't minimize API calls as required
+- For n = 2 billion, this would take forever!
+- Wastes the property that all versions after bad are also bad
+
+### Approach 2: Binary Search (Optimal) ✅
+
+**Time Complexity:** O(log n)
+**Space Complexity:** O(1)
+
+Use binary search to find the boundary between good and bad versions:
+
+```javascript
+function solution(isBadVersion) {
+  return function(n) {
+    let left = 1;
+    let right = n;
+
+    // Search for the boundary between good and bad
+    while (left < right) {
+      const mid = Math.floor(left + (right - left) / 2);
+
+      if (isBadVersion(mid)) {
+        // mid is bad, but there might be earlier bad versions
+        right = mid; // Don't exclude mid!
+      } else {
+        // mid is good, first bad must be after mid
+        left = mid + 1; // Exclude mid
+      }
+    }
+
+    // When left === right, we found the first bad version
+    return left;
+  };
+}
+```
+
+**How Binary Search Finds the Boundary:**
+
+```
+n = 10, bad = 6
+Versions: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+Status:   [G, G, G, G, G, B, B, B, B, B]
+                         ↑ Find this boundary!
+
+Step 1: left=1, right=10, mid=5
+  isBadVersion(5)=false (good)
+  First bad is after 5: left=6
+
+Step 2: left=6, right=10, mid=8
+  isBadVersion(8)=true (bad)
+  First bad might be 8 or earlier: right=8
+
+Step 3: left=6, right=8, mid=7
+  isBadVersion(7)=true (bad)
+  First bad might be 7 or earlier: right=7
+
+Step 4: left=6, right=7, mid=6
+  isBadVersion(6)=true (bad)
+  First bad might be 6 or earlier: right=6
+
+Step 5: left=6, right=6
+  Loop ends, return 6 ✅
+
+API calls: 4 (vs 6 for linear search)
+```
+
+**Critical Difference from Standard Binary Search:**
+
+```javascript
+// Standard binary search (finding exact match):
+while (left <= right) {
+  if (found) return mid;
+  left = mid + 1;
+  right = mid - 1;
+}
+
+// Finding first bad version (finding boundary):
+while (left < right) {  // Note: left < right (not <=)
+  if (isBadVersion(mid)) {
+    right = mid;  // Keep mid as possible answer
+  } else {
+    left = mid + 1;
+  }
+}
+return left;  // left === right at the boundary
+```
+
+### Key Insights
+
+1. **Finding Boundary vs Finding Target**: This is about finding the transition point, not an exact match
+2. **Keep Potential Answer**: When mid is bad, set `right = mid` (not `mid - 1`)
+3. **Loop Condition**: Use `left < right` (not `left <= right`)
+4. **No Need for Found Check**: Loop naturally converges to the answer
+5. **Overflow Prevention**: Critical for n up to 2³¹ - 1
+
+**Why `left < right` instead of `left <= right`?**
+
+```
+When we find a bad version, we don't exclude it:
+  right = mid (not mid - 1)
+
+This means left and right can converge to the same value:
+  When left === right, we found the answer!
+
+If we used left <= right, we'd loop forever because
+right never goes below left.
+```
+
+## Common Mistakes
+
+❌ **Using wrong loop condition:**
+```javascript
+while (left <= right) { // Wrong! Creates infinite loop
+  if (isBadVersion(mid)) {
+    right = mid; // This means left can equal right
+  }
+}
+```
+
+❌ **Excluding mid when it's bad:**
+```javascript
+if (isBadVersion(mid)) {
+  right = mid - 1; // Wrong! Might skip the first bad version
+}
+```
+
+❌ **Not preventing integer overflow:**
+```javascript
+const mid = Math.floor((left + right) / 2); // Overflow for large n!
+```
+
+❌ **Returning wrong value:**
+```javascript
+return right; // Works but less clear than left
+return mid;   // Wrong! mid might not be final answer
+```
+
+✅ **Correct implementation:**
+```javascript
+function solution(isBadVersion) {
+  return function(n) {
+    let left = 1;
+    let right = n;
+
+    while (left < right) { // Correct: < not <=
+      const mid = Math.floor(left + (right - left) / 2); // Prevent overflow
+
+      if (isBadVersion(mid)) {
+        right = mid; // Keep mid as possible answer
+      } else {
+        left = mid + 1; // Exclude mid
+      }
+    }
+
+    return left; // left === right at the answer
+  };
+}
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Clarify: "We're looking for the boundary between good and bad versions"
+2. State: "All versions after the first bad are also bad - this creates a sorted property"
+3. Connect: "This sorted property means we can use binary search"
+4. Highlight: "The key difference is we're finding a boundary, not an exact match"
+5. Emphasize: "We need to minimize API calls, so O(log n) is crucial"
+
+**Key talking points:**
+- "This is a boundary-finding variant of binary search"
+- "When mid is bad, we can't exclude it - it might be the first bad version"
+- "When mid is good, we know the first bad is after mid"
+- "The loop naturally converges to the exact boundary point"
+
+**Why this pattern matters:**
+
+```
+Many binary search problems are about finding boundaries:
+- First element >= target (lower bound)
+- Last element <= target (upper bound)
+- First true in boolean array
+- Last false in boolean array
+
+This problem teaches the boundary-finding pattern!
+```
+
+**Follow-up questions you might get:**
+- **What if no bad versions exist?** Not possible per constraints, but return n+1
+- **What if all versions are bad?** Algorithm correctly returns 1
+- **Can you find the last good version?** Yes, return left - 1 after finding first bad
+- **What if isBadVersion is expensive?** Binary search minimizes calls: O(log n) vs O(n)
+- **How does this handle overflow?** Using `left + (right - left) / 2` prevents overflow
+
+**Real-world applications:**
+- Finding when a bug was introduced in version control
+- Bisecting git commits to find regression
+- Finding threshold in sorted boolean arrays
+- Identifying transitions in time-series data

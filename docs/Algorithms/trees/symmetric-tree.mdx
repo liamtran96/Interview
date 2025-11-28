@@ -1,0 +1,345 @@
+---
+sidebar_position: 4
+difficulty: Easy
+tags: [trees, recursion, symmetry, amazon, google]
+leetcode_url: https://leetcode.com/problems/symmetric-tree/
+companies: [Amazon, Google, Microsoft, Meta, Apple]
+pattern: "Trees"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Symmetric Tree
+
+<AlgorithmProblem
+  title="Symmetric Tree"
+  difficulty="Easy"
+  description={`
+<p>Given the <code>root</code> of a binary tree, check whether it is a <strong>mirror of itself</strong> (i.e., symmetric around its center).</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>The number of nodes in the tree is in the range [1, 10<sup>3</sup>]</li>
+  <li>-100 ≤ Node.val ≤ 100</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'root = [1,2,2,3,4,4,3]',
+      output: 'true'
+    },
+    {
+      input: 'root = [1,2,2,null,3,null,3]',
+      output: 'false'
+    },
+    {
+      input: 'root = [1]',
+      output: 'true'
+    }
+  ]}
+  starterCode={`class TreeNode {
+  constructor(val = 0, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+function isSymmetric(root) {
+  // TODO: Check if tree is symmetric (mirror)
+  return true;
+}`}
+  solution={`class TreeNode {
+  constructor(val = 0, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+function isSymmetric(root) {
+  if (root === null) return true;
+  return isMirror(root.left, root.right);
+}
+
+function isMirror(left, right) {
+  // Base case: both null - symmetric
+  if (left === null &amp;&amp; right === null) return true;
+
+  // One null or values differ - not symmetric
+  if (left === null || right === null) return false;
+  if (left.val !== right.val) return false;
+
+  // Recursively check mirrored subtrees
+  // left's left should mirror right's right
+  // left's right should mirror right's left
+  return isMirror(left.left, right.right) &amp;&amp; isMirror(left.right, right.left);
+}`}
+  testCases={[
+    {
+      input: [[[1, 2, 2, 3, 4, 4, 3]]],
+      expected: true,
+      description: 'Symmetric tree'
+    },
+    {
+      input: [[[1, 2, 2, null, 3, null, 3]]],
+      expected: false,
+      description: 'Structure not symmetric'
+    },
+    {
+      input: [[[1]]],
+      expected: true,
+      description: 'Single node (symmetric)'
+    },
+    {
+      input: [[[1, 2, 2]]],
+      expected: true,
+      description: 'Simple symmetric tree'
+    },
+    {
+      input: [[[1, 2, 3]]],
+      expected: false,
+      description: 'Different values (not symmetric)'
+    },
+    {
+      input: [[[1, 2, 2, 3, 4, 4, 3, 5, 6, 6, 5, 7, 8, 8, 7]]],
+      expected: true,
+      description: 'Large symmetric tree'
+    }
+  ]}
+  functionName="isSymmetric"
+/>
+
+## Solution Explanation
+
+### Approach 1: Recursive Mirror Comparison (Most Elegant) ✅
+
+**Time Complexity:** O(n) - compare each node pair once
+**Space Complexity:** O(h) - recursion stack, where h is height
+
+Recursively compare node pairs where left subtree mirrors right subtree:
+
+```javascript
+function isSymmetric(root) {
+  if (root === null) return true;
+  return isMirror(root.left, root.right);
+}
+
+function isMirror(left, right) {
+  if (left === null &amp;&amp; right === null) return true;
+  if (left === null || right === null) return false;
+  if (left.val !== right.val) return false;
+
+  // Key insight: left's left mirrors right's right (outer)
+  //              left's right mirrors right's left (inner)
+  return isMirror(left.left, right.right) &amp;&amp;
+         isMirror(left.right, right.left);
+}
+```
+
+**How it works:**
+
+```
+Tree:
+        1
+       / \
+      2   2    (symmetric!)
+     / \ / \
+    3  4 4  3
+
+isMirror(2, 2):
+  - Values match (2 === 2) ✓
+  - isMirror(3, 3):     ✓ (left.left vs right.right)
+  - isMirror(4, 4):     ✓ (left.right vs right.left)
+  - return true
+
+Key insight: We compare "diagonals" (outer &amp;&amp; inner):
+  - left.left with right.right (outer edges)
+  - left.right with right.left (inner edges)
+```
+
+### Approach 2: BFS Queue (Level-Order)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(w) - queue width
+
+Use queue to compare pairs level by level:
+
+```javascript
+function isSymmetric(root) {
+  if (root === null) return true;
+
+  const queue = [[root.left, root.right]];
+
+  while (queue.length > 0) {
+    const [left, right] = queue.shift();
+
+    // Both null - continue
+    if (left === null &amp;&amp; right === null) continue;
+
+    // One null or values differ - not symmetric
+    if (left === null || right === null || left.val !== right.val) {
+      return false;
+    }
+
+    // Enqueue pairs in mirrored order
+    queue.push([left.left, right.right]);   // outer edges
+    queue.push([left.right, right.left]);   // inner edges
+  }
+
+  return true;
+}
+```
+
+### Approach 3: DFS Stack (Iterative)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(h)
+
+Use stack instead of recursion:
+
+```javascript
+function isSymmetric(root) {
+  if (root === null) return true;
+
+  const stack = [[root.left, root.right]];
+
+  while (stack.length > 0) {
+    const [left, right] = stack.pop();
+
+    // Both null - continue
+    if (left === null &amp;&amp; right === null) continue;
+
+    // One null or values differ - not symmetric
+    if (left === null || right === null || left.val !== right.val) {
+      return false;
+    }
+
+    // Push pairs in mirrored order
+    stack.push([left.left, right.right]);   // outer
+    stack.push([left.right, right.left]);   // inner
+  }
+
+  return true;
+}
+```
+
+## Comparison of Approaches
+
+| Approach | Time | Space | Best For | Simplicity |
+|----------|------|-------|----------|-----------|
+| Recursive | O(n) | O(h) | **Most interviews** | Easy |
+| BFS | O(n) | O(w) | Level-by-level | Medium |
+| DFS Stack | O(n) | O(h) | No recursion | Medium |
+
+## Common Mistakes
+
+❌ **Comparing left with left and right with right:**
+```javascript
+function isMirror(left, right) {
+  if (left === null &amp;&amp; right === null) return true;
+  if (left === null || right === null) return false;
+  if (left.val !== right.val) return false;
+  // WRONG: This checks if left subtree is symmetric with itself
+  return isMirror(left.left, left.right) &amp;&amp;
+         isMirror(right.left, right.right);
+}
+```
+
+✅ **Compare diagonals for mirror symmetry:**
+```javascript
+function isMirror(left, right) {
+  if (left === null &amp;&amp; right === null) return true;
+  if (left === null || right === null) return false;
+  if (left.val !== right.val) return false;
+  // CORRECT: Compare left's left with right's right (outer)
+  //                  left's right with right's left (inner)
+  return isMirror(left.left, right.right) &amp;&amp;
+         isMirror(left.right, right.left);
+}
+```
+
+---
+
+❌ **Not handling single node:**
+```javascript
+function isSymmetric(root) {
+  return isMirror(root.left, root.right);  // Works for single node? YES
+  // Actually this is fine - isMirror(null, null) returns true
+}
+```
+
+✅ **Clearer to handle root separately:**
+```javascript
+function isSymmetric(root) {
+  if (root === null) return true;
+  return isMirror(root.left, root.right);
+}
+```
+
+---
+
+❌ **Checking wrong pair of subtrees:**
+```javascript
+// For skewed tree [1, 2, 2, 3, null, null, 3]
+// Left child 3 is left of node 2
+// Right child 3 is right of node 2
+// NOT symmetric, but this check might miss it
+
+isMirror(left.left, left.right)  // WRONG order!
+```
+
+✅ **Compare left with right in mirrored fashion:**
+```javascript
+// left.left (left subtree, left child) should match
+// right.right (right subtree, right child) - they're symmetric positions
+isMirror(left.left, right.right) &amp;&amp; isMirror(left.right, right.left)
+```
+
+## Interview Tips
+
+**What to mention:**
+1. **Mirror concept:** Each side is mirror image of other
+2. **Diagonal comparison:** Compare diagonals (outer &amp;&amp; inner)
+3. **Not same structure:** Unlike "Same Tree", we check mirroring
+4. **Recursive elegance:** Very clean recursive solution
+
+**Follow-up questions:**
+
+**Q: Is this the same as checking if tree equals its inversion?**
+A: Not quite! Symmetric is stricter - it's a mirror, not just any same structure.
+
+**Q: What about left-heavy vs right-heavy asymmetric trees?**
+A: They would fail on value check or structure check.
+
+**Q: Can you do it iteratively?**
+A: Yes! Use BFS or DFS with explicit queue/stack for pairs.
+
+## Edge Cases
+
+```javascript
+// Single node
+isSymmetric(1) → true
+
+// Two symmetric nodes
+isSymmetric([1, 2, 2]) → true
+
+// Two different nodes
+isSymmetric([1, 2, 3]) → false
+
+// Empty tree (should not occur per constraints)
+isSymmetric(null) → true
+
+// Skewed tree (never symmetric unless single node)
+isSymmetric([1, 2]) → false
+
+// Deep symmetric tree
+isSymmetric([1,2,2,3,4,4,3,...]) → true (if symmetric)
+```
+
+## Related Problems
+
+- **Same Tree** - Check if two trees are identical
+- **Invert Binary Tree** - Mirror the tree structure
+- **Binary Tree Longest Consecutive Sequence** - Path patterns
+- **Balanced Binary Tree** - Check height balance
+

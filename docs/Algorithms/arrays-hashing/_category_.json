@@ -1,0 +1,9 @@
+{
+  "label": "Arrays & Hashing",
+  "position": 1,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "description": "Master array manipulation and hash table patterns - the foundation of algorithm problem-solving."
+  }
+}

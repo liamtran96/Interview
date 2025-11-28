@@ -1,0 +1,443 @@
+---
+sidebar_position: 5
+difficulty: Easy
+tags: [backtracking, string, dynamic-programming, amazon, google, microsoft]
+leetcode_url: https://leetcode.com/problems/generate-parentheses/
+companies: [Amazon, Google, Microsoft, Meta]
+pattern: "Backtracking & Greedy"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Generate Parentheses
+
+<AlgorithmProblem
+  title="Generate Parentheses"
+  difficulty="Easy"
+  description={`
+<p>Given <code>n</code> pairs of parentheses, write a function to <em>generate all combinations of well-formed parentheses</em>.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &le; n &le; 8</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'n = 3',
+      output: '["((()))","(()())","(())()","()(())","()()()"]'
+    },
+    {
+      input: 'n = 1',
+      output: '["()"]'
+    }
+  ]}
+  starterCode={`function generateParenthesis(n) {
+  // Write your code here
+
+}`}
+  solution={`function generateParenthesis(n) {
+  // Backtracking with pruning: O(4^n / sqrt(n)) time, O(4^n) space
+  const result = [];
+
+  function backtrack(current, open, close) {
+    // Base case: used all pairs
+    if (open === n && close === n) {
+      result.push(current);
+      return;
+    }
+
+    // Can add opening parenthesis if haven't used all
+    if (open < n) {
+      backtrack(current + '(', open + 1, close);
+    }
+
+    // Can add closing only if it doesn't exceed opening
+    if (close < open) {
+      backtrack(current + ')', open, close + 1);
+    }
+  }
+
+  backtrack('', 0, 0);
+  return result;
+}`}
+  testCases={[
+    {
+      input: [3],
+      expected: ['((()))', '(()())', '(())()', '()(())', '()()()'],
+      description: 'Catalan number C(3) = 5 combinations'
+    },
+    {
+      input: [1],
+      expected: ['()'],
+      description: 'Single pair'
+    },
+    {
+      input: [2],
+      expected: ['(())', '()()'],
+      description: 'Two pairs - C(2) = 2'
+    },
+    {
+      input: [4],
+      expected: 14,
+      description: 'Four pairs - C(4) = 14 combinations (verify count)'
+    },
+    {
+      input: [0],
+      expected: [''],
+      description: 'Zero pairs'
+    },
+    {
+      input: [5],
+      expected: 42,
+      description: 'Five pairs - C(5) = 42 combinations (verify count)'
+    }
+  ]}
+  functionName="generateParenthesis"
+/>
+
+## Solution Explanation
+
+### Approach 1: Backtracking with Pruning (Optimal) ✅
+
+**Time Complexity:** O(4^n / sqrt(n)) - Catalan number
+**Space Complexity:** O(n) for recursion depth
+
+Track count of opening and closing parentheses and prune invalid combinations:
+
+```javascript
+function generateParenthesis(n) {
+  const result = [];
+
+  function backtrack(current, open, close) {
+    // Base case: generated complete parenthesis string
+    if (open === n && close === n) {
+      result.push(current);
+      return;
+    }
+
+    // Pruning 1: can add '(' if haven't used all n opening
+    if (open < n) {
+      backtrack(current + '(', open + 1, close);
+    }
+
+    // Pruning 2: can add ')' only if closing &lt; opening
+    // (ensures validity - never more closing than opening)
+    if (close < open) {
+      backtrack(current + ')', open, close + 1);
+    }
+  }
+
+  backtrack('', 0, 0);
+  return result;
+}
+```
+
+**Pruning logic:**
+
+At any point in building the string:
+- `open` = number of opening parentheses added
+- `close` = number of closing parentheses added
+
+**Valid conditions:**
+- `open &le; n` - haven't exceeded n opening parentheses
+- `close &le; open` - never more closing than opening
+- When `open === n && close === n` - found valid combination
+
+**Why this works:**
+- We only add '(' when `open < n`
+- We only add ')' when `close < open`
+- This guarantees valid parentheses (never unmatched)
+
+**Decision tree for n=2:**
+
+```
+                           ""
+                        /
+                      "("  (open=1, close=0)
+                    /      \
+                "("        "()"  (open=1, close=1)
+               /  \         /
+            "("  "()"      "()()"  ✓
+           /\    /\        (VALID)
+        "(("  "()(" "()"
+       /     /
+    "(()"  "()()"  ✓
+```
+
+**Trace for n=2:**
+```
+backtrack('', 0, 0)
+
+  open < 2:
+    backtrack('(', 1, 0)
+
+      open < 2:
+        backtrack('((', 2, 0)
+          open === 2, close < 2:
+            backtrack('(()', 2, 1)
+              open === 2, close === 2
+              result = ['(())']
+
+      close < open:
+        backtrack('()', 1, 1)
+
+          open < 2:
+            backtrack('()(', 2, 1)
+              close < open:
+                backtrack('()()', 2, 2)
+                  result = ['(())', '()()']
+
+          close < open (1 < 1 = false) - no more closing
+```
+
+### Approach 2: Dynamic Programming
+
+**Time Complexity:** O(Catalan(n))
+**Space Complexity:** O(Catalan(n))
+
+Build from previous smaller problems:
+
+```javascript
+function generateParenthesis(n) {
+  const dp = [[]];
+  dp[0] = [''];
+
+  for (let i = 1; i <= n; i++) {
+    const current = [];
+
+    // Try all ways to split i pairs
+    for (let j = 0; j < i; j++) {
+      // j pairs inside first (), i-1-j pairs outside
+      const left = dp[j];
+      const right = dp[i - 1 - j];
+
+      for (const l of left) {
+        for (const r of right) {
+          current.push('(' + l + ')' + r);
+        }
+      }
+    }
+
+    dp[i] = current;
+  }
+
+  return dp[n];
+}
+```
+
+**How it works:**
+
+```
+For n = 3, we use previous results:
+
+dp[0] = [""]
+dp[1] = ["()"]
+dp[2] = [
+  "(" + "" + ")" + "()" = "()()",
+  "(" + "()" + ")" + "" = "(())"
+]
+
+dp[3]:
+  j=0: left=[""], right=dp[2]
+    "(" + "" + ")" + "()()" = "()()()"
+    "(" + "" + ")" + "(())" = "()(())"
+
+  j=1: left=["()"], right=dp[1]
+    "(" + "()" + ")" + "()" = "(()())"
+
+  j=2: left=["()", "()"], right=[""]
+    "(" + "(())" + ")" + "" = "((()))"
+    "(" + "()()" + ")" + "" = "(()())"
+```
+
+### Approach 3: Iterative (Using Queue)
+
+**Time Complexity:** O(Catalan(n))
+**Space Complexity:** O(Catalan(n))
+
+```javascript
+function generateParenthesis(n) {
+  const result = [];
+  const queue = [{ str: '', open: 0, close: 0 }];
+
+  while (queue.length &gt; 0) {
+    const { str, open, close } = queue.shift();
+
+    if (open === n && close === n) {
+      result.push(str);
+      continue;
+    }
+
+    if (open < n) {
+      queue.push({ str: str + '(', open: open + 1, close });
+    }
+
+    if (close < open) {
+      queue.push({ str: str + ')', open, close: close + 1 });
+    }
+  }
+
+  return result;
+}
+```
+
+## Backtracking Template
+
+```javascript
+function generateParenthesis(n) {
+  // 1. Initialize result
+  const result = [];
+
+  // 2. Define helper function with state
+  function backtrack(current, open, close) {
+    // 3. Base case: complete solution
+    if (open === n && close === n) {
+      result.push(current);
+      return;
+    }
+
+    // 4. Pruning: only add valid characters
+    if (open < n) {
+      backtrack(current + '(', open + 1, close);
+    }
+
+    if (close < open) {
+      backtrack(current + ')', open, close + 1);
+    }
+  }
+
+  // 5. Start recursion
+  backtrack('', 0, 0);
+
+  return result;
+}
+```
+
+**Key insight:** Pruning happens before recursion, not in recursion.
+
+## Common Mistakes
+
+❌ **Adding characters without pruning:**
+```javascript
+// Wrong: generates invalid combinations
+for (let i = 0; i < 2 * n; i++) {
+  backtrack(current + '(');
+  backtrack(current + ')');
+}
+
+// Correct: prune before adding
+if (open < n) backtrack(current + '(', ...);
+if (close < open) backtrack(current + ')', ...);
+```
+
+❌ **Wrong pruning condition for closing parenthesis:**
+```javascript
+// Wrong: allows unmatched closing
+if (close &lt; n) {
+  backtrack(current + ')', ...);
+}
+
+// Correct: closing can't exceed opening
+if (close &lt; open) {
+  backtrack(current + ')', ...);
+}
+```
+
+❌ **Not tracking open/close counts:**
+```javascript
+// Wrong: can't determine if we can add ')'
+backtrack(current + '(');
+backtrack(current + ')');
+
+// Correct: track counts
+backtrack(current + '(', open + 1, close);
+backtrack(current + ')', open, close + 1);
+```
+
+❌ **String concatenation inefficiency (minor):**
+```javascript
+// Less efficient: creates many string objects
+backtrack(current + '(', ...);
+
+// More efficient (alternative): use array
+current.push('(');
+backtrack(current, ...);
+current.pop();
+```
+
+## Interview Tips
+
+**What to mention:**
+
+1. **Problem intuition:**
+   - Generate valid parentheses combinations
+   - Valid = never closing parenthesis before opening
+   - Total = Catalan number C(n)
+
+2. **Pruning explanation:**
+   - Can add '(' while `open < n`
+   - Can add ')' only while `close < open`
+   - This ensures all generated are valid
+
+3. **Why efficient:**
+   - Backtracking explores all valid combinations
+   - Pruning prevents invalid branches (50% reduction)
+   - Time: O(Catalan(n)) which is much better than 2^(2n)
+
+4. **Alternatives:**
+   - DP approach (bottom-up)
+   - Iterative using queue
+
+**Follow-up questions:**
+
+**Q: What is the Catalan number?**
+A: C(n) = (2n)! / ((n+1)! * n!). Counts valid parenthesis strings.
+
+**Q: Can you generate the k-th combination?**
+A: Yes, use Catalan number math to calculate positions without generating all.
+
+**Q: What if we had different bracket types?**
+A: Extend pruning: track counts for each type ({}, [], ()).
+
+## Edge Cases
+
+```javascript
+// Single pair
+n=1 → ["()"]
+
+// Two pairs
+n=2 → ["(())", "()()"]
+
+// Three pairs
+n=3 → ["((()))", "(()())", "(())()", "()(())", "()()()"]
+
+// Zero (edge case)
+n=0 → [""]
+
+// Four pairs
+n=4 → 14 combinations (C(4) = 14)
+```
+
+## Catalan Number
+
+The n-th Catalan number counts valid parenthesis strings:
+```
+C(0) = 1
+C(1) = 1
+C(2) = 2
+C(3) = 5
+C(4) = 14
+C(5) = 42
+C(6) = 132
+C(7) = 429
+C(8) = 1430
+
+Formula: C(n) = C(0)*C(n-1) + C(1)*C(n-2) + ... + C(n-1)*C(0)
+```
+
+## Related Problems
+
+- **Valid Parentheses** (Easy) - Check if valid
+- **Remove Invalid Parentheses** (Hard) - Minimum removals
+- **Valid Parentheses String** (Medium) - With wildcards
+- **Palindrome Partitioning** (Medium) - Similar backtracking

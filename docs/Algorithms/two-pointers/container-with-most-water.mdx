@@ -1,0 +1,335 @@
+---
+sidebar_position: 6
+difficulty: Medium
+tags: [two-pointers, array, greedy, amazon, google, facebook]
+leetcode_url: https://leetcode.com/problems/container-with-most-water/
+companies: [Amazon, Google, Facebook, Microsoft, Bloomberg]
+pattern: "Two Pointers"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Container With Most Water
+
+<AlgorithmProblem
+  title="Container With Most Water"
+  difficulty="Medium"
+  description={`
+<p>You are given an integer array <code>height</code> of length <code>n</code>. There are <code>n</code> vertical lines drawn such that the two endpoints of the <code>i<sup>th</sup></code> line are <code>(i, 0)</code> and <code>(i, height[i])</code>.</p>
+<p>Find two lines that together with the x-axis form a container, such that the container contains the most water.</p>
+<p>Return <em>the maximum amount of water a container can store</em>.</p>
+<p><strong>Notice</strong> that you may not slant the container.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>n == height.length</li>
+  <li>2 ≤ n ≤ 10<sup>5</sup></li>
+  <li>0 ≤ height[i] ≤ 10<sup>4</sup></li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'height = [1,8,6,2,5,4,8,3,7]',
+      output: '49',
+      explanation: 'The vertical lines are at indices 1 and 8, with heights 8 and 7. The area is min(8,7) * (8-1) = 7 * 7 = 49.'
+    },
+    {
+      input: 'height = [1,1]',
+      output: '1',
+      explanation: 'The only possible container has width 1 and height 1, so area = 1.'
+    },
+    {
+      input: 'height = [4,3,2,1,4]',
+      output: '16',
+      explanation: 'Lines at indices 0 and 4 form the largest container: min(4,4) * 4 = 16.'
+    }
+  ]}
+  starterCode={`function maxArea(height) {
+  // Write your code here
+
+}`}
+  solution={`function maxArea(height) {
+  // Two pointer approach: O(n) time, O(1) space
+  let maxArea = 0;
+  let left = 0;
+  let right = height.length - 1;
+
+  while (left < right) {
+    // Calculate current area
+    const width = right - left;
+    const h = Math.min(height[left], height[right]);
+    const area = width * h;
+
+    maxArea = Math.max(maxArea, area);
+
+    // Move pointer with smaller height
+    if (height[left] < height[right]) {
+      left++;
+    } else {
+      right--;
+    }
+  }
+
+  return maxArea;
+}`}
+  testCases={[
+    {
+      input: [[1, 8, 6, 2, 5, 4, 8, 3, 7]],
+      expected: 49,
+      description: 'Standard case from problem example'
+    },
+    {
+      input: [[1, 1]],
+      expected: 1,
+      description: 'Minimum length array'
+    },
+    {
+      input: [[4, 3, 2, 1, 4]],
+      expected: 16,
+      description: 'Same heights at edges'
+    },
+    {
+      input: [[1, 2, 1]],
+      expected: 2,
+      description: 'Peak in middle'
+    },
+    {
+      input: [[2, 3, 4, 5, 18, 17, 6]],
+      expected: 17,
+      description: 'Tall lines in middle'
+    },
+    {
+      input: [[1, 2, 4, 3]],
+      expected: 4,
+      description: 'Small array with increasing then decreasing'
+    }
+  ]}
+  functionName="maxArea"
+/>
+
+## Solution Explanation
+
+### Approach 1: Brute Force (Not Recommended)
+
+**Time Complexity:** O(n²)
+**Space Complexity:** O(1)
+
+Check every possible pair of lines:
+
+```javascript
+function maxArea(height) {
+  let maxArea = 0;
+
+  for (let i = 0; i < height.length - 1; i++) {
+    for (let j = i + 1; j < height.length; j++) {
+      const width = j - i;
+      const h = Math.min(height[i], height[j]);
+      const area = width * h;
+      maxArea = Math.max(maxArea, area);
+    }
+  }
+
+  return maxArea;
+}
+```
+
+**Why not use this?**
+- O(n²) is too slow for n up to 10⁵
+- Checks many suboptimal combinations
+- Interview red flag: Not optimized
+
+### Approach 2: Two Pointers (Optimal) ✅
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1)
+
+Start from widest container and move inward:
+
+```javascript
+function maxArea(height) {
+  let maxArea = 0;
+  let left = 0;
+  let right = height.length - 1;
+
+  while (left < right) {
+    // Calculate area with current pair
+    const width = right - left;
+    const h = Math.min(height[left], height[right]);
+    const area = width * h;
+
+    maxArea = Math.max(maxArea, area);
+
+    // Move pointer with smaller height
+    if (height[left] < height[right]) {
+      left++;
+    } else {
+      right--;
+    }
+  }
+
+  return maxArea;
+}
+```
+
+**How it works:**
+
+1. **Start with widest container**: Maximum possible width
+2. **Calculate area**: width × min(height[left], height[right])
+3. **Move pointer with smaller height**:
+   - If height[left] < height[right]: left++
+   - Else: right--
+4. **Update maximum**: Track best area seen
+5. **Repeat** until pointers meet
+
+**Example walkthrough:**
+
+```
+height = [1, 8, 6, 2, 5, 4, 8, 3, 7]
+         0  1  2  3  4  5  6  7  8
+
+Initial: left=0, right=8
+[1, 8, 6, 2, 5, 4, 8, 3, 7]
+ L                       R
+width = 8, h = min(1, 7) = 1
+area = 8 × 1 = 8
+maxArea = 8
+→ height[left]=1 < height[right]=7, move left++
+
+Step 2: left=1, right=8
+[1, 8, 6, 2, 5, 4, 8, 3, 7]
+    L                    R
+width = 7, h = min(8, 7) = 7
+area = 7 × 7 = 49 ✅
+maxArea = 49
+→ height[left]=8 > height[right]=7, move right--
+
+Step 3: left=1, right=7
+[1, 8, 6, 2, 5, 4, 8, 3, 7]
+    L                 R
+width = 6, h = min(8, 3) = 3
+area = 6 × 3 = 18
+maxArea = 49
+→ height[left]=8 > height[right]=3, move right--
+
+... continue until left meets right
+
+Final: maxArea = 49
+```
+
+### Why This Works: The Greedy Insight
+
+**Key question:** Why can we safely move the pointer with smaller height?
+
+**Answer:** Moving the taller pointer can never improve the area!
+
+**Proof:**
+- Area = width × min(height[left], height[right])
+- Width decreases with each step
+- Height is limited by the shorter line
+
+If height[left] < height[right]:
+- Current height is limited by height[left]
+- Moving right-- reduces width AND keeps height ≤ height[left]
+- Can't improve area
+- Moving left++ gives chance for taller left line
+
+**Invariant:**
+- We never miss the optimal solution
+- We explore all potentially better configurations
+- Each move eliminates suboptimal choices
+
+### Visual Understanding
+
+```
+Example: [4, 3, 2, 1, 4]
+
+Option 1: Use lines at 0 and 4
+[4, 3, 2, 1, 4]
+ L           R
+width = 4, height = min(4,4) = 4
+area = 4 × 4 = 16 ✅ Optimal!
+
+Option 2: Use lines at 0 and 3
+[4, 3, 2, 1, 4]
+ L        R
+width = 3, height = min(4,1) = 1
+area = 3 × 1 = 3 (worse)
+
+The algorithm finds option 1 first, then
+safely eliminates suboptimal options.
+```
+
+## Common Mistakes
+
+❌ **Moving both pointers at once:**
+```javascript
+left++;
+right--;  // Wrong! Move only one pointer
+```
+
+❌ **Moving the taller pointer:**
+```javascript
+if (height[left] < height[right]) {
+  right--;  // Wrong direction!
+}
+```
+
+❌ **Using max height instead of min:**
+```javascript
+const h = Math.max(height[left], height[right]); // Wrong!
+// Should be Math.min - container height limited by shorter line
+```
+
+❌ **Trying to optimize by skipping values:**
+```javascript
+// Don't try to skip ahead - might miss optimal solution
+while (height[left] < height[left + 1]) left++;
+```
+
+❌ **Not updating maxArea:**
+```javascript
+const area = width * h;
+// Missing: maxArea = Math.max(maxArea, area)
+```
+
+## Interview Tips
+
+**Discussion points:**
+1. Start with brute force to show understanding
+2. Explain why O(n²) is too slow
+3. Introduce two-pointer approach with greedy insight
+4. Walk through example showing pointer movements
+5. Explain why moving smaller pointer is optimal
+
+**Follow-up questions:**
+- Why move the smaller pointer? → Taller pointer won't improve area
+- Can we use dynamic programming? → No, greedy is optimal here
+- What if we could slant the container? → Different problem entirely
+- How would you prove this is correct? → Explain greedy choice property
+
+**Key insights to mention:**
+- Width decreases monotonically
+- Height is limited by shorter line
+- Moving taller pointer never improves area
+- Greedy choice eliminates suboptimal solutions
+
+**What makes this problem tricky:**
+- Non-obvious that greedy works
+- Must understand why moving smaller pointer is safe
+- Area formula involves two variables (width and height)
+
+**Proof strategy:**
+```
+For any container (i, j):
+- If height[i] < height[j], then
+  all containers (i, k) where k < j
+  have area ≤ current area because:
+  - Width is smaller: (k - i) < (j - i)
+  - Height is still ≤ height[i]
+```
+
+## Related Problems
+
+- **Trapping Rain Water** (Hard) - Similar concept but different approach
+- **Maximal Rectangle** (Hard) - 2D version of area calculation
+- **Largest Rectangle in Histogram** (Hard) - Related optimization problem
+- **Product of Array Except Self** (Medium) - Different two-pointer application

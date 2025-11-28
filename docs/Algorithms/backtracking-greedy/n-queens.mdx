@@ -1,0 +1,505 @@
+---
+sidebar_position: 8
+difficulty: Medium
+tags: [backtracking, array, constraint-satisfaction, amazon, google]
+leetcode_url: https://leetcode.com/problems/n-queens/
+companies: [Amazon, Google, Microsoft, Meta]
+pattern: "Backtracking & Greedy"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# N-Queens
+
+<AlgorithmProblem
+  title="N-Queens"
+  difficulty="Medium"
+  description={`
+<p>The <strong>N-queens</strong> puzzle is the problem of placing <code>n</code> queens on an <code>n x n</code> chessboard such that no two queens threaten each other.</p>
+<p>Given an integer <code>n</code>, return <em>all distinct solutions to the</em> <em>N-queens puzzle</em>. Each solution contains a distinct board configuration of the N-queens placement, where <code>q</code> and <code>.</code> indicate a queen and an empty space, respectively.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &le; n &le; 9</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'n = 4',
+      output: '[[".Q..",\"...Q","Q...","..Q."],["..Q.","Q...","...Q",".Q.."]]'
+    },
+    {
+      input: 'n = 1',
+      output: '[["Q"]]'
+    }
+  ]}
+  starterCode={`function solveNQueens(n) {
+  // Write your code here
+
+}`}
+  solution={`function solveNQueens(n) {
+  // Backtracking with constraint tracking: O(n!) time, O(n) space
+  const result = [];
+  const board = Array.from({ length: n }, () => Array(n).fill('.'));
+  const columns = new Set();
+  const diagonals = new Set(); // row - col
+  const antiDiagonals = new Set(); // row + col
+
+  function backtrack(row) {
+    // Base case: placed all queens
+    if (row === n) {
+      result.push(board.map(r => r.join('')));
+      return;
+    }
+
+    // Try placing queen in each column of this row
+    for (let col = 0; col < n; col++) {
+      const diagonal = row - col;
+      const antiDiagonal = row + col;
+
+      // Pruning: skip if column or diagonal already has queen
+      if (columns.has(col) || diagonals.has(diagonal) || antiDiagonals.has(antiDiagonal)) {
+        continue;
+      }
+
+      // Place queen
+      board[row][col] = 'Q';
+      columns.add(col);
+      diagonals.add(diagonal);
+      antiDiagonals.add(antiDiagonal);
+
+      // Explore next row
+      backtrack(row + 1);
+
+      // Backtrack: remove queen
+      board[row][col] = '.';
+      columns.delete(col);
+      diagonals.delete(diagonal);
+      antiDiagonals.delete(antiDiagonal);
+    }
+  }
+
+  backtrack(0);
+  return result;
+}`}
+  testCases={[
+    {
+      input: [4],
+      expected: 2,
+      description: 'n=4 has exactly 2 solutions (verify count)'
+    },
+    {
+      input: [1],
+      expected: 1,
+      description: 'n=1 has 1 solution: place queen at (0,0)'
+    },
+    {
+      input: [2],
+      expected: 0,
+      description: 'n=2 has 0 solutions (no valid placement)'
+    },
+    {
+      input: [3],
+      expected: 0,
+      description: 'n=3 has 0 solutions'
+    },
+    {
+      input: [5],
+      expected: 10,
+      description: 'n=5 has 10 solutions'
+    },
+    {
+      input: [8],
+      expected: 92,
+      description: 'n=8 has 92 solutions'
+    }
+  ]}
+  functionName="solveNQueens"
+/>
+
+## Solution Explanation
+
+### Approach 1: Backtracking with Constraint Sets (Optimal) ✅
+
+**Time Complexity:** O(n!)
+**Space Complexity:** O(n) for recursion depth + constraint sets
+
+Track constraints using three Sets to avoid redundant conflict checking:
+
+```javascript
+function solveNQueens(n) {
+  const result = [];
+  const board = Array.from({ length: n }, () => Array(n).fill('.'));
+  const columns = new Set();
+  const diagonals = new Set(); // row - col
+  const antiDiagonals = new Set(); // row + col
+
+  function backtrack(row) {
+    // Base case: placed all n queens
+    if (row === n) {
+      result.push(board.map(r => r.join('')));
+      return;
+    }
+
+    // Try each column in this row
+    for (let col = 0; col < n; col++) {
+      const diagonal = row - col;
+      const antiDiagonal = row + col;
+
+      // Pruning: skip if any conflict
+      if (columns.has(col) || diagonals.has(diagonal) || antiDiagonals.has(antiDiagonal)) {
+        continue;
+      }
+
+      // Place queen
+      board[row][col] = 'Q';
+      columns.add(col);
+      diagonals.add(diagonal);
+      antiDiagonals.add(antiDiagonal);
+
+      // Explore next row
+      backtrack(row + 1);
+
+      // Backtrack: remove queen
+      board[row][col] = '.';
+      columns.delete(col);
+      diagonals.delete(diagonal);
+      antiDiagonals.delete(antiDiagonal);
+    }
+  }
+
+  backtrack(0);
+  return result;
+}
+```
+
+**Constraint tracking explained:**
+
+Queens attack horizontally, vertically, and diagonally:
+
+```
+Vertical conflicts:   Same column
+  . . Q . .
+  . . . . .
+  . . Q . .  ← Conflict
+
+Diagonal conflicts:   row - col is same
+  Q . . . .
+  . Q . . .
+  . . Q . .  ← All have row-col = 0 (same diagonal)
+
+Anti-diagonal:        row + col is same
+  . . . . Q
+  . . . Q .
+  . . Q . .  ← All have row+col = 4 (same anti-diagonal)
+```
+
+**Trace for n=4:**
+
+```
+backtrack(0):
+  row=0, try each column:
+
+    col=0:
+      Place Q at (0,0)
+      columns = {0}, diagonals = {0}, antiDiagonals = {0}
+
+      backtrack(1):
+        col=0,1: skip (column 0 taken)
+        col=2: skip (diagonals/antiDiagonals conflict)
+        col=3:
+          Place Q at (1,3)
+          columns = {0,3}, diagonals = {-2, 0}, antiDiagonals = {0, 4}
+
+          backtrack(2):
+            col=0,2: skip
+            col=1:
+              Place Q at (2,1)
+              backtrack(3):
+                col=2:
+                  Place Q at (3,2)
+                  row === n → add solution
+
+    col=1:
+      Skip or place and continue...
+    ...
+
+Final: 2 solutions for n=4
+```
+
+### Approach 2: Backtracking without Constraint Sets
+
+**Time Complexity:** O(n^2 × n!) due to conflict checking
+**Space Complexity:** O(n)
+
+```javascript
+function solveNQueens(n) {
+  const result = [];
+  const board = Array.from({ length: n }, () => Array(n).fill('.'));
+
+  function isSafe(row, col) {
+    // Check column
+    for (let i = 0; i < row; i++) {
+      if (board[i][col] === 'Q') return false;
+    }
+
+    // Check upper-left diagonal
+    for (let i = row - 1, j = col - 1; i >= 0 && j >= 0; i--, j--) {
+      if (board[i][j] === 'Q') return false;
+    }
+
+    // Check upper-right diagonal
+    for (let i = row - 1, j = col + 1; i >= 0 && j < n; i--, j++) {
+      if (board[i][j] === 'Q') return false;
+    }
+
+    return true;
+  }
+
+  function backtrack(row) {
+    if (row === n) {
+      result.push(board.map(r => r.join('')));
+      return;
+    }
+
+    for (let col = 0; col < n; col++) {
+      if (isSafe(row, col)) {
+        board[row][col] = 'Q';
+        backtrack(row + 1);
+        board[row][col] = '.';
+      }
+    }
+  }
+
+  backtrack(0);
+  return result;
+}
+```
+
+**Less efficient:** Checks board for conflicts instead of tracking sets.
+
+### Approach 3: Using Arrays for Constraints
+
+**Time Complexity:** O(n!)
+**Space Complexity:** O(n)
+
+```javascript
+function solveNQueens(n) {
+  const result = [];
+  const board = Array(n).fill(null).map(() => Array(n).fill('.'));
+  const cols = new Array(n).fill(true);
+  const diag = new Array(2 * n - 1).fill(true); // row - col + n - 1
+  const antiDiag = new Array(2 * n - 1).fill(true); // row + col
+
+  function backtrack(row) {
+    if (row === n) {
+      result.push(board.map(r => [...r]));
+      return;
+    }
+
+    for (let col = 0; col < n; col++) {
+      const d = row - col + n - 1;
+      const ad = row + col;
+
+      if (cols[col] && diag[d] && antiDiag[ad]) {
+        board[row][col] = 'Q';
+        cols[col] = false;
+        diag[d] = false;
+        antiDiag[ad] = false;
+
+        backtrack(row + 1);
+
+        board[row][col] = '.';
+        cols[col] = true;
+        diag[d] = true;
+        antiDiag[ad] = true;
+      }
+    }
+  }
+
+  backtrack(0);
+  return result;
+}
+```
+
+**Alternative:** Uses boolean arrays instead of Sets.
+
+## Backtracking Template
+
+```javascript
+function solveNQueens(n) {
+  // 1. Initialize board and constraints
+  const result = [];
+  const board = Array.from({ length: n }, () => Array(n).fill('.'));
+  const columns = new Set();
+  const diagonals = new Set();
+  const antiDiagonals = new Set();
+
+  // 2. Define helper function
+  function backtrack(row) {
+    // 3. Base case: placed all queens
+    if (row === n) {
+      result.push(board.map(r => r.join('')));
+      return;
+    }
+
+    // 4. Try each column in current row
+    for (let col = 0; col < n; col++) {
+      const diagonal = row - col;
+      const antiDiagonal = row + col;
+
+      // 5. Pruning: check constraints
+      if (columns.has(col) || diagonals.has(diagonal) || antiDiagonals.has(antiDiagonal)) {
+        continue;
+      }
+
+      // 6. Place queen and mark constraints
+      board[row][col] = 'Q';
+      columns.add(col);
+      diagonals.add(diagonal);
+      antiDiagonals.add(antiDiagonal);
+
+      // 7. Explore next row
+      backtrack(row + 1);
+
+      // 8. Backtrack: remove queen
+      board[row][col] = '.';
+      columns.delete(col);
+      diagonals.delete(diagonal);
+      antiDiagonals.delete(antiDiagonal);
+    }
+  }
+
+  // 9. Start from first row
+  backtrack(0);
+
+  return result;
+}
+```
+
+## Common Mistakes
+
+❌ **Not tracking all three constraints:**
+```javascript
+// Wrong: only tracks column, misses diagonal conflicts
+if (!columns.has(col)) {
+  backtrack(row + 1);
+}
+
+// Correct: track row-col and row+col diagonals
+if (!columns.has(col) && !diagonals.has(row - col) && !antiDiagonals.has(row + col)) {
+  backtrack(row + 1);
+}
+```
+
+❌ **Wrong diagonal calculation:**
+```javascript
+// Wrong: diagonals all have different row-col
+const diagonal = row + col; // This is anti-diagonal!
+
+// Correct:
+const diagonal = row - col; // Main diagonals
+const antiDiagonal = row + col; // Anti-diagonals
+```
+
+❌ **Not backtracking properly:**
+```javascript
+// Wrong: constraints not cleaned up
+board[row][col] = 'Q';
+columns.add(col);
+backtrack(row + 1);
+// Missing cleanup!
+
+// Correct: always backtrack
+board[row][col] = 'Q';
+columns.add(col);
+backtrack(row + 1);
+board[row][col] = '.';
+columns.delete(col);
+```
+
+❌ **Wrong board representation:**
+```javascript
+// Wrong: includes row index in solution
+result.push(board);
+
+// Correct: only include string representation
+result.push(board.map(r => r.join('')));
+```
+
+## Interview Tips
+
+**What to mention:**
+
+1. **Problem understanding:**
+   - Place n queens on n×n board
+   - No two queens can attack each other
+   - Find all distinct solutions
+
+2. **Attack constraints:**
+   - Same column: track with Set
+   - Same diagonal (↖ to ↘): track with row - col
+   - Anti-diagonal (↙ to ↗): track with row + col
+
+3. **Algorithm efficiency:**
+   - Backtracking reduces search space dramatically
+   - Constraint sets provide O(1) conflict checking
+   - Time: O(n!) since at most n! permutations
+   - Space: O(n) for recursion depth
+
+4. **Key optimization:**
+   - Use Sets instead of checking board array
+   - Avoid redundant conflict checks
+
+**Follow-up questions:**
+
+**Q: What if you only need the count?**
+A: Return count instead of board configurations (same backtracking).
+
+**Q: How would you handle n=9?**
+A: Algorithm already efficient enough, constraint sets handle it.
+
+**Q: Can you generate N-Queens solutions iteratively?**
+A: Possible but much more complex, backtracking is natural fit.
+
+## Edge Cases
+
+```javascript
+// Minimum case
+n=1 → 1 solution: [["Q"]]
+
+// No solution
+n=2 → 0 solutions
+n=3 → 0 solutions
+
+// Small solutions
+n=4 → 2 solutions
+
+// Famous case
+n=8 → 92 solutions
+
+// Maximum
+n=9 → 352 solutions
+```
+
+## Constraints Summary
+
+For a placement at (row, col):
+```
+Constraint 1: No queen in same column
+  → Track in: Set<col>
+
+Constraint 2: No queen in main diagonal (↖ to ↘)
+  → All cells on same diagonal have row - col = constant
+  → Track in: Set<row - col>
+
+Constraint 3: No queen in anti-diagonal (↙ to ↗)
+  → All cells on same diagonal have row + col = constant
+  → Track in: Set<row + col>
+```
+
+## Related Problems
+
+- **N-Queens II** (Hard) - Count solutions instead of listing them
+- **Sudoku Solver** (Hard) - Similar constraint satisfaction
+- **Permutations** (Medium) - Similar backtracking pattern
+- **Combinations** (Medium) - Simpler backtracking

@@ -1,0 +1,438 @@
+---
+sidebar_position: 10
+difficulty: Medium
+tags: [trees, construction, traversal, recursion, amazon, google]
+leetcode_url: https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/
+companies: [Amazon, Google, Microsoft, Meta, Apple]
+pattern: "Trees"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Construct Binary Tree from Preorder and Inorder Traversal
+
+<AlgorithmProblem
+  title="Construct Binary Tree from Preorder and Inorder Traversal"
+  difficulty="Medium"
+  description={`
+<p>Given two integer arrays <code>preorder</code> and <code>inorder</code> where:</p>
+<ul>
+  <li><code>preorder</code> is the preorder traversal of a binary tree</li>
+  <li><code>inorder</code> is the inorder traversal of the same tree</li>
+</ul>
+<p>Construct and return <strong>the binary tree</strong>.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 ≤ preorder.length ≤ 3000</li>
+  <li>inorder.length == preorder.length</li>
+  <li>-3000 ≤ preorder[i], inorder[i] ≤ 3000</li>
+  <li>preorder and inorder consist of <strong>unique</strong> values</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'preorder = [3,9,20,15,7], inorder = [9,3,15,20,7]',
+      output: '[3,9,20,null,null,15,7]'
+    },
+    {
+      input: 'preorder = [-1], inorder = [-1]',
+      output: '[-1]'
+    },
+    {
+      input: 'preorder = [1,2], inorder = [2,1]',
+      output: '[1,2]'
+    }
+  ]}
+  starterCode={`class TreeNode {
+  constructor(val = 0, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+function buildTree(preorder, inorder) {
+  // TODO: Construct tree from preorder and inorder traversals
+  return null;
+}`}
+  solution={`class TreeNode {
+  constructor(val = 0, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+function buildTree(preorder, inorder) {
+  // Use hash map for O(1) lookups of inorder indices
+  const inorderMap = new Map();
+  for (let i = 0; i &lt; inorder.length; i++) {
+    inorderMap.set(inorder[i], i);
+  }
+
+  let preIdx = 0;
+
+  function buildHelper(inStart, inEnd) {
+    // Base case: invalid range
+    if (inStart &gt; inEnd) return null;
+
+    // Preorder: first element is root
+    const rootVal = preorder[preIdx];
+    preIdx++;
+
+    // Find root's position in inorder
+    const inIdx = inorderMap.get(rootVal);
+
+    // Create root node
+    const root = new TreeNode(rootVal);
+
+    // Recursively build left subtree
+    // Left subtree uses inorder[inStart...inIdx-1]
+    root.left = buildHelper(inStart, inIdx - 1);
+
+    // Recursively build right subtree
+    // Right subtree uses inorder[inIdx+1...inEnd]
+    root.right = buildHelper(inIdx + 1, inEnd);
+
+    return root;
+  }
+
+  return buildHelper(0, inorder.length - 1);
+}`}
+  testCases={[
+    {
+      input: [
+        [3, 9, 20, 15, 7],
+        [9, 3, 15, 20, 7]
+      ],
+      expected: [3, 9, 20, null, null, 15, 7],
+      description: 'Standard example'
+    },
+    {
+      input: [[-1], [-1]],
+      expected: [-1],
+      description: 'Single node'
+    },
+    {
+      input: [[1, 2], [2, 1]],
+      expected: [1, 2],
+      description: 'Two nodes (left child)'
+    },
+    {
+      input: [[1, 2, 3], [1, 2, 3]],
+      expected: [1, 2, 3],
+      description: 'Right-skewed tree'
+    },
+    {
+      input: [[1, 2, 3, 4, 5, 6, 7], [4, 2, 5, 1, 6, 3, 7]],
+      expected: [1, 2, 3, 4, 5, 6, 7],
+      description: 'Complete binary tree'
+    },
+    {
+      input: [[1, 2, 4, 5, 3], [4, 2, 5, 1, 3]],
+      expected: [1, 2, 3, 4, 5],
+      description: 'Unbalanced tree'
+    }
+  ]}
+  functionName="buildTree"
+/>
+
+## Solution Explanation
+
+### Approach 1: Recursive with Hash Map (Most Efficient) ✅
+
+**Time Complexity:** O(n) - visit each node once
+**Space Complexity:** O(n) - hash map + recursion stack
+
+Use preorder and inorder properties to identify root and partition:
+
+```javascript
+function buildTree(preorder, inorder) {
+  const inorderMap = new Map();
+  for (let i = 0; i &lt; inorder.length; i++) {
+    inorderMap.set(inorder[i], i);
+  }
+
+  let preIdx = 0;
+
+  function buildHelper(inStart, inEnd) {
+    if (inStart &gt; inEnd) return null;
+
+    // Root is first in preorder
+    const rootVal = preorder[preIdx++];
+    // Find root position in inorder
+    const inIdx = inorderMap.get(rootVal);
+
+    // Create root
+    const root = new TreeNode(rootVal);
+
+    // Build left subtree (inorder: inStart to inIdx-1)
+    root.left = buildHelper(inStart, inIdx - 1);
+    // Build right subtree (inorder: inIdx+1 to inEnd)
+    root.right = buildHelper(inIdx + 1, inEnd);
+
+    return root;
+  }
+
+  return buildHelper(0, inorder.length - 1);
+}
+```
+
+**How it works:**
+
+```
+preorder = [3, 9, 20, 15, 7]
+inorder  = [9, 3, 15, 20, 7]
+
+Key insights:
+- Preorder: root, left subtree, right subtree
+- Inorder: left subtree, root, right subtree
+
+Step 1: Root = 3 (first in preorder)
+  Find 3 in inorder → index 1
+  Left: inorder[0..0] = [9]
+  Right: inorder[2..4] = [15, 20, 7]
+
+Step 2: Build left subtree with preorder[1..1] = [9], inorder[0..0] = [9]
+  Root = 9, no children
+
+Step 3: Build right subtree with preorder[2..4] = [20, 15, 7], inorder[2..4] = [15, 20, 7]
+  Root = 20 (first in preorder[2..4])
+  Find 20 in inorder → index 3
+  Left: inorder[2..2] = [15]
+  Right: inorder[4..4] = [7]
+
+Step 4: Build left of 20 → Node 15
+Step 5: Build right of 20 → Node 7
+
+Result:
+      3
+     / \
+    9   20
+       /  \
+      15   7 ✅
+```
+
+### Approach 2: Recursive without Hash Map
+
+**Time Complexity:** O(n²) - indexOf is O(n)
+**Space Complexity:** O(n)
+
+Find inorder index using array search:
+
+```javascript
+function buildTree(preorder, inorder) {
+  if (!preorder.length) return null;
+
+  // Root is first in preorder
+  const rootVal = preorder[0];
+  const inIdx = inorder.indexOf(rootVal);
+
+  // Create root
+  const root = new TreeNode(rootVal);
+
+  // Left subtree: elements before root in inorder
+  root.left = buildTree(
+    preorder.slice(1, inIdx + 1),
+    inorder.slice(0, inIdx)
+  );
+
+  // Right subtree: elements after root in inorder
+  root.right = buildTree(
+    preorder.slice(inIdx + 1),
+    inorder.slice(inIdx + 1)
+  );
+
+  return root;
+}
+```
+
+**Cleaner but slower** - slice creates O(n) copies
+
+### Approach 3: Iterative with Stack
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(n)
+
+Use stack to build tree bottom-up (more complex):
+
+```javascript
+function buildTree(preorder, inorder) {
+  if (!preorder.length) return null;
+
+  const root = new TreeNode(preorder[0]);
+  const stack = [root];
+  let inIdx = 0;
+
+  for (let i = 1; i &lt; preorder.length; i++) {
+    const val = preorder[i];
+    let node = stack[stack.length - 1];
+
+    if (node.val === inorder[inIdx]) {
+      // Found right boundary, connect right child
+      while (stack.length &amp;&amp; stack[stack.length - 1].val === inorder[inIdx]) {
+        node = stack.pop();
+        inIdx++;
+      }
+      node.right = new TreeNode(val);
+      stack.push(node.right);
+    } else {
+      // Left child
+      node.left = new TreeNode(val);
+      stack.push(node.left);
+    }
+  }
+
+  return root;
+}
+```
+
+## Comparison of Approaches
+
+| Approach | Time | Space | Best For | Simplicity |
+|----------|------|-------|----------|-----------|
+| Hash Map | O(n) | O(n) | **Most efficient** | Medium |
+| Array slice | O(n²) | O(n) | Simpler code | Easy |
+| Iterative | O(n) | O(n) | No recursion | Hard |
+
+## Common Mistakes
+
+❌ **Confusing preorder and inorder structure:**
+```javascript
+// Preorder: root, LEFT, RIGHT
+// Inorder: LEFT, root, RIGHT
+
+// Wrong: assuming inorder is root, left, right
+const inIdx = 0;  // Wrong!
+```
+
+✅ **Remember traversal properties:**
+```javascript
+// Preorder: First element is ROOT
+const rootVal = preorder[0];
+
+// Inorder: Find root, split into left and right
+const inIdx = inorder.indexOf(rootVal);
+const leftInorder = inorder.slice(0, inIdx);      // Elements before root
+const rightInorder = inorder.slice(inIdx + 1);   // Elements after root
+```
+
+---
+
+❌ **Not tracking preorder index correctly:**
+```javascript
+function buildTree(preorder, inorder) {
+  function buildHelper(inStart, inEnd, preStart, preEnd) {
+    if (inStart &gt; inEnd) return null;
+
+    const rootVal = preorder[preStart];
+    const inIdx = inorder.indexOf(rootVal);
+    const leftSize = inIdx - inStart;
+
+    const root = new TreeNode(rootVal);
+    root.left = buildHelper(inStart, inIdx - 1, preStart + 1, preStart + leftSize);
+    root.right = buildHelper(inIdx + 1, inEnd, preStart + leftSize + 1, preEnd);
+    return root;
+  }
+
+  return buildHelper(0, inorder.length - 1, 0, preorder.length - 1);
+}
+// Correct but complicated - using global preIdx is cleaner
+```
+
+✅ **Use global preIdx pointer:**
+```javascript
+let preIdx = 0;
+
+function buildHelper(inStart, inEnd) {
+  if (inStart &gt; inEnd) return null;
+
+  const rootVal = preorder[preIdx++];  // Increment preIdx
+  const inIdx = inorderMap.get(rootVal);
+
+  const root = new TreeNode(rootVal);
+  root.left = buildHelper(inStart, inIdx - 1);
+  root.right = buildHelper(inIdx + 1, inEnd);
+  return root;
+}
+```
+
+---
+
+❌ **Not handling empty arrays:**
+```javascript
+function buildTree(preorder, inorder) {
+  // Will crash if empty
+  const rootVal = preorder[0];
+  // ...
+}
+```
+
+✅ **Check for empty base case:**
+```javascript
+function buildTree(preorder, inorder) {
+  if (!preorder.length) return null;
+  // ...
+}
+```
+
+## Interview Tips
+
+**What to mention:**
+1. **Key insight:** Preorder starts with root, inorder splits left/right
+2. **Hash map:** For O(1) lookup of inorder indices
+3. **Recursive structure:** Match preorder size with inorder partition
+4. **Time complexity:** O(n) with hash map, O(n²) without
+
+**Follow-up questions:**
+
+**Q: What if you had postorder instead of preorder?**
+A: Similar approach, but postorder ends with root, inorder still splits.
+
+**Q: How would you validate the construction?**
+A: Verify traversals match: preorder(constructed) == preorder, etc.
+
+**Q: Can there be multiple valid trees?**
+A: No - preorder + inorder uniquely determine the tree.
+
+## Edge Cases
+
+```javascript
+// Single node
+buildTree([1], [1]) → 1
+
+// Two nodes (left child)
+buildTree([1, 2], [2, 1]) → 1
+                                 \
+                                  2
+
+// Two nodes (right child)
+buildTree([1, 2], [1, 2]) → 1
+                               /
+                              2
+
+// Complete tree
+buildTree([1,2,3,4,5,6,7], [4,2,5,1,6,3,7]) → Balanced tree
+
+// Left-skewed
+buildTree([1,2,3], [3,2,1]) → 1
+                                 /
+                                2
+                               /
+                              3
+
+// Right-skewed
+buildTree([1,2,3], [1,2,3]) → 1
+                                 \
+                                  2
+                                   \
+                                    3
+```
+
+## Related Problems
+
+- **Construct Binary Tree from Inorder and Postorder** (Medium) - Different traversals
+- **Construct Binary Tree from Preorder Traversal** (Medium) - Single traversal (harder)
+- **Binary Tree Inorder Traversal** (Medium) - Traversal itself
+- **Binary Tree Preorder Traversal** (Medium) - Traversal itself
+

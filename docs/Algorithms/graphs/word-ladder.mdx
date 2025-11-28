@@ -1,0 +1,403 @@
+---
+sidebar_position: 7
+difficulty: Medium
+tags: [graphs, bfs, strings, amazon, google, facebook]
+leetcode_url: https://leetcode.com/problems/word-ladder/
+companies: [Amazon, Google, Facebook, Microsoft, Apple]
+pattern: "Graphs"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Word Ladder
+
+<AlgorithmProblem
+  title="Word Ladder"
+  difficulty="Medium"
+  description={`
+<p>A <strong>transformation sequence</strong> from word <code>beginWord</code> to word <code>endWord</code> using a dictionary <code>wordList</code> is a sequence of words where:</p>
+<ul>
+  <li>The first word is <code>beginWord</code>.</li>
+  <li>The last word is <code>endWord</code>.</li>
+  <li>Only one letter can be changed at a time.</li>
+  <li>Every intermediate word must exist in <code>wordList</code>.</li>
+</ul>
+<p>Given two words, <code>beginWord</code> and <code>endWord</code>, and a dictionary <code>wordList</code>, return <em>the <strong>number of words</strong> in the <strong>shortest transformation sequence</strong> from</em> <code>beginWord</code> <em>to</em> <code>endWord</code>, <em>or</em> <code>0</code> <em>if no such sequence exists</em>.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &lt;= beginWord.length &lt;= 10</li>
+  <li>endWord.length == beginWord.length</li>
+  <li>1 &lt;= wordList.length &lt;= 5000</li>
+  <li>wordList[i].length == beginWord.length</li>
+  <li><code>beginWord</code>, <code>endWord</code>, and <code>wordList[i]</code> consist of lowercase English letters</li>
+  <li><code>beginWord != endWord</code></li>
+  <li>All the words in <code>wordList</code> are unique.</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'beginWord = "hit", endWord = "cog", wordList = ["hot","dot","dog","lot","log","cog"]',
+      output: '5',
+      explanation: 'One shortest transformation sequence is "hit" -> "hot" -> "dot" -> "dog" -> "cog".'
+    },
+    {
+      input: 'beginWord = "hit", endWord = "cog", wordList = ["hot","dot","dog","lot","log"]',
+      output: '0',
+      explanation: 'The endWord "cog" is not in wordList, therefore there is no valid transformation sequence.'
+    },
+    {
+      input: 'beginWord = "a", endWord = "c", wordList = ["a","b","c"]',
+      output: '3',
+      explanation: 'Shortest path: "a" -> "b" -> "c" (only 1 letter changes at a time: a→b, b→c)'
+    }
+  ]}
+  starterCode={`function ladderLength(beginWord, endWord, wordList) {
+  // Write your code here
+  return 0;
+}`}
+  solution={`function ladderLength(beginWord, endWord, wordList) {
+  // BFS to find shortest path in word transformation graph
+  // Time: O(n × l²) where n = words, l = length of word
+  // Space: O(n × l) for graph
+
+  if (!wordList.includes(endWord)) {
+    return 0;  // Impossible if endWord not in list
+  }
+
+  const wordSet = new Set(wordList);
+  const queue = [[beginWord, 1]];
+  const visited = new Set([beginWord]);
+
+  while (queue.length > 0) {
+    const [word, level] = queue.shift();
+
+    // Found the endWord
+    if (word === endWord) {
+      return level;
+    }
+
+    // Check all neighbors (one character change away)
+    for (let i = 0; i < word.length; i++) {
+      for (let c = 97; c <= 122; c++) {  // a to z
+        const ch = String.fromCharCode(c);
+        if (ch === word[i]) continue;
+
+        const newWord = word.slice(0, i) + ch + word.slice(i + 1);
+
+        if (wordSet.has(newWord) && !visited.has(newWord)) {
+          if (newWord === endWord) {
+            return level + 1;
+          }
+
+          visited.add(newWord);
+          queue.push([newWord, level + 1]);
+        }
+      }
+    }
+  }
+
+  return 0;  // No path found
+}`}
+  testCases={[
+    {
+      input: ["hit", "cog", ["hot","dot","dog","lot","log","cog"]],
+      expected: 5,
+      description: 'Complete sequence: hit->hot->dot->dog->cog'
+    },
+    {
+      input: ["hit", "cog", ["hot","dot","dog","lot","log"]],
+      expected: 0,
+      description: 'EndWord not in list'
+    },
+    {
+      input: ["a", "c", ["a","b","c"]],
+      expected: 3,
+      description: 'Simple chain: a->b->c'
+    },
+    {
+      input: ["cold", "warm", ["cold","cord","card","ward","warm","hard"]],
+      expected: 5,
+      description: 'cold->cord->card->ward->warm'
+    },
+    {
+      input: ["qa", "sq", ["si","go","se","cm","so","ph","mt","db","mb","sb","kr","ln","tm","le","th","td","tc","ql","qu","qu","tq","tt","ff","yh","hh","ll","cc","kk","kc","jb","jd","uh","um","ug","ul","uq"]],
+      expected: 0,
+      description: 'No valid path exists'
+    },
+    {
+      input: ["hot", "dog", ["hot","dog"]],
+      expected: 0,
+      description: 'Cannot transform (more than 1 letter differs)'
+    }
+  ]}
+  functionName="ladderLength"
+/>
+
+## Solution Explanation
+
+### Approach 1: BFS (Breadth-First Search) ✅
+
+**Time Complexity:** O(n × l²) where n = number of words, l = length of word
+**Space Complexity:** O(n × l) for set and queue
+
+BFS finds the shortest path in the word transformation graph:
+
+```javascript
+function ladderLength(beginWord, endWord, wordList) {
+  if (!wordList.includes(endWord)) {
+    return 0;  // endWord must be in dictionary
+  }
+
+  const wordSet = new Set(wordList);
+  const queue = [[beginWord, 1]];  // [word, distance from start]
+  const visited = new Set([beginWord]);
+
+  while (queue.length > 0) {
+    const [word, level] = queue.shift();
+
+    if (word === endWord) {
+      return level;  // Found shortest path!
+    }
+
+    // Try changing each character
+    for (let i = 0; i < word.length; i++) {
+      // Try all 26 letters
+      for (let c = 97; c <= 122; c++) {  // ASCII codes for a-z
+        const ch = String.fromCharCode(c);
+        if (ch === word[i]) continue;  // Skip same character
+
+        const newWord = word.slice(0, i) + ch + word.slice(i + 1);
+
+        // Check if newWord is valid and unvisited
+        if (wordSet.has(newWord) && !visited.has(newWord)) {
+          if (newWord === endWord) {
+            return level + 1;  // Found it!
+          }
+
+          visited.add(newWord);
+          queue.push([newWord, level + 1]);
+        }
+      }
+    }
+  }
+
+  return 0;  // No path exists
+}
+```
+
+**How it works:**
+
+```
+beginWord = "hit", endWord = "cog"
+wordList = ["hot","dot","dog","lot","log","cog"]
+
+Step 1: Initialize
+  queue = [["hit", 1]]
+  visited = {"hit"}
+
+Step 2: Process "hit" (level 1)
+  Try all neighbors (1 char change):
+    - ha, hb, ..., hz (hit[0])
+    - iat, ibt, ..., izt (hit[1])
+    - hia, hib, ..., hiz (hit[2])
+  Found: "hot" ✓
+  queue = [["hot", 2]]
+  visited = {"hit", "hot"}
+
+Step 3: Process "hot" (level 2)
+  Try all neighbors:
+  Found: "dot", "lot" ✓
+  queue = [["dot", 3], ["lot", 3]]
+  visited = {"hit", "hot", "dot", "lot"}
+
+Step 4: Process "dot" (level 3)
+  Try all neighbors:
+  Found: "dog" ✓
+  queue = [["lot", 3], ["dog", 4]]
+  visited = {"hit", "hot", "dot", "lot", "dog"}
+
+Step 5: Process "lot" (level 3)
+  Try all neighbors:
+  Found: "log" ✓
+  queue = [["dog", 4], ["log", 4]]
+
+Step 6: Process "dog" (level 4)
+  Try all neighbors:
+  Found: "cog" ✓
+  queue = [["log", 4], ["cog", 5]]
+
+Step 7: Process "log" (level 4)
+  No new neighbors
+
+Step 8: Process "cog" (level 5)
+  word === endWord → return 5
+
+Result: 5
+```
+
+### Approach 2: BFS with Pattern Matching ✅
+
+**Time Complexity:** O(n × l) with preprocessing
+**Space Complexity:** O(n × l)
+
+Instead of trying all 26 letters, build a graph using patterns:
+
+```javascript
+function ladderLength(beginWord, endWord, wordList) {
+  if (!wordList.includes(endWord)) {
+    return 0;
+  }
+
+  const wordSet = new Set(wordList);
+  wordSet.add(beginWord);
+
+  // Map patterns to words: "*ot" → ["hot", "dot", "lot"]
+  const patternMap = new Map();
+
+  for (const word of wordSet) {
+    for (let i = 0; i < word.length; i++) {
+      const pattern = word.slice(0, i) + "*" + word.slice(i + 1);
+      if (!patternMap.has(pattern)) {
+        patternMap.set(pattern, []);
+      }
+      patternMap.get(pattern).push(word);
+    }
+  }
+
+  const queue = [[beginWord, 1]];
+  const visited = new Set([beginWord]);
+
+  while (queue.length > 0) {
+    const [word, level] = queue.shift();
+
+    if (word === endWord) {
+      return level;
+    }
+
+    // Find neighbors using patterns
+    for (let i = 0; i < word.length; i++) {
+      const pattern = word.slice(0, i) + "*" + word.slice(i + 1);
+
+      for (const neighbor of patternMap.get(pattern) || []) {
+        if (neighbor === word || visited.has(neighbor)) continue;
+
+        if (neighbor === endWord) {
+          return level + 1;
+        }
+
+        visited.add(neighbor);
+        queue.push([neighbor, level + 1]);
+      }
+    }
+  }
+
+  return 0;
+}
+```
+
+**Pattern-based approach benefits:**
+- More efficient: Don't try 26 letters per position
+- Only explores actual words
+- Reduces branching factor
+
+### Key Concepts
+
+1. **Graph Transformation**: Words are nodes, edges connect 1-letter-different words
+2. **Shortest Path**: BFS finds shortest path in unweighted graph
+3. **Pattern Optimization**: Use patterns (*ot) instead of trying all letters
+4. **Early Termination**: Return immediately when endWord found
+
+## Common Mistakes
+
+❌ Not checking if endWord exists:
+```javascript
+// Wrong - might search forever if endWord not in list
+function ladderLength(beginWord, endWord, wordList) {
+  // Missing: if (!wordList.includes(endWord)) return 0;
+}
+```
+
+❌ Trying to find path via DFS (gets longest path, not shortest):
+```javascript
+// Wrong - DFS doesn't guarantee shortest path
+function dfs(word, target, path) {
+  // This might find a path but not the shortest
+}
+```
+
+❌ Not tracking visited words:
+```javascript
+// Wrong - revisit same word, infinite loop or exponential time
+const queue = [beginWord];
+while (queue.length > 0) {
+  const word = queue.shift();
+  // Missing: visited.add(word)
+  // Can add same word multiple times!
+}
+```
+
+✅ Correct approach:
+```javascript
+// BFS for shortest path
+// Check if endWord exists first
+// Track visited to avoid revisits
+
+if (!wordList.includes(endWord)) return 0;
+
+const queue = [[beginWord, 1]];
+const visited = new Set([beginWord]);
+
+while (queue.length > 0) {
+  const [word, level] = queue.shift();
+  if (word === endWord) return level;
+
+  // Explore neighbors, mark visited
+  for (const neighbor of getNeighbors(word)) {
+    if (!visited.has(neighbor)) {
+      visited.add(neighbor);
+      queue.push([neighbor, level + 1]);
+    }
+  }
+}
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Recognize: "This is a shortest path problem in a word graph"
+2. Key insight: "Words are nodes, edges exist between 1-letter-different words"
+3. Approach: "Use BFS to find shortest path"
+4. Optimization: "Use patterns instead of trying all 26 letters"
+5. Complexity: "O(n × l²) or O(n × l) with pattern optimization"
+
+**Key talking points:**
+- "BFS guarantees shortest path in unweighted graphs"
+- "Pattern matching (e.g., *ot) reduces neighbors to check"
+- "Must verify endWord exists before searching"
+- "Visited set prevents cycles and revisits"
+
+**Pattern matching example:**
+```
+word = "hot"
+Patterns: "*ot", "h*t", "ho*"
+These patterns match all 1-letter neighbors
+More efficient than trying all 26 letters
+```
+
+**What if interviewer asks:**
+- **"Why BFS not DFS?"** - BFS finds shortest path, DFS doesn't
+- **"What if path doesn't exist?"** - Return 0
+- **"Can we reconstruct path?"** - Track parent pointers during BFS
+- **"How to optimize?"** - Use patterns instead of trying letters
+
+**Related LeetCode Problems:**
+- Word Ladder II (find all paths)
+- Minimum Distance Between BST Nodes
+- Shortest Path in Unweighted Graph
+- Number of Islands
+
+**Follow-up variations:**
+- Find all shortest transformation sequences
+- Find transformation with minimum cost
+- Find k shortest paths
+- Handle weighted graph (cost per transformation)

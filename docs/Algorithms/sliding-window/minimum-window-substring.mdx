@@ -1,0 +1,398 @@
+---
+sidebar_position: 7
+difficulty: Hard
+tags: [string, sliding-window, hash-table, amazon, facebook]
+leetcode_url: https://leetcode.com/problems/minimum-window-substring/
+companies: [Amazon, Facebook, Google, Microsoft, Uber]
+pattern: "Sliding Window"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Minimum Window Substring
+
+<AlgorithmProblem
+  title="Minimum Window Substring"
+  difficulty="Hard"
+  description={`
+<p>Given two strings <code>s</code> and <code>t</code> of lengths <code>m</code> and <code>n</code> respectively, return <em>the <strong>minimum window substring</strong> of</em> <code>s</code> <em>such that every character in</em> <code>t</code> <em>(including duplicates) is included in the window</em>. If there is no such substring, return the empty string <code>""</code>.</p>
+<p>The testcases will be generated such that the answer is <strong>unique</strong>.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>m == s.length</li>
+  <li>n == t.length</li>
+  <li>1 &lt;= m, n &lt;= 10<sup>5</sup></li>
+  <li><code>s</code> and <code>t</code> consist of uppercase and lowercase English letters</li>
+</ul>
+<h4>Follow up:</h4>
+<p>Could you find an algorithm that runs in O(m + n) time?</p>
+`}
+  examples={[
+    {
+      input: 's = "ADOBECODEBANC", t = "ABC"',
+      output: '"BANC"',
+      explanation: 'The minimum window substring "BANC" includes A, B, and C from string t.'
+    },
+    {
+      input: 's = "a", t = "a"',
+      output: '"a"',
+      explanation: 'The entire string s is the minimum window.'
+    },
+    {
+      input: 's = "a", t = "aa"',
+      output: '""',
+      explanation: 'Both "a"s from t must be included in the window. Since the largest window of s only has one "a", return empty string.'
+    }
+  ]}
+  starterCode={`function minWindow(s, t) {
+  // Write your code here
+
+}`}
+  solution={`function minWindow(s, t) {
+  // Variable-size sliding window: O(m + n) time, O(k) space
+  if (t.length > s.length) return "";
+
+  // Build frequency map for t
+  const tMap = new Map();
+  for (const char of t) {
+    tMap.set(char, (tMap.get(char) || 0) + 1);
+  }
+
+  let left = 0;
+  let minLen = Infinity;
+  let minStart = 0;
+  let required = tMap.size;  // Unique characters we need
+  let formed = 0;  // Unique characters we have with desired frequency
+
+  const windowMap = new Map();
+
+  for (let right = 0; right < s.length; right++) {
+    // Expand window: add character from right
+    const char = s[right];
+    windowMap.set(char, (windowMap.get(char) || 0) + 1);
+
+    // Check if frequency of current character matches desired count in t
+    if (tMap.has(char) && windowMap.get(char) === tMap.get(char)) {
+      formed++;
+    }
+
+    // Contract window: try to minimize while valid
+    while (formed === required && left <= right) {
+      // Update result if this window is smaller
+      if (right - left + 1 < minLen) {
+        minLen = right - left + 1;
+        minStart = left;
+      }
+
+      // Remove character from left
+      const leftChar = s[left];
+      windowMap.set(leftChar, windowMap.get(leftChar) - 1);
+
+      // Check if this makes window invalid
+      if (tMap.has(leftChar) && windowMap.get(leftChar) < tMap.get(leftChar)) {
+        formed--;
+      }
+
+      left++;
+    }
+  }
+
+  return minLen === Infinity ? "" : s.substring(minStart, minStart + minLen);
+}`}
+  testCases={[
+    {
+      input: ['ADOBECODEBANC', 'ABC'],
+      expected: 'BANC',
+      description: 'Standard case: s="ADOBECODEBANC", t="ABC"'
+    },
+    {
+      input: ['a', 'a'],
+      expected: 'a',
+      description: 'Single character match: s="a", t="a"'
+    },
+    {
+      input: ['a', 'aa'],
+      expected: '',
+      description: 'Impossible case: s="a", t="aa"'
+    },
+    {
+      input: ['abc', 'cba'],
+      expected: 'abc',
+      description: 'Entire string needed: s="abc", t="cba"'
+    },
+    {
+      input: ['aaaaaaaaaaaabbbbbcdd', 'abcdd'],
+      expected: 'abbbbbcdd',
+      description: 'Multiple same characters: s has many as and bs'
+    },
+    {
+      input: ['ab', 'b'],
+      expected: 'b',
+      description: 'Simple substring: s="ab", t="b"'
+    }
+  ]}
+  functionName="minWindow"
+/>
+
+## Solution Explanation
+
+### Approach 1: Brute Force (Not Recommended)
+
+**Time Complexity:** O(n² × m) where n = s.length, m = t.length
+**Space Complexity:** O(m)
+
+Check every possible substring:
+
+```javascript
+function minWindow(s, t) {
+  let minLen = Infinity;
+  let result = "";
+
+  for (let i = 0; i < s.length; i++) {
+    for (let j = i; j < s.length; j++) {
+      const substring = s.slice(i, j + 1);
+      if (containsAll(substring, t)) {
+        if (substring.length < minLen) {
+          minLen = substring.length;
+          result = substring;
+        }
+      }
+    }
+  }
+
+  return result;
+}
+
+function containsAll(str, target) {
+  const map = new Map();
+  for (const char of target) {
+    map.set(char, (map.get(char) || 0) + 1);
+  }
+
+  for (const char of str) {
+    if (map.has(char)) {
+      map.set(char, map.get(char) - 1);
+    }
+  }
+
+  for (const count of map.values()) {
+    if (count > 0) return false;
+  }
+  return true;
+}
+```
+
+**Why not use this?**
+- Generates all O(n²) substrings
+- Checks each substring in O(m) time
+- Total O(n² × m) is prohibitively slow
+
+### Approach 2: Variable-Size Sliding Window (Optimal) ✅
+
+**Time Complexity:** O(m + n)
+**Space Complexity:** O(m + n)
+
+Use two pointers with frequency maps:
+
+```javascript
+function minWindow(s, t) {
+  if (t.length > s.length) return "";
+
+  // Build frequency map for target string t
+  const tMap = new Map();
+  for (const char of t) {
+    tMap.set(char, (tMap.get(char) || 0) + 1);
+  }
+
+  let left = 0;
+  let minLen = Infinity;
+  let minStart = 0;
+
+  // Track how many unique characters we've matched
+  let required = tMap.size;  // Number of unique chars in t
+  let formed = 0;  // Number of unique chars in window with desired frequency
+
+  const windowMap = new Map();
+
+  // Expand window with right pointer
+  for (let right = 0; right < s.length; right++) {
+    const char = s[right];
+    windowMap.set(char, (windowMap.get(char) || 0) + 1);
+
+    // Check if this character's frequency matches requirement
+    if (tMap.has(char) && windowMap.get(char) === tMap.get(char)) {
+      formed++;
+    }
+
+    // Contract window: try to minimize while all characters included
+    while (formed === required && left <= right) {
+      // Update result if this window is smaller
+      if (right - left + 1 < minLen) {
+        minLen = right - left + 1;
+        minStart = left;
+      }
+
+      // Remove leftmost character
+      const leftChar = s[left];
+      windowMap.set(leftChar, windowMap.get(leftChar) - 1);
+
+      // Check if removing this breaks a requirement
+      if (tMap.has(leftChar) && windowMap.get(leftChar) < tMap.get(leftChar)) {
+        formed--;
+      }
+
+      left++;
+    }
+  }
+
+  return minLen === Infinity ? "" : s.substring(minStart, minStart + minLen);
+}
+```
+
+**How the Variable-Size Window works:**
+
+```
+s = "ADOBECODEBANC", t = "ABC"
+tMap = {A: 1, B: 1, C: 1}, required = 3
+
+Expand phase:
+right=0: A → windowMap={A:1}, formed=1
+right=1: D → windowMap={A:1,D:1}, formed=1
+right=2: O → windowMap={A:1,D:1,O:1}, formed=1
+right=3: B → windowMap={A:1,D:1,O:1,B:1}, formed=2
+right=4: E → windowMap={A:1,D:1,O:1,B:1,E:1}, formed=2
+right=5: C → windowMap={A:1,D:1,O:1,B:1,E:1,C:1}, formed=3 ✅
+
+Contract phase (formed === required):
+  "ADOBEC" length=6, save this
+  Remove A: formed=2 (break)
+
+Continue expanding:
+right=6: O → formed=2
+right=7: D → formed=2
+right=8: E → formed=2
+right=9: B → formed=3 ✅
+
+Contract phase:
+  Remove D,O,B: "ECODE"
+  Remove E: "CODE"
+  Remove C: formed=2 (break)
+
+right=10: A → formed=3 ✅
+Contract phase:
+  "EBANC" length=5
+  "BANC" length=4 ✅ (minimum!)
+
+Result: "BANC"
+```
+
+### Key Sliding Window Technique
+
+This demonstrates **variable-size window with complex condition**:
+
+1. **Expand**: Right pointer moves to include more characters
+2. **Contract**: Left pointer moves to minimize window when valid
+3. **Tracking**: Use `formed` counter to avoid repeated map comparisons
+4. **Update**: Save minimum window during contraction phase
+
+**The "formed" optimization:**
+- Instead of comparing entire maps, track count of satisfied unique characters
+- `formed === required` means window is valid
+- O(1) check instead of O(k) map comparison
+
+### Key Insights
+
+1. **Variable window**: Size changes based on whether we have all characters
+2. **Greedy contraction**: Always try to minimize when valid
+3. **Frequency matching**: Handle duplicates correctly with counts
+4. **Formed counter**: Clever optimization to avoid expensive map comparisons
+
+## Common Mistakes
+
+❌ Not handling duplicate characters:
+```javascript
+// Wrong - only checks presence, not count
+const tSet = new Set(t);
+if (windowSet.size === tSet.size) // Doesn't handle "aa" in t
+```
+
+❌ Comparing maps inefficiently:
+```javascript
+// Slow - O(k) comparison on every iteration
+while (mapsContain(windowMap, tMap)) {
+  // Should use formed counter
+}
+```
+
+❌ Wrong window update:
+```javascript
+// Wrong - updates during expansion
+if (windowMap.has(char)) {
+  minLen = Math.min(minLen, right - left + 1);
+}
+// Should update during contraction
+```
+
+✅ Correct approach - formed counter with greedy contraction:
+```javascript
+// Build target frequency map
+const tMap = buildFrequencyMap(t);
+let required = tMap.size;
+let formed = 0;
+
+// Expand window
+for (let right = 0; right < s.length; right++) {
+  addToWindow(s[right]);
+
+  // Check if this character satisfied requirement
+  if (tMap.has(s[right]) && windowCount(s[right]) === tMap.get(s[right])) {
+    formed++;
+  }
+
+  // Contract greedily while valid
+  while (formed === required) {
+    updateResult();
+    removeFromWindow(s[left]);
+    if (characterNoLongerSatisfied(s[left])) {
+      formed--;
+    }
+    left++;
+  }
+}
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Recognize: "This is a hard sliding window problem with variable size"
+2. Identify key challenge: "We need to track character frequencies, not just presence"
+3. Explain optimization: "Use 'formed' counter to avoid repeated map comparisons"
+4. Walk through: "Expand to make valid, contract to minimize"
+5. Complexity: "O(m + n) time using the sliding window technique"
+
+**Key talking points:**
+- "This is the hardest sliding window problem - variable size with frequency matching"
+- "We expand right pointer to include characters, contract left to minimize"
+- "The 'formed' counter tracks how many unique characters have correct frequency"
+- "This avoids O(k) map comparison on each iteration, keeping it O(1)"
+
+**Complexity analysis:**
+- Time: O(m + n) - each character in s visited at most twice (right + left)
+- Space: O(m + n) - maps store characters from both strings
+
+**Follow-up questions you might get:**
+- **What if t has duplicate characters?** Already handled with frequency maps
+- **Can we do better than O(m+n)?** No, must examine all characters at least once
+- **What if we want maximum window?** Different problem requiring different approach
+- **How to handle case sensitivity?** Convert both strings to same case
+
+**Common variations:**
+- **Longest Substring Without Repeating Characters**: Similar technique, different condition
+- **Longest Substring with At Most K Distinct Characters**: Variable window with different constraint
+- **Smallest Subarray with Sum >= K**: Similar contraction logic
+
+**Implementation tips:**
+1. Use Map for frequency tracking
+2. Use `formed` counter for O(1) validity check
+3. Update result during contraction, not expansion
+4. Handle edge cases: empty strings, impossible cases

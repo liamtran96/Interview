@@ -1,0 +1,367 @@
+---
+sidebar_position: 6
+difficulty: Medium
+tags: [stack, array, math, amazon, facebook]
+leetcode_url: https://leetcode.com/problems/evaluate-reverse-polish-notation/
+companies: [Amazon, Facebook, Microsoft, LinkedIn, Apple]
+pattern: "Stack"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Evaluate Reverse Polish Notation
+
+<AlgorithmProblem
+  title="Evaluate Reverse Polish Notation"
+  difficulty="Medium"
+  description={`
+<p>You are given an array of strings <code>tokens</code> that represents an arithmetic expression in <strong>Reverse Polish Notation</strong>.</p>
+<p>Evaluate the expression. Return an integer that represents the value of the expression.</p>
+<p><strong>Note that:</strong></p>
+<ul>
+  <li>The valid operators are <code>'+'</code>, <code>'-'</code>, <code>'*'</code>, and <code>'/'</code>.</li>
+  <li>Each operand may be an integer or another expression.</li>
+  <li>The division between two integers always <strong>truncates toward zero</strong>.</li>
+  <li>There will not be any division by zero.</li>
+  <li>The input represents a valid arithmetic expression in reverse polish notation.</li>
+  <li>The answer and all the intermediate calculations can be represented in a <strong>32-bit</strong> integer.</li>
+</ul>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &lt;= tokens.length &lt;= 10<sup>4</sup></li>
+  <li><code>tokens[i]</code> is either an operator: <code>"+"</code>, <code>"-"</code>, <code>"*"</code>, or <code>"/"</code>, or an integer in the range <code>[-200, 200]</code>.</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'tokens = ["2","1","+","3","*"]',
+      output: '9',
+      explanation: '((2 + 1) * 3) = 9'
+    },
+    {
+      input: 'tokens = ["4","13","5","/","+"]',
+      output: '6',
+      explanation: '(4 + (13 / 5)) = 6'
+    },
+    {
+      input: 'tokens = ["10","6","9","3","+","-11","*","/","*","17","+","5","+"]',
+      output: '22',
+      explanation: '((10 * (6 / ((9 + 3) * -11))) + 17) + 5 = 22'
+    }
+  ]}
+  starterCode={`function evalRPN(tokens) {
+  // Write your code here
+
+}`}
+  solution={`function evalRPN(tokens) {
+  // Stack approach: O(n) time, O(n) space
+  const stack = [];
+
+  for (const token of tokens) {
+    if (['+', '-', '*', '/'].includes(token)) {
+      // Operator: pop two operands
+      const b = stack.pop();
+      const a = stack.pop();
+
+      // Apply operator
+      let result;
+      switch (token) {
+        case '+':
+          result = a + b;
+          break;
+        case '-':
+          result = a - b;
+          break;
+        case '*':
+          result = a * b;
+          break;
+        case '/':
+          // Truncate toward zero
+          result = Math.trunc(a / b);
+          break;
+      }
+
+      // Push result back to stack
+      stack.push(result);
+    } else {
+      // Number: push to stack
+      stack.push(parseInt(token));
+    }
+  }
+
+  // Final result is the only element in stack
+  return stack[0];
+}`}
+  testCases={[
+    {
+      input: [["2", "1", "+", "3", "*"]],
+      expected: 9,
+      description: 'Simple expression: ((2 + 1) * 3) = 9'
+    },
+    {
+      input: [["4", "13", "5", "/", "+"]],
+      expected: 6,
+      description: 'Division: (4 + (13 / 5)) = 6'
+    },
+    {
+      input: [["10", "6", "9", "3", "+", "-11", "*", "/", "*", "17", "+", "5", "+"]],
+      expected: 22,
+      description: 'Complex expression with multiple operations'
+    },
+    {
+      input: [["3", "11", "+", "5", "-"]],
+      expected: 9,
+      description: 'Addition and subtraction: ((3 + 11) - 5) = 9'
+    },
+    {
+      input: [["18"]],
+      expected: 18,
+      description: 'Single number: 18'
+    },
+    {
+      input: [["4", "-2", "/", "2", "-", "3", "-", "-"]],
+      expected: -7,
+      description: 'Negative numbers and truncation: -7'
+    }
+  ]}
+  functionName="evalRPN"
+/>
+
+## Solution Explanation
+
+### What is Reverse Polish Notation (RPN)?
+
+**Infix notation** (normal): `(2 + 1) * 3`
+**Postfix notation** (RPN): `2 1 + 3 *`
+
+**Key difference:**
+- Infix: operators between operands, needs parentheses
+- Postfix: operators after operands, no parentheses needed
+
+**RPN evaluation rules:**
+1. Scan left to right
+2. If number → push to stack
+3. If operator → pop 2 operands, apply operation, push result
+4. Final result is the only element in stack
+
+### Approach: Stack Evaluation ✅
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(n)
+
+Use a stack to evaluate RPN expression:
+
+```javascript
+function evalRPN(tokens) {
+  const stack = [];
+  const operators = new Set(['+', '-', '*', '/']);
+
+  for (const token of tokens) {
+    if (operators.has(token)) {
+      // Pop two operands (order matters!)
+      const b = stack.pop(); // Second operand
+      const a = stack.pop(); // First operand
+
+      // Apply operation
+      let result;
+      switch (token) {
+        case '+': result = a + b; break;
+        case '-': result = a - b; break;
+        case '*': result = a * b; break;
+        case '/': result = Math.trunc(a / b); break; // Truncate toward zero
+      }
+
+      // Push result
+      stack.push(result);
+    } else {
+      // It's a number, push to stack
+      stack.push(parseInt(token));
+    }
+  }
+
+  // Final answer
+  return stack[0];
+}
+```
+
+**How Stack Evaluation Works:**
+
+```
+Input: ["2", "1", "+", "3", "*"]
+Goal: Compute (2 + 1) * 3 = 9
+
+Step 1: "2" is number → push
+  stack: [2]
+
+Step 2: "1" is number → push
+  stack: [2, 1]
+
+Step 3: "+" is operator
+  pop: b=1, a=2
+  compute: 2 + 1 = 3
+  push: 3
+  stack: [3]
+
+Step 4: "3" is number → push
+  stack: [3, 3]
+
+Step 5: "*" is operator
+  pop: b=3, a=3
+  compute: 3 * 3 = 9
+  push: 9
+  stack: [9]
+
+Result: 9 ✅
+```
+
+**Complex example:**
+
+```
+Input: ["10", "6", "9", "3", "+", "-11", "*", "/", "*", "17", "+", "5", "+"]
+
+10 → stack: [10]
+6 → stack: [10, 6]
+9 → stack: [10, 6, 9]
+3 → stack: [10, 6, 9, 3]
+"+" → 9+3=12 → stack: [10, 6, 12]
+-11 → stack: [10, 6, 12, -11]
+"*" → 12*(-11)=-132 → stack: [10, 6, -132]
+"/" → 6/(-132)=0 (truncates) → stack: [10, 0]
+"*" → 10*0=0 → stack: [0]
+17 → stack: [0, 17]
+"+" → 0+17=17 → stack: [17]
+5 → stack: [17, 5]
+"+" → 17+5=22 → stack: [22]
+
+Result: 22 ✅
+```
+
+### Important: Division Truncates Toward Zero
+
+```javascript
+// JavaScript division and truncation
+Math.floor(7 / 2)    // = 3
+Math.trunc(7 / 2)    // = 3  (same for positive)
+
+Math.floor(-7 / 2)   // = -4  (rounds down)
+Math.trunc(-7 / 2)   // = -3  (truncates toward zero) ✅
+
+// For RPN, use Math.trunc to truncate toward zero
+result = Math.trunc(a / b);
+```
+
+**Why Math.trunc not Math.floor:**
+- `Math.floor` rounds down (toward negative infinity)
+- `Math.trunc` removes decimal part (toward zero)
+- RPN spec requires truncation toward zero
+
+### Alternative Implementation with Helper Functions
+
+```javascript
+function evalRPN(tokens) {
+  const stack = [];
+
+  const operations = {
+    '+': (a, b) => a + b,
+    '-': (a, b) => a - b,
+    '*': (a, b) => a * b,
+    '/': (a, b) => Math.trunc(a / b)
+  };
+
+  for (const token of tokens) {
+    if (token in operations) {
+      const b = stack.pop();
+      const a = stack.pop();
+      stack.push(operations[token](a, b));
+    } else {
+      stack.push(parseInt(token));
+    }
+  }
+
+  return stack[0];
+}
+```
+
+### Key Insights
+
+1. **Stack is perfect for RPN**: Natural fit for postfix evaluation
+2. **Order matters**: Pop b then a, compute a op b (not b op a)
+3. **Each token processed once**: Linear time complexity
+4. **Truncate toward zero**: Use Math.trunc for division
+5. **No parentheses needed**: RPN inherently unambiguous
+
+## Common Mistakes
+
+❌ Wrong operand order (subtraction/division affected):
+```javascript
+const a = stack.pop();
+const b = stack.pop();
+result = a - b; // Wrong! Should be b - a
+```
+
+❌ Using Math.floor instead of Math.trunc:
+```javascript
+result = Math.floor(a / b); // Wrong for negative results
+// Math.floor(-7/2) = -4
+// Math.trunc(-7/2) = -3 ✅
+```
+
+❌ Not parsing token to number:
+```javascript
+stack.push(token); // Wrong! Token is string
+// Should be: stack.push(parseInt(token))
+```
+
+❌ Not handling negative numbers:
+```javascript
+if (token === '+' || token === '-' || ...) // Won't work for "-11"
+// Use token in operators or includes instead
+```
+
+✅ Correct approach with proper order and truncation:
+```javascript
+if (['+', '-', '*', '/'].includes(token)) {
+  const b = stack.pop(); // Second operand (right)
+  const a = stack.pop(); // First operand (left)
+
+  let result;
+  switch (token) {
+    case '+': result = a + b; break;
+    case '-': result = a - b; break;  // a - b, not b - a
+    case '*': result = a * b; break;
+    case '/': result = Math.trunc(a / b); break;  // Truncate toward zero
+  }
+
+  stack.push(result);
+} else {
+  stack.push(parseInt(token)); // Parse string to number
+}
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Explain what **RPN/postfix notation** is
+2. Describe the **stack-based evaluation** algorithm
+3. Emphasize **operand order matters** (for - and /)
+4. Mention **Math.trunc vs Math.floor** for division
+5. Walk through a simple example step-by-step
+
+**Key talking points:**
+- "RPN is postfix notation where operators come after operands"
+- "Stack is the natural data structure for evaluating RPN"
+- "Push numbers, pop-compute-push for operators"
+- "Order matters: pop b, pop a, compute a op b"
+- "Use Math.trunc for division to truncate toward zero"
+
+**Why RPN is used:**
+- No parentheses needed (unambiguous)
+- Easy to evaluate with a stack
+- Used in calculators (HP calculators)
+- Efficient for computers
+
+**Follow-up questions you might get:**
+- **How to convert infix to postfix?** Shunting-yard algorithm
+- **What about prefix notation?** Similar but operators before operands
+- **Can we evaluate without stack?** Not efficiently for general case
+- **How to handle operator precedence in infix?** Need parsing algorithm or convert to RPN first

@@ -1,0 +1,404 @@
+---
+sidebar_position: 3
+difficulty: Easy
+tags: [dynamic-programming, array, divide-and-conquer, greedy]
+leetcode_url: https://leetcode.com/problems/maximum-subarray/
+companies: [Microsoft, Apple, Amazon, Meta, Google]
+pattern: "Dynamic Programming"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Maximum Subarray (Kadane's Algorithm)
+
+<AlgorithmProblem
+  title="Maximum Subarray"
+  difficulty="Easy"
+  description={`
+<p>Given an integer array <code>nums</code>, find the <strong>contiguous subarray</strong> (containing at least one number) which has the largest sum and return that sum.</p>
+<p>A subarray is a contiguous part of an array.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &le; nums.length &le; 10<sup>5</sup></li>
+  <li>-10<sup>4</sup> &le; nums[i] &le; 10<sup>4</sup></li>
+</ul>
+<h4>Follow up:</h4>
+<p>If you have figured out the O(n) solution, try coding another solution using the <strong>divide and conquer</strong> approach, which is an important algorithm paradigm.</p>
+`}
+  examples={[
+    {
+      input: 'nums = [-2,1,-3,4,-1,2,1,-5,4]',
+      output: '6',
+      explanation: 'The subarray [4,-1,2,1] has the largest sum = 6'
+    },
+    {
+      input: 'nums = [5,4,-1,7,8]',
+      output: '23',
+      explanation: 'The entire array has the largest sum = 23'
+    },
+    {
+      input: 'nums = [-1]',
+      output: '-1',
+      explanation: 'Single element (must choose at least one)'
+    }
+  ]}
+  starterCode={`function maxSubArray(nums) {
+  // Write your code here
+
+}`}
+  solution={`function maxSubArray(nums) {
+  // Kadane's Algorithm: O(n) time, O(1) space
+  let maxSoFar = nums[0];
+  let maxEndingHere = nums[0];
+
+  for (let i = 1; i < nums.length; i++) {
+    // At each index, decide: extend subarray or start fresh
+    maxEndingHere = Math.max(nums[i], maxEndingHere + nums[i]);
+
+    // Update global maximum
+    maxSoFar = Math.max(maxSoFar, maxEndingHere);
+  }
+
+  return maxSoFar;
+}`}
+  testCases={[
+    {
+      input: [[-2, 1, -3, 4, -1, 2, 1, -5, 4]],
+      expected: 6,
+      description: 'Subarray [4,-1,2,1] has sum 6'
+    },
+    {
+      input: [[5, 4, -1, 7, 8]],
+      expected: 23,
+      description: 'Entire array has sum 23'
+    },
+    {
+      input: [[-1]],
+      expected: -1,
+      description: 'Single negative element'
+    },
+    {
+      input: [[-2, -1]],
+      expected: -1,
+      description: 'All negative: pick maximum'
+    },
+    {
+      input: [[1, 2, 3, 4]],
+      expected: 10,
+      description: 'All positive: entire array'
+    },
+    {
+      input: [[-2, 1, -3, 4, -1, 2, 1, -5, 4]],
+      expected: 6,
+      description: 'Mixed positive and negative'
+    }
+  ]}
+  functionName="maxSubArray"
+/>
+
+## Solution Explanation
+
+### Approach 1: Brute Force (Not Recommended)
+
+**Time Complexity:** O(n³)
+**Space Complexity:** O(1)
+
+Check all possible subarrays:
+
+```javascript
+function maxSubArray(nums) {
+  let maxSum = Number.NEGATIVE_INFINITY;
+
+  // Try all starting positions
+  for (let i = 0; i < nums.length; i++) {
+    // Try all ending positions
+    for (let j = i; j < nums.length; j++) {
+      // Calculate sum of subarray nums[i:j+1]
+      let sum = 0;
+      for (let k = i; k <= j; k++) {
+        sum += nums[k];
+      }
+      maxSum = Math.max(maxSum, sum);
+    }
+  }
+
+  return maxSum;
+}
+
+// Example: nums = [-2, 1, -3, 4]
+// Subarrays: [-2], [-2,1], [-2,1,-3], [-2,1,-3,4], [1], [1,-3], [1,-3,4], ...
+// Check sum of each, track maximum
+// Very inefficient!
+```
+
+**Why avoid?** Triple nested loop is too slow.
+
+### Approach 2: Optimized Brute Force
+
+**Time Complexity:** O(n²)
+**Space Complexity:** O(1)
+
+Precompute sums while extending subarray:
+
+```javascript
+function maxSubArray(nums) {
+  let maxSum = Number.NEGATIVE_INFINITY;
+
+  for (let i = 0; i < nums.length; i++) {
+    let sum = 0;
+    // From position i, extend to the right
+    for (let j = i; j < nums.length; j++) {
+      sum += nums[j];  // Incrementally add
+      maxSum = Math.max(maxSum, sum);
+    }
+  }
+
+  return maxSum;
+}
+
+// Trace: nums = [-2, 1, -3, 4]
+// i=0: sum = -2, max = -2
+//      sum = -2 + 1 = -1, max = -1
+//      sum = -1 + (-3) = -4, max = -1
+//      sum = -4 + 4 = 0, max = 0
+// i=1: sum = 1, max = 1
+//      sum = 1 + (-3) = -2, max = 1
+//      sum = -2 + 4 = 2, max = 2
+// i=2: sum = -3, max = 2
+//      sum = -3 + 4 = 1, max = 2
+// i=3: sum = 4, max = 4
+// Final: max = 4
+```
+
+Better but still quadratic.
+
+### Approach 3: Kadane's Algorithm (Optimal) ✅
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1)
+
+Use DP to track max sum ending at current position:
+
+```javascript
+function maxSubArray(nums) {
+  // maxEndingHere = max sum of subarray ending at index i
+  // maxSoFar = overall maximum sum seen so far
+
+  let maxSoFar = nums[0];
+  let maxEndingHere = nums[0];
+
+  for (let i = 1; i < nums.length; i++) {
+    // Key decision: extend subarray or start fresh from nums[i]?
+    // Extend if previous sum is positive, otherwise start fresh
+    maxEndingHere = Math.max(nums[i], maxEndingHere + nums[i]);
+
+    // Update global maximum
+    maxSoFar = Math.max(maxSoFar, maxEndingHere);
+  }
+
+  return maxSoFar;
+}
+
+// Trace: nums = [-2, 1, -3, 4, -1, 2, 1, -5, 4]
+// i=0: maxEndingHere = -2, maxSoFar = -2
+// i=1: maxEndingHere = max(1, -2+1) = max(1, -1) = 1, maxSoFar = 1
+// i=2: maxEndingHere = max(-3, 1+(-3)) = max(-3, -2) = -2, maxSoFar = 1
+// i=3: maxEndingHere = max(4, -2+4) = max(4, 2) = 4, maxSoFar = 4
+// i=4: maxEndingHere = max(-1, 4+(-1)) = max(-1, 3) = 3, maxSoFar = 4
+// i=5: maxEndingHere = max(2, 3+2) = max(2, 5) = 5, maxSoFar = 5
+// i=6: maxEndingHere = max(1, 5+1) = max(1, 6) = 6, maxSoFar = 6 ✓
+// i=7: maxEndingHere = max(-5, 6+(-5)) = max(-5, 1) = 1, maxSoFar = 6
+// i=8: maxEndingHere = max(4, 1+4) = max(4, 5) = 5, maxSoFar = 6
+// Result: 6 (subarray [4, -1, 2, 1])
+```
+
+**How Kadane's works:**
+
+At each position `i`, we ask: "Should I extend the previous subarray or start a new one?"
+
+- If `maxEndingHere + nums[i] > nums[i]`: Extend (previous sum was positive)
+- If `maxEndingHere + nums[i] <= nums[i]`: Start fresh (previous sum was negative)
+
+This is exactly what `Math.max(nums[i], maxEndingHere + nums[i])` does!
+
+### Approach 4: Divide and Conquer
+
+**Time Complexity:** O(n log n)
+**Space Complexity:** O(log n) recursive stack
+
+Divide array in half, find max in left, right, and crossing middle:
+
+```javascript
+function maxSubArray(nums) {
+  function helper(left, right) {
+    // Base case: single element
+    if (left === right) return nums[left];
+
+    const mid = Math.floor((left + right) / 2);
+
+    // Maximum sum in left half
+    const leftMax = helper(left, mid);
+
+    // Maximum sum in right half
+    const rightMax = helper(mid + 1, right);
+
+    // Maximum sum crossing the middle
+    const crossingMax = maxCrossingSum(left, mid, right);
+
+    return Math.max(leftMax, rightMax, crossingMax);
+  }
+
+  function maxCrossingSum(left, mid, right) {
+    // Find max sum in left half ending at mid
+    let leftSum = Number.NEGATIVE_INFINITY;
+    let sum = 0;
+    for (let i = mid; i >= left; i--) {
+      sum += nums[i];
+      leftSum = Math.max(leftSum, sum);
+    }
+
+    // Find max sum in right half starting from mid+1
+    let rightSum = Number.NEGATIVE_INFINITY;
+    sum = 0;
+    for (let i = mid + 1; i <= right; i++) {
+      sum += nums[i];
+      rightSum = Math.max(rightSum, sum);
+    }
+
+    return leftSum + rightSum;
+  }
+
+  return helper(0, nums.length - 1);
+}
+```
+
+More complex but demonstrates divide-and-conquer pattern.
+
+## Comparison of Approaches
+
+| Approach | Time | Space | Notes |
+|----------|------|-------|-------|
+| Brute Force (O(n³)) | O(n³) | O(1) | Too slow |
+| Optimized Brute (O(n²)) | O(n²) | O(1) | Still slow |
+| **Kadane's DP** | **O(n)** | **O(1)** | **Best!** |
+| Divide & Conquer | O(n log n) | O(log n) | Demonstrates paradigm |
+
+## DP Formula
+
+```
+maxEndingHere[i] = max(nums[i], maxEndingHere[i-1] + nums[i])
+maxSoFar = max(maxSoFar, maxEndingHere[i])
+
+Interpretation:
+- At index i, either start fresh with nums[i]
+- Or extend previous subarray by adding nums[i]
+- Keep track of overall maximum
+```
+
+## Key Insights
+
+**Why Kadane's is optimal:**
+
+1. **Single pass:** Process array left to right once
+2. **O(1) space:** Only store two values
+3. **Greedy DP:** Decision at each step determines subarray end
+4. **Optimal substructure:** Solution includes optimal solution of subproblem
+
+**The key idea:**
+```
+If sum so far is negative, it only hurts the next element.
+Better to start fresh than carry negative sum forward.
+```
+
+## Common Mistakes
+
+❌ **Using separate variables without understanding relationship:**
+```javascript
+// Wrong - might not track correctly
+let max = nums[0];
+for (let i = 1; i < nums.length; i++) {
+  if (nums[i] > max) max = nums[i];  // Only finds max element!
+}
+```
+
+❌ **Forgetting to compare with overall maximum:**
+```javascript
+// Wrong - only returns last computed max
+let maxEndingHere = nums[0];
+for (let i = 1; i < nums.length; i++) {
+  maxEndingHere = Math.max(nums[i], maxEndingHere + nums[i]);
+}
+return maxEndingHere;  // Might not be global max!
+```
+
+❌ **Wrong comparison in decision:**
+```javascript
+// Wrong - logic reversed
+maxEndingHere = Math.min(nums[i], maxEndingHere + nums[i]);  // No!
+
+// Correct
+maxEndingHere = Math.max(nums[i], maxEndingHere + nums[i]);
+```
+
+✅ **Correct Kadane's implementation:**
+```javascript
+function maxSubArray(nums) {
+  let maxSoFar = nums[0];
+  let maxEndingHere = nums[0];
+
+  for (let i = 1; i < nums.length; i++) {
+    // Extend previous or start fresh
+    maxEndingHere = Math.max(nums[i], maxEndingHere + nums[i]);
+    // Update global maximum
+    maxSoFar = Math.max(maxSoFar, maxEndingHere);
+  }
+
+  return maxSoFar;
+}
+```
+
+## Interview Tips
+
+**When discussing:**
+1. Recognize: "This is classic Kadane's algorithm"
+2. Key insight: "If sum so far is negative, start fresh"
+3. DP state: "`maxEndingHere` = max sum ending at current index"
+4. Transition: "Either extend previous subarray or start new"
+5. Optimize: "O(n) time, O(1) space"
+
+**Key talking points:**
+- "This is one of the most elegant DP solutions"
+- "Named after Jon Bentley's linear time algorithm"
+- "Key: if accumulated sum is negative, it only hurts future elements"
+- "Single pass through array with two variables"
+
+**Follow-up questions:**
+
+**Q: Return the actual subarray, not just sum?**
+A: Track start/end indices when updating maxSoFar.
+
+**Q: What if subarray must be of length k?**
+A: Use sliding window of fixed size k.
+
+**Q: What if you need at least k subarrays?**
+A: Extend DP state to track count.
+
+**Q: Can you do divide and conquer?**
+A: Yes, find max in left half, right half, and crossing middle.
+
+## Edge Cases
+
+```javascript
+maxSubArray([1]) → 1           // Single element
+maxSubArray([-1]) → -1         // Single negative
+maxSubArray([-2, -1]) → -1     // All negative
+maxSubArray([1, 2, 3]) → 6     // All positive
+maxSubArray([-2, 1, -3, 4]) → 4 // Mixed
+```
+
+## Related Problems
+
+- **Best Time to Buy and Sell Stock** (Easy) - Similar DP
+- **Maximum Product Subarray** (Medium) - Similar but track min/max
+- **Subarray Sum Equals K** (Medium) - Find subarrays with specific sum
+- **Bitonic Subsequence** (Hard) - DP with direction constraint

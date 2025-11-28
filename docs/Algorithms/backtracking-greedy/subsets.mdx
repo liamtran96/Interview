@@ -1,0 +1,431 @@
+---
+sidebar_position: 2
+difficulty: Easy
+tags: [backtracking, array, bit-manipulation, amazon, apple]
+leetcode_url: https://leetcode.com/problems/subsets/
+companies: [Amazon, Apple, Google, Microsoft]
+pattern: "Backtracking & Greedy"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Subsets
+
+<AlgorithmProblem
+  title="Subsets"
+  difficulty="Easy"
+  description={`
+<p>Given an integer array <code>nums</code> of <strong>unique</strong> elements, return <em>all possible subsets (the power set)</em>.</p>
+<p>The solution set <strong>must not contain duplicate subsets</strong>. Return the solution in <strong>any order</strong>.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &le; nums.length &le; 10</li>
+  <li>-10 &le; nums[i] &le; 10</li>
+  <li>All the numbers of <code>nums</code> are <strong>unique</strong></li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'nums = [1,2,3]',
+      output: '[[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]'
+    },
+    {
+      input: 'nums = [0]',
+      output: '[[],[0]]'
+    }
+  ]}
+  starterCode={`function subsets(nums) {
+  // Write your code here
+
+}`}
+  solution={`function subsets(nums) {
+  // Backtracking: O(n * 2^n) time, O(2^n) space
+  const result = [];
+
+  function backtrack(index, currentSubset) {
+    // Add current subset to result at every level
+    result.push([...currentSubset]);
+
+    // Explore adding each remaining element
+    for (let i = index; i < nums.length; i++) {
+      currentSubset.push(nums[i]); // Include
+      backtrack(i + 1, currentSubset); // Explore
+      currentSubset.pop(); // Exclude (backtrack)
+    }
+  }
+
+  backtrack(0, []);
+  return result;
+}`}
+  testCases={[
+    {
+      input: [[1, 2, 3]],
+      expected: [[], [1], [2], [1, 2], [3], [1, 3], [2, 3], [1, 2, 3]],
+      description: 'All 2^3 = 8 subsets'
+    },
+    {
+      input: [[0]],
+      expected: [[], [0]],
+      description: 'Single element - 2 subsets'
+    },
+    {
+      input: [[1]],
+      expected: [[], [1]],
+      description: 'Single element array'
+    },
+    {
+      input: [[1, 2]],
+      expected: [[], [1], [2], [1, 2]],
+      description: 'Two elements - 4 subsets'
+    },
+    {
+      input: [[4, 5]],
+      expected: [[], [4], [5], [4, 5]],
+      description: 'Different values'
+    },
+    {
+      input: [[-1, 0, 1]],
+      expected: [[], [-1], [0], [-1, 0], [1], [-1, 1], [0, 1], [-1, 0, 1]],
+      description: 'Negative and positive numbers'
+    }
+  ]}
+  functionName="subsets"
+/>
+
+## Solution Explanation
+
+### Approach 1: Backtracking (Optimal) ✅
+
+**Time Complexity:** O(n × 2^n)
+**Space Complexity:** O(2^n) for the result
+
+Recursively build subsets by deciding to include or exclude each element:
+
+```javascript
+function subsets(nums) {
+  const result = [];
+
+  function backtrack(index, currentSubset) {
+    // Add subset at every step (not just at leaves)
+    result.push([...currentSubset]);
+
+    // Try adding each remaining element
+    for (let i = index; i < nums.length; i++) {
+      currentSubset.push(nums[i]); // Include element
+      backtrack(i + 1, currentSubset); // Explore further
+      currentSubset.pop(); // Backtrack: exclude element
+    }
+  }
+
+  backtrack(0, []);
+  return result;
+}
+```
+
+**Decision tree for [1,2,3]:**
+
+```
+                        []
+                   /    |    \
+                 1      (skip)  \
+                /         \      \
+              [1]         [skip]  [skip]
+             /  \           |        \
+            2    (skip)     2        (skip)
+           / \     |       / \         |
+         [1,2] [1] |  [2] [skip]     3
+         / \    |   |  /\   |       /|\
+        3 (skip) [1] (skip)[2] (skip)[skip]
+       /|   |     |   |  /\   |      |
+   [1,2,3][1,2][1,3][1][2,3][2][3] []
+```
+
+**Trace for [1,2,3]:**
+```
+backtrack(0, [])
+  → result = [[]]
+
+  i=0: nums[0]=1
+    currentSubset = [1]
+    backtrack(1, [1])
+      → result = [[], [1]]
+
+      i=1: nums[1]=2
+        currentSubset = [1,2]
+        backtrack(2, [1,2])
+          → result = [[], [1], [1,2]]
+
+          i=2: nums[2]=3
+            currentSubset = [1,2,3]
+            backtrack(3, [1,2,3])
+              → result = [[], [1], [1,2], [1,2,3]]
+              (i=3, no more elements)
+            currentSubset.pop() → [1,2]
+        currentSubset.pop() → [1]
+
+      i=2: nums[2]=3
+        currentSubset = [1,3]
+        backtrack(2, [1,3])
+          → result = [..., [1,3]]
+          (i=2, nums.length=3, loop doesn't execute)
+        currentSubset.pop() → [1]
+
+  currentSubset.pop() → []
+
+  i=1: nums[1]=2
+    currentSubset = [2]
+    backtrack(2, [2])
+      → result = [..., [2]]
+      i=2: nums[2]=3
+        currentSubset = [2,3]
+        backtrack(3, [2,3])
+          → result = [..., [2,3]]
+        currentSubset.pop() → [2]
+    currentSubset.pop() → []
+
+  i=2: nums[2]=3
+    currentSubset = [3]
+    backtrack(3, [3])
+      → result = [..., [3]]
+    currentSubset.pop() → []
+```
+
+### Approach 2: Bit Manipulation
+
+**Time Complexity:** O(n × 2^n)
+**Space Complexity:** O(2^n)
+
+Use binary representation to decide which elements to include:
+
+```javascript
+function subsets(nums) {
+  const result = [];
+  const n = nums.length;
+
+  // 2^n possible subsets
+  for (let mask = 0; mask < (1 << n); mask++) {
+    const subset = [];
+
+    for (let i = 0; i < n; i++) {
+      // Check if i-th bit is set
+      if ((mask & (1 << i)) !== 0) {
+        subset.push(nums[i]);
+      }
+    }
+
+    result.push(subset);
+  }
+
+  return result;
+}
+```
+
+**How it works:**
+
+```
+nums = [1, 2, 3]
+
+mask = 0 (binary: 000) → [] (no bits set)
+mask = 1 (binary: 001) → [1] (bit 0 set)
+mask = 2 (binary: 010) → [2] (bit 1 set)
+mask = 3 (binary: 011) → [1, 2] (bits 0,1 set)
+mask = 4 (binary: 100) → [3] (bit 2 set)
+mask = 5 (binary: 101) → [1, 3] (bits 0,2 set)
+mask = 6 (binary: 110) → [2, 3] (bits 1,2 set)
+mask = 7 (binary: 111) → [1, 2, 3] (bits 0,1,2 set)
+```
+
+### Approach 3: Iterative Expansion
+
+**Time Complexity:** O(n × 2^n)
+**Space Complexity:** O(2^n)
+
+Start with empty set, progressively add elements:
+
+```javascript
+function subsets(nums) {
+  let result = [[]];
+
+  for (const num of nums) {
+    const newSubsets = [];
+    for (const subset of result) {
+      newSubsets.push([...subset, num]);
+    }
+    result = result.concat(newSubsets);
+  }
+
+  return result;
+}
+```
+
+**How it works:**
+
+```
+nums = [1, 2, 3]
+
+Start: result = [[]]
+
+Process 1:
+  subsets = [[]]
+  add 1 to each: [[1]]
+  result = [[], [1]]
+
+Process 2:
+  subsets = [[], [1]]
+  add 2 to each: [[2], [1,2]]
+  result = [[], [1], [2], [1,2]]
+
+Process 3:
+  subsets = [[], [1], [2], [1,2]]
+  add 3 to each: [[3], [1,3], [2,3], [1,2,3]]
+  result = [[], [1], [2], [1,2], [3], [1,3], [2,3], [1,2,3]]
+```
+
+## Backtracking Template
+
+```javascript
+function subsets(nums) {
+  // 1. Initialize result
+  const result = [];
+
+  // 2. Define helper function
+  function backtrack(index, currentSubset) {
+    // 3. Add current state to result
+    result.push([...currentSubset]);
+
+    // 4. Explore all possibilities from this point
+    for (let i = index; i < nums.length; i++) {
+      // Include nums[i]
+      currentSubset.push(nums[i]);
+
+      // Explore further
+      backtrack(i + 1, currentSubset);
+
+      // Backtrack: undo the include
+      currentSubset.pop();
+    }
+  }
+
+  // 5. Start recursion
+  backtrack(0, []);
+
+  return result;
+}
+```
+
+**Key points:**
+- We add subsets at every level (not just leaves)
+- Loop starts from `index` to avoid duplicates
+- Each element is either included (push) or excluded (skip)
+- We must backtrack (pop) after exploring
+
+## Common Mistakes
+
+❌ **Not copying the subset when adding to result:**
+```javascript
+// Wrong: all references point to same array
+const subset = [];
+result.push(subset); // References same array
+subset.push(1); // Modifies all entries!
+
+// Correct: copy the subset
+result.push([...subset]); // Independent copy
+```
+
+❌ **Not using the correct loop range:**
+```javascript
+// Wrong: recomputes same subsets multiple times
+for (let i = 0; i < nums.length; i++) {
+  // This will generate [1,2] and [2,1] separately
+
+// Correct: start from index to avoid duplicates
+for (let i = index; i < nums.length; i++) {
+```
+
+❌ **Forgetting to backtrack:**
+```javascript
+// Wrong: doesn't undo changes
+function backtrack(index, currentSubset) {
+  result.push([...currentSubset]);
+  for (let i = index; i < nums.length; i++) {
+    currentSubset.push(nums[i]);
+    backtrack(i + 1, currentSubset);
+    // Missing: currentSubset.pop();
+  }
+}
+
+// Correct: undo the push
+currentSubset.push(nums[i]);
+backtrack(i + 1, currentSubset);
+currentSubset.pop(); // Backtrack!
+```
+
+❌ **Using direct array push instead of spread:**
+```javascript
+// Wrong: may cause issues with shallow copy
+result.push(currentSubset);
+
+// Correct: ensures independent copy
+result.push([...currentSubset]);
+```
+
+## Interview Tips
+
+**What to mention:**
+
+1. **Explain the intuition:**
+   - For each element, we have 2 choices: include or exclude
+   - With n elements, we have 2^n subsets
+   - Backtracking explores all these choices
+
+2. **Mention the approaches:**
+   - Backtracking (most intuitive)
+   - Bit manipulation (clever but less intuitive)
+   - Iterative expansion (good alternative)
+
+3. **Discuss complexity:**
+   - Time: O(n × 2^n) to generate all subsets
+   - Space: O(2^n) for result (unavoidable)
+
+**Follow-up questions:**
+
+**Q: What if there were duplicate elements?**
+A: Sort first, then skip duplicates in the loop:
+```javascript
+for (let i = index; i < nums.length; i++) {
+  if (i > index && nums[i] === nums[i-1]) continue;
+  // ...
+}
+```
+
+**Q: Can you do this iteratively without backtracking?**
+A: Yes, the iterative expansion approach works well.
+
+**Q: How would you generate subsets of a specific size?**
+A: Add a check: `if (currentSubset.length === k) { result.push(...) }`
+
+## Edge Cases
+
+```javascript
+// Single element
+[1] → [[], [1]]
+
+// Two elements
+[1, 2] → [[], [1], [2], [1, 2]]
+
+// Negative numbers
+[-1, 0] → [[], [-1], [0], [-1, 0]]
+
+// Zero
+[0] → [[], [0]]
+
+// Maximum size (10 elements)
+// 2^10 = 1024 subsets
+```
+
+## Related Problems
+
+- **Subsets II** (Medium) - With duplicate elements
+- **Combinations** (Medium) - Subsets of specific size
+- **Permutations** (Medium) - All orderings
+- **Power Set** - Another name for subsets

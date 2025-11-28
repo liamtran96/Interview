@@ -1,0 +1,326 @@
+---
+sidebar_position: 1
+difficulty: Easy
+tags: [graphs, dfs, bfs, matrix, amazon, google, meta]
+leetcode_url: https://leetcode.com/problems/number-of-islands/
+companies: [Amazon, Google, Meta, Microsoft, Apple]
+pattern: "Graphs"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Number of Islands
+
+<AlgorithmProblem
+  title="Number of Islands"
+  difficulty="Easy"
+  description={`
+<p>Given an <code>m x n</code> 2D binary grid <code>grid</code> which represents a map of <code>1</code>s (land) and <code>0</code>s (water), return <em>the number of islands</em>.</p>
+<p>An <strong>island</strong> is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are surrounded by water.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li><code>m == grid.length</code></li>
+  <li><code>n == grid[i].length</code></li>
+  <li>1 &lt;= m, n &lt;= 300</li>
+  <li><code>grid[i][j]</code> is <code>'0'</code> or <code>'1'</code></li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'grid = [["1","1","1","1","0"],["1","1","0","1","0"],["1","1","0","0","0"],["0","0","0","0","0"]]',
+      output: '1',
+      explanation: 'All 1s form a single connected island.'
+    },
+    {
+      input: 'grid = [["1","1","0","0","0"],["1","1","0","0","0"],["0","0","1","0","0"],["0","0","0","1","1"]]',
+      output: '3',
+      explanation: 'There are three islands: one at top-left, one in middle, and one at bottom-right.'
+    },
+    {
+      input: 'grid = [["0"]]',
+      output: '0',
+      explanation: 'Single water cell, no islands.'
+    }
+  ]}
+  starterCode={`function numIslands(grid) {
+  // Write your code here
+  return 0;
+}`}
+  solution={`function numIslands(grid) {
+  // DFS approach: O(m * n) time, O(m * n) space for recursion
+  if (!grid || grid.length === 0) return 0;
+
+  let count = 0;
+  const rows = grid.length;
+  const cols = grid[0].length;
+
+  // Iterate through each cell
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      // Found a land cell that hasn't been visited
+      if (grid[i][j] === '1') {
+        count++;
+        dfs(grid, i, j, rows, cols);
+      }
+    }
+  }
+
+  return count;
+}
+
+function dfs(grid, i, j, rows, cols) {
+  // Base case: out of bounds or water
+  if (i < 0 || i >= rows || j < 0 || j >= cols || grid[i][j] === '0') {
+    return;
+  }
+
+  // Mark as visited by turning to water
+  grid[i][j] = '0';
+
+  // Visit all 4 adjacent cells
+  dfs(grid, i + 1, j, rows, cols);  // down
+  dfs(grid, i - 1, j, rows, cols);  // up
+  dfs(grid, i, j + 1, rows, cols);  // right
+  dfs(grid, i, j - 1, rows, cols);  // left
+}`}
+  testCases={[
+    {
+      input: [[["1","1","1","1","0"],["1","1","0","1","0"],["1","1","0","0","0"],["0","0","0","0","0"]]],
+      expected: 1,
+      description: 'Single connected island'
+    },
+    {
+      input: [[["1","1","0","0","0"],["1","1","0","0","0"],["0","0","1","0","0"],["0","0","0","1","1"]]],
+      expected: 3,
+      description: 'Three separate islands'
+    },
+    {
+      input: [[["0"]]],
+      expected: 0,
+      description: 'Single water cell'
+    },
+    {
+      input: [[["1","1"],["1","1"]]],
+      expected: 1,
+      description: 'All land forming one island'
+    },
+    {
+      input: [[["1","0","1","0"],["1","0","1","0"]]],
+      expected: 4,
+      description: 'Alternating land and water (checkerboard)'
+    },
+    {
+      input: [[["1"]]],
+      expected: 1,
+      description: 'Single land cell'
+    }
+  ]}
+  functionName="numIslands"
+/>
+
+## Solution Explanation
+
+### Approach 1: Depth-First Search (DFS) ✅
+
+**Time Complexity:** O(m × n) where m = rows, n = columns
+**Space Complexity:** O(m × n) for recursion call stack in worst case
+
+Use DFS to explore each island and mark all connected land cells as visited:
+
+```javascript
+function numIslands(grid) {
+  if (!grid || grid.length === 0) return 0;
+
+  let count = 0;
+  const rows = grid.length;
+  const cols = grid[0].length;
+
+  // For each cell in grid
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      // Found unvisited land
+      if (grid[i][j] === '1') {
+        count++;  // Found new island
+        dfs(grid, i, j, rows, cols);  // Explore entire island
+      }
+    }
+  }
+
+  return count;
+}
+
+function dfs(grid, i, j, rows, cols) {
+  // Boundary check or already water
+  if (i < 0 || i >= rows || j < 0 || j >= cols || grid[i][j] === '0') {
+    return;
+  }
+
+  // Mark current cell as visited
+  grid[i][j] = '0';
+
+  // Explore all 4 directions
+  dfs(grid, i + 1, j, rows, cols);  // down
+  dfs(grid, i - 1, j, rows, cols);  // up
+  dfs(grid, i, j + 1, rows, cols);  // right
+  dfs(grid, i, j - 1, rows, cols);  // left
+}
+```
+
+**How it works:**
+```
+Grid:
+["1","1","1"]
+["0","1","0"]
+["1","1","1"]
+
+Iteration:
+i=0, j=0: Found '1' → count=1, DFS explores (0,0)→(0,1)→(0,2)→(1,1)→(2,1)→(2,0)→(2,2)
+All connected cells marked as '0'
+
+i=0, j=1: Already '0' (visited)
+i=0, j=2: Already '0' (visited)
+i=1, j=0: Already '0' (water)
+i=1, j=1: Already '0' (visited)
+i=1, j=2: Already '0' (water)
+i=2, j=0: Already '0' (visited)
+i=2, j=1: Already '0' (visited)
+i=2, j=2: Already '0' (visited)
+
+Result: count = 1
+```
+
+### Approach 2: Breadth-First Search (BFS) ✅
+
+**Time Complexity:** O(m × n)
+**Space Complexity:** O(min(m, n)) for queue
+
+```javascript
+function numIslands(grid) {
+  if (!grid || grid.length === 0) return 0;
+
+  let count = 0;
+  const rows = grid.length;
+  const cols = grid[0].length;
+
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      if (grid[i][j] === '1') {
+        count++;
+        bfs(grid, i, j, rows, cols);
+      }
+    }
+  }
+
+  return count;
+}
+
+function bfs(grid, startI, startJ, rows, cols) {
+  const queue = [[startI, startJ]];
+  grid[startI][startJ] = '0';
+
+  const directions = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+
+  while (queue.length > 0) {
+    const [i, j] = queue.shift();
+
+    // Check all 4 directions
+    for (const [di, dj] of directions) {
+      const ni = i + di;
+      const nj = j + dj;
+
+      if (ni >= 0 && ni < rows && nj >= 0 && nj < cols && grid[ni][nj] === '1') {
+        grid[ni][nj] = '0';
+        queue.push([ni, nj]);
+      }
+    }
+  }
+}
+```
+
+**BFS vs DFS:**
+- **DFS**: Simpler recursive implementation, uses call stack
+- **BFS**: Uses explicit queue, better for finding shortest paths
+
+### Key Concepts
+
+1. **Island Detection**: Count connected components of '1's in 2D grid
+2. **Marking Visited**: Modify grid to mark visited cells (in-place modification)
+3. **4-Directional Movement**: Check up, down, left, right (no diagonals)
+4. **Boundary Checking**: Essential to prevent out-of-bounds access
+
+## Common Mistakes
+
+❌ Forgetting to mark visited cells:
+```javascript
+// Wrong - infinite recursion or recounting
+if (grid[i][j] === '1') {
+  count++;
+  dfs(grid, i, j);  // Never marks as visited
+}
+```
+
+❌ Not checking boundaries:
+```javascript
+// Wrong - will access out of bounds
+dfs(grid, i + 1, j);  // No bounds check
+```
+
+❌ Counting same island multiple times:
+```javascript
+// Wrong - marks visited after counting
+for (i = 0; i < rows; i++) {
+  for (j = 0; j < cols; j++) {
+    if (grid[i][j] === '1') {
+      count++;  // Count before exploring entire island
+    }
+  }
+}
+```
+
+✅ Correct approach:
+```javascript
+// Mark visited WHILE exploring, not before or after
+function dfs(grid, i, j, rows, cols) {
+  if (i < 0 || i >= rows || j < 0 || j >= cols || grid[i][j] === '0') {
+    return;
+  }
+  grid[i][j] = '0';  // Mark visited immediately
+
+  // Explore 4 neighbors
+  dfs(grid, i + 1, j, rows, cols);
+  dfs(grid, i - 1, j, rows, cols);
+  dfs(grid, i, j + 1, rows, cols);
+  dfs(grid, i, j - 1, rows, cols);
+}
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Recognize: "This is a graph problem on a 2D matrix (connected components)"
+2. Explain approach: "Use DFS or BFS to explore each island completely"
+3. Implementation: "Mark cells as visited while exploring to avoid recounting"
+4. Complexity: "O(m × n) time since we visit each cell once, O(m × n) space for recursion"
+
+**Key talking points:**
+- "Each island is a connected component of '1's in the grid"
+- "We iterate through each cell, and when we find an unvisited '1', we increment counter and explore the entire island"
+- "The key optimization is marking cells as visited immediately to avoid processing them again"
+
+**Variations you might encounter:**
+- **Maximum Area of Island**: Keep track of area while DFS
+- **Number of Enclaves**: Count islands not touching border
+- **Closest Escape from Haunted House**: BFS for shortest path from all islands
+- **Islands in 3D**: Extend to 3D grid with 6 directions
+
+**What if interviewer asks:**
+- **"Can we modify the input grid?"** - If not, use visited set instead
+- **"What if grid is very large?"** - Discuss space optimization, or external storage
+- **"Can islands be diagonal?"** - Clarify what "adjacent" means
+- **"What about performance limits?"** - DFS works fine for 300×300 matrix
+
+**Related LeetCode Problems:**
+- Surrounded Regions
+- Max Area of Island
+- Number of Enclaves
+- Island Perimeter

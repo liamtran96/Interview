@@ -1,0 +1,366 @@
+---
+sidebar_position: 4
+difficulty: Easy
+tags: [stack, string, two-pointers, google, facebook]
+leetcode_url: https://leetcode.com/problems/backspace-string-compare/
+companies: [Google, Facebook, Amazon, Microsoft]
+pattern: "Stack"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Backspace String Compare
+
+<AlgorithmProblem
+  title="Backspace String Compare"
+  difficulty="Easy"
+  description={`
+<p>Given two strings <code>s</code> and <code>t</code>, return <code>true</code> if they are equal when both are typed into empty text editors. <code>'#'</code> means a backspace character.</p>
+<p>Note that after backspacing an empty text, the text will continue empty.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &lt;= s.length, t.length &lt;= 200</li>
+  <li><code>s</code> and <code>t</code> only contain lowercase letters and <code>'#'</code> characters.</li>
+</ul>
+<p><strong>Follow up:</strong> Can you solve it in O(n) time and O(1) space?</p>
+`}
+  examples={[
+    {
+      input: 's = "ab#c", t = "ad#c"',
+      output: 'true',
+      explanation: 'Both s and t become "ac".'
+    },
+    {
+      input: 's = "ab##", t = "c#d#"',
+      output: 'true',
+      explanation: 'Both s and t become "".'
+    },
+    {
+      input: 's = "a#c", t = "b"',
+      output: 'false',
+      explanation: 's becomes "c" while t becomes "b".'
+    }
+  ]}
+  starterCode={`function backspaceCompare(s, t) {
+  // Write your code here
+
+}`}
+  solution={`function backspaceCompare(s, t) {
+  // Stack approach: O(n) time, O(n) space
+  const buildString = (str) => {
+    const stack = [];
+    for (const char of str) {
+      if (char === '#') {
+        // Backspace: remove last character if exists
+        if (stack.length > 0) {
+          stack.pop();
+        }
+      } else {
+        // Regular character: add to result
+        stack.push(char);
+      }
+    }
+    return stack.join('');
+  };
+
+  return buildString(s) === buildString(t);
+}`}
+  testCases={[
+    {
+      input: ["ab#c", "ad#c"],
+      expected: true,
+      description: 'Basic backspace: "ab#c" vs "ad#c" → both become "ac"'
+    },
+    {
+      input: ["ab##", "c#d#"],
+      expected: true,
+      description: 'Multiple backspaces: "ab##" vs "c#d#" → both become ""'
+    },
+    {
+      input: ["a#c", "b"],
+      expected: false,
+      description: 'Different results: "a#c" → "c", "b" → "b"'
+    },
+    {
+      input: ["a##c", "#a#c"],
+      expected: true,
+      description: 'Backspace on empty: both become "c"'
+    },
+    {
+      input: ["abc###", ""],
+      expected: true,
+      description: 'All backspaced: both become ""'
+    },
+    {
+      input: ["bxj##tw", "bxo#j##tw"],
+      expected: true,
+      description: 'Complex sequence: both become "btw"'
+    }
+  ]}
+  functionName="backspaceCompare"
+/>
+
+## Solution Explanation
+
+### Approach 1: Stack (Intuitive)
+
+**Time Complexity:** O(m + n)
+**Space Complexity:** O(m + n)
+
+Use a stack to process backspaces:
+
+```javascript
+function backspaceCompare(s, t) {
+  const buildString = (str) => {
+    const stack = [];
+
+    for (const char of str) {
+      if (char === '#') {
+        // Backspace: pop if stack not empty
+        if (stack.length > 0) {
+          stack.pop();
+        }
+      } else {
+        // Regular character: push to stack
+        stack.push(char);
+      }
+    }
+
+    return stack.join('');
+  };
+
+  // Build both strings and compare
+  return buildString(s) === buildString(t);
+}
+```
+
+**How Stack Processes Backspaces:**
+
+```
+Input: "ab#c"
+
+Step 1: 'a' → push
+  stack: ['a']
+
+Step 2: 'b' → push
+  stack: ['a', 'b']
+
+Step 3: '#' → backspace, pop
+  stack: ['a']
+
+Step 4: 'c' → push
+  stack: ['a', 'c']
+
+Result: "ac"
+```
+
+**Why Stack Works:**
+1. **Natural typing simulation**: Stack mimics text editor behavior
+2. **Handles backspace**: Pop removes last character
+3. **Simple logic**: Push on character, pop on backspace
+4. **Clear state**: Final stack is the result
+
+### Approach 2: Two Pointers (Optimal) ✅
+
+**Time Complexity:** O(m + n)
+**Space Complexity:** O(1)
+
+Traverse strings backwards, counting backspaces:
+
+```javascript
+function backspaceCompare(s, t) {
+  let i = s.length - 1;
+  let j = t.length - 1;
+
+  while (i >= 0 || j >= 0) {
+    // Find next valid character in s
+    i = getNextValidChar(s, i);
+    // Find next valid character in t
+    j = getNextValidChar(t, j);
+
+    // If one string ended but not the other
+    if ((i >= 0) !== (j >= 0)) return false;
+
+    // If both have valid chars, they must match
+    if (i >= 0 && j >= 0 && s[i] !== t[j]) return false;
+
+    i--;
+    j--;
+  }
+
+  return true;
+}
+
+function getNextValidChar(str, index) {
+  let backspaceCount = 0;
+
+  while (index >= 0) {
+    if (str[index] === '#') {
+      backspaceCount++;
+      index--;
+    } else if (backspaceCount > 0) {
+      backspaceCount--;
+      index--;
+    } else {
+      break; // Found valid character
+    }
+  }
+
+  return index;
+}
+```
+
+**How Two Pointers Work:**
+
+```
+s = "ab#c"    t = "ad#c"
+     ↑              ↑
+     i              j
+
+Start from end:
+
+s[3]='c', t[3]='c' ✓ Match
+Move left: i=2, j=2
+
+s[2]='#' → backspace, skip 'b'
+t[2]='#' → backspace, skip 'd'
+Now: i=0, j=0
+
+s[0]='a', t[0]='a' ✓ Match
+
+Result: true ✅
+```
+
+**Key Insight of Backwards Traversal:**
+
+Going backwards, backspaces tell us how many characters to skip:
+```
+"abc##d"
+       ↑ start here
+
+'d' → valid character
+'#' → skip next character ('c')
+'#' → skip next character ('b')
+'a' → valid character
+
+Valid characters: ['a', 'd'] (reading backwards)
+Result: "ad"
+```
+
+### Approach 3: Build Strings with Arrays
+
+**Time Complexity:** O(m + n)
+**Space Complexity:** O(m + n)
+
+Similar to stack but using arrays:
+
+```javascript
+function backspaceCompare(s, t) {
+  const build = (str) => {
+    const result = [];
+    for (const char of str) {
+      if (char !== '#') {
+        result.push(char);
+      } else if (result.length > 0) {
+        result.pop();
+      }
+    }
+    return result.join('');
+  };
+
+  return build(s) === build(t);
+}
+```
+
+### Key Insights
+
+1. **Stack is natural**: Mimics text editor with undo (backspace)
+2. **Two pointers optimize space**: O(1) space by processing backwards
+3. **Backwards is key**: Backspaces affect previous characters
+4. **Count backspaces**: Track how many chars to skip when going backwards
+
+## Common Mistakes
+
+❌ Not checking if stack is empty before popping:
+```javascript
+if (char === '#') {
+  stack.pop(); // Error if stack is empty!
+}
+```
+
+❌ Processing strings forward in O(1) space approach:
+```javascript
+// Wrong - backspaces affect characters before them
+// Can't process forward without extra space
+for (let i = 0; i < s.length; i++) {
+  // This won't work for O(1) space
+}
+```
+
+❌ Not handling different string lengths:
+```javascript
+// Wrong - one string might end before the other
+if (s[i] !== t[j]) return false;
+```
+
+✅ Correct stack approach with proper checks:
+```javascript
+const buildString = (str) => {
+  const stack = [];
+  for (const char of str) {
+    if (char === '#') {
+      // Check before popping
+      if (stack.length > 0) {
+        stack.pop();
+      }
+    } else {
+      stack.push(char);
+    }
+  }
+  return stack.join('');
+};
+```
+
+✅ Correct O(1) space approach with backwards traversal:
+```javascript
+function getNextValidChar(str, index) {
+  let backspaceCount = 0;
+
+  while (index >= 0) {
+    if (str[index] === '#') {
+      backspaceCount++;
+      index--;
+    } else if (backspaceCount > 0) {
+      // Skip this character (it's backspaced)
+      backspaceCount--;
+      index--;
+    } else {
+      // Found valid character
+      break;
+    }
+  }
+
+  return index;
+}
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Start with the **stack approach** (most intuitive)
+2. Explain why stack naturally models backspace
+3. Mention the **follow-up** for O(1) space
+4. Discuss **backwards traversal** for space optimization
+5. Walk through complex example like "bxj##tw"
+
+**Key talking points:**
+- "Stack naturally models typing with backspace"
+- "For O(1) space, we process backwards counting backspaces"
+- "Going backwards, backspaces tell us how many chars to skip"
+- "Two pointers compare valid characters from both strings"
+
+**Follow-up questions you might get:**
+- **What if '#' is not backspace but regular char?** Simple string comparison
+- **Handle multiple types of backspace?** Similar logic, check char type
+- **What about other editing operations?** Would need more complex state machine
+- **Why backwards for O(1) space?** Backspaces affect previous chars, need to know future backspaces

@@ -1,0 +1,459 @@
+---
+sidebar_position: 11
+difficulty: Hard
+tags: [dynamic-programming, string, regex, pattern-matching]
+leetcode_url: https://leetcode.com/problems/regular-expression-matching/
+companies: [Google, Amazon, Meta, Microsoft, Apple]
+pattern: "Dynamic Programming"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Regular Expression Matching
+
+<AlgorithmProblem
+  title="Regular Expression Matching"
+  difficulty="Hard"
+  description={`
+<p>Given an input string <code>s</code> and a pattern <code>p</code>, implement regular expression matching with support for <code>'.'</code> and <code>'*'</code> where:</p>
+<ul>
+  <li><code>'.'</code> Matches any single character.</li>
+  <li><code>'*'</code> Matches zero or more of the preceding element.</li>
+</ul>
+<p>The matching should cover the <strong>entire</strong> input string (not partial).</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &le; s.length &le; 20</li>
+  <li>1 &le; p.length &le; 30</li>
+  <li>s contains only lowercase English letters.</li>
+  <li>p contains only lowercase English letters, '.', and '*'.</li>
+  <li>For each appearance of the character '*', there will be a previous non-'*' character to match.</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 's = "aa", p = "a"',
+      output: 'false',
+      explanation: '"a" does not match the entire string "aa"'
+    },
+    {
+      input: 's = "aa", p = "a*"',
+      output: 'true',
+      explanation: '"*" means zero or more of the preceding element, "a*" matches two "a"s'
+    },
+    {
+      input: 's = "ab", p = ".*"',
+      output: 'true',
+      explanation: '".*" matches any sequence, including "ab"'
+    }
+  ]}
+  starterCode={`function isMatch(s, p) {
+  // Write your code here
+
+}`}
+  solution={`function isMatch(s, p) {
+  // 2D DP - Tabulation: O(m*n) time, O(m*n) space
+  const m = s.length;
+  const n = p.length;
+
+  // dp[i][j] = true if s[0..i-1] matches p[0..j-1]
+  const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(false));
+
+  // Base case: empty string and empty pattern match
+  dp[0][0] = true;
+
+  // Handle patterns like a*, a*b*, a*b*c* that can match empty string
+  for (let j = 2; j <= n; j++) {
+    if (p[j - 1] === '*') {
+      dp[0][j] = dp[0][j - 2];  // '*' matches zero of preceding char
+    }
+  }
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (p[j - 1] === '*') {
+        // Match zero of preceding char OR match one/more
+        dp[i][j] = dp[i][j - 2] || (dp[i - 1][j] && (s[i - 1] === p[j - 2] || p[j - 2] === '.'));
+      } else if (p[j - 1] === '.' || s[i - 1] === p[j - 1]) {
+        // Characters match or pattern has '.'
+        dp[i][j] = dp[i - 1][j - 1];
+      }
+    }
+  }
+
+  return dp[m][n];
+}`}
+  testCases={[
+    {
+      input: ["aa", "a"],
+      expected: false,
+      description: '"a" cannot match "aa"'
+    },
+    {
+      input: ["aa", "a*"],
+      expected: true,
+      description: '"a*" matches "aa"'
+    },
+    {
+      input: ["ab", ".*"],
+      expected: true,
+      description: '".*" matches any sequence'
+    },
+    {
+      input: ["aab", "c*a*b"],
+      expected: true,
+      description: '"c*a*b" matches "aab"'
+    },
+    {
+      input: ["a", "."],
+      expected: true,
+      description: '"." matches any single char'
+    },
+    {
+      input: ["mississippi", "mis*is*p*."],
+      expected: false,
+      description: 'Cannot match'
+    }
+  ]}
+  functionName="isMatch"
+/>
+
+## Solution Explanation
+
+### Approach 1: Brute Force Recursion
+
+**Time Complexity:** O(2<sup>n</sup>) exponential
+**Space Complexity:** O(n) recursive stack
+
+Try all possible pattern interpretations:
+
+```javascript
+function isMatch(s, p) {
+  function helper(i, j) {
+    // Base cases
+    if (j === p.length) {
+      return i === s.length; // Pattern exhausted, must finish string
+    }
+
+    // Check if current characters match
+    const charMatch = i < s.length && (s[i] === p[j] || p[j] === '.');
+
+    if (j + 1 < p.length && p[j + 1] === '*') {
+      // Next char is '*': try matching zero or more
+      return (
+        helper(i, j + 2) ||  // Match zero of current char
+        (charMatch && helper(i + 1, j))  // Match one/more
+      );
+    } else {
+      // Regular character or '.': must match exactly one
+      return charMatch && helper(i + 1, j + 1);
+    }
+  }
+
+  return helper(0, 0);
+}
+
+// Trace: s="aa", p="a*"
+// helper(0, 0):
+//   charMatch = true (s[0]='a' === p[0]='a')
+//   p[1]='*', try:
+//     - helper(0, 2): j=2 >= p.length=2, return i=0 === s.length=2? false
+//     - helper(1, 0): charMatch, continue
+// helper(1, 0):
+//   charMatch = true (s[1]='a' === p[0]='a')
+//   p[1]='*', try:
+//     - helper(1, 2): j=2 >= p.length=2, return i=1 === s.length=2? false
+//     - helper(2, 0): charMatch, continue
+// helper(2, 0):
+//   charMatch = false (i=2 >= s.length=2)
+//   p[1]='*', try:
+//     - helper(2, 2): j=2 >= p.length=2, return i=2 === s.length=2? true! ✓
+```
+
+**Why slow?** Many overlapping subproblems.
+
+### Approach 2: Memoization (Better)
+
+**Time Complexity:** O(m × n)
+**Space Complexity:** O(m × n)
+
+Cache results:
+
+```javascript
+function isMatch(s, p) {
+  const memo = {};
+
+  function helper(i, j) {
+    if (j === p.length) return i === s.length;
+
+    const key = `${i},${j}`;
+    if (key in memo) return memo[key];
+
+    const charMatch = i < s.length && (s[i] === p[j] || p[j] === '.');
+
+    let result;
+    if (j + 1 < p.length && p[j + 1] === '*') {
+      result = helper(i, j + 2) || (charMatch && helper(i + 1, j));
+    } else {
+      result = charMatch && helper(i + 1, j + 1);
+    }
+
+    memo[key] = result;
+    return result;
+  }
+
+  return helper(0, 0);
+}
+```
+
+### Approach 3: DP Tabulation (Optimal) ✅
+
+**Time Complexity:** O(m × n)
+**Space Complexity:** O(m × n)
+
+Build table bottom-up:
+
+```javascript
+function isMatch(s, p) {
+  const m = s.length;
+  const n = p.length;
+
+  // dp[i][j] = true if s[0..i-1] matches p[0..j-1]
+  const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(false));
+
+  // Base case: empty pattern matches empty string
+  dp[0][0] = true;
+
+  // Handle patterns like a*, a*b*, etc. matching empty string
+  for (let j = 2; j <= n; j++) {
+    if (p[j - 1] === '*') {
+      dp[0][j] = dp[0][j - 2];  // '*' cancels preceding char
+    }
+  }
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (p[j - 1] === '*') {
+        // Two cases for '*':
+        // 1. Match zero: dp[i][j-2] (ignore a*)
+        // 2. Match one or more: dp[i-1][j] if char matches
+        dp[i][j] = dp[i][j - 2] ||
+                   (dp[i - 1][j] && (s[i - 1] === p[j - 2] || p[j - 2] === '.'));
+      } else if (p[j - 1] === '.' || s[i - 1] === p[j - 1]) {
+        // Current characters match
+        dp[i][j] = dp[i - 1][j - 1];
+      }
+      // else: no match, dp[i][j] stays false
+    }
+  }
+
+  return dp[m][n];
+}
+
+// Trace: s="aa", p="a*"
+//        ''  a  *
+//    ''  T   F  T
+//    a   F   T  T
+//    a   F   F  T
+//
+// dp[0][0] = true (base)
+// dp[0][2] = dp[0][0] = true (a* matches empty)
+// dp[1][1]: s[0]='a', p[0]='a' match → dp[0][0] = true
+// dp[1][2]: p[1]='*' → dp[1][0] OR (dp[0][2] AND match) = false OR true = true
+// dp[2][1]: s[1]='a', p[0]='a' match → dp[1][0] = false
+// dp[2][2]: p[1]='*' → dp[2][0] OR (dp[1][2] AND match) = false OR true = true
+```
+
+## DP Recurrence Relation
+
+```
+dp[i][j] = true if s[0..i-1] matches p[0..j-1]
+
+Case 1: p[j-1] === '*'
+  Two options:
+  a) Match zero times: dp[i][j-2]
+  b) Match one or more: dp[i-1][j] AND (s[i-1] === p[j-2] OR p[j-2] === '.')
+  dp[i][j] = dp[i][j-2] OR second_condition
+
+Case 2: p[j-1] === '.' OR s[i-1] === p[j-1]
+  Characters match:
+  dp[i][j] = dp[i-1][j-1]
+
+Case 3: Characters don't match
+  dp[i][j] = false
+
+Base cases:
+  dp[0][0] = true (empty pattern, empty string)
+  dp[0][j] = dp[0][j-2] if p[j-1] === '*'
+  dp[i][0] = false for i > 0 (non-empty string, empty pattern)
+```
+
+## Key Insights
+
+**Understanding '*' matching:**
+
+```
+Pattern: "a*"
+Meaning: zero or more 'a's
+
+Matches: "", "a", "aa", "aaa", ...
+
+In DP:
+- Match zero: skip "a*" entirely → dp[i][j-2]
+- Match one or more: use one 'a', keep the pattern → dp[i-1][j]
+```
+
+**Understanding '.' matching:**
+
+```
+Pattern: "a.c"
+Meaning: 'a', then any char, then 'c'
+
+Matches: "aac", "abc", "adc", ...
+
+In DP:
+- '.' acts like any character
+- If p[j]='.' or s[i]=p[j], characters match
+```
+
+## Visualization: Building the DP Table
+
+```
+s = "aa"
+p = "a*"
+
+       ''  a  *
+    '' T   F  T   (empty matches: true, a=false, a*=true)
+    a  F   T  T   (a matches a: true, a with a*: true)
+    a  F   F  T   (aa matches a: false, aa matches a*: true)
+
+Key decisions:
+- dp[0][2]: p[1]='*', so dp[0][2] = dp[0][0] = true
+- dp[1][2]: p[1]='*', match char? (s[0]='a' === p[0]='a')
+            dp[1][2] = dp[1][0] OR (dp[0][2] AND true) = true
+- dp[2][2]: p[1]='*', match char? (s[1]='a' === p[0]='a')
+            dp[2][2] = dp[2][0] OR (dp[1][2] AND true) = true
+```
+
+## Common Mistakes
+
+❌ **Confusing '*' logic:**
+```javascript
+// Wrong - '*' means repetition of preceding, not zero chars
+if (p[j] === '*') {
+  dp[i][j] = dp[i][j-1];  // Only handles one rep
+}
+
+// Correct - handle both zero and one+ repetitions
+if (p[j-1] === '*') {
+  dp[i][j] = dp[i][j-2] || (dp[i-1][j] && charMatch);
+}
+```
+
+❌ **Wrong character matching with '*':**
+```javascript
+// Wrong - doesn't check if preceding character matches
+if (p[j-1] === '*') {
+  dp[i][j] = dp[i-1][j];  // Missing character check
+}
+
+// Correct - check if preceding char matches
+if (p[j-1] === '*') {
+  dp[i][j] = dp[i][j-2] || (dp[i-1][j] && (s[i-1] === p[j-2] || p[j-2] === '.'));
+}
+```
+
+❌ **Not handling empty patterns with '*':**
+```javascript
+// Wrong - doesn't initialize base case for a*, a*b*, etc.
+for (let j = 0; j <= n; j++) {
+  dp[0][j] = false;
+}
+
+// Correct - patterns with '*' can match empty string
+for (let j = 2; j <= n; j++) {
+  if (p[j-1] === '*') {
+    dp[0][j] = dp[0][j-2];
+  }
+}
+```
+
+✅ **Correct solution:**
+```javascript
+function isMatch(s, p) {
+  const m = s.length;
+  const n = p.length;
+
+  const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(false));
+
+  dp[0][0] = true;
+
+  for (let j = 2; j <= n; j++) {
+    if (p[j - 1] === '*') {
+      dp[0][j] = dp[0][j - 2];
+    }
+  }
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (p[j - 1] === '*') {
+        dp[i][j] = dp[i][j - 2] ||
+                   (dp[i - 1][j] && (s[i - 1] === p[j - 2] || p[j - 2] === '.'));
+      } else if (p[j - 1] === '.' || s[i - 1] === p[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1];
+      }
+    }
+  }
+
+  return dp[m][n];
+}
+```
+
+## Interview Tips
+
+**When discussing:**
+1. Clarify: "'.' matches any char, '*' matches zero or more"
+2. State: "`dp[i][j]` = can s[0..i-1] match p[0..j-1]"
+3. Key: "'*' has two cases: match zero or one+"
+4. Handle: "Patterns with '*' can match empty string"
+5. Complexity: "O(m × n) time and space"
+
+**Key talking points:**
+- "This is one of the hardest DP problems"
+- "'*' is tricky: must check preceding character"
+- "Base case for 'a*', 'a*b*' matching empty string is important"
+- "When '*' matches one or more, stay in same pattern state"
+- "When '*' matches zero, skip to after the '*'"
+
+**Follow-up questions:**
+
+**Q: Support '+' (one or more) in addition to '*'?**
+A: Similar logic, but don't include dp[i][j-2] case.
+
+**Q: What if pattern can have groups with '()'?**
+A: More complex, requires different approach (recursive with groups).
+
+**Q: Case-insensitive matching?**
+A: Convert both to lowercase before processing.
+
+**Q: Return matched segments?**
+A: Backtrack from dp[m][n] to reconstruct the match.
+
+## Edge Cases
+
+```javascript
+isMatch("", "") → true                    // Both empty
+isMatch("a", "") → false                  // String with empty pattern
+isMatch("", ".*") → true                  // .* matches anything
+isMatch("a", "a") → true                  // Exact match
+isMatch("a", ".") → true                  // . matches single char
+isMatch("aa", "a") → false                // String longer
+isMatch("ab", ".*") → true                // .* matches any sequence
+```
+
+## Related Problems
+
+- **Wildcard Matching** (Hard) - Similar but with '*' and '?'
+- **Edit Distance** (Hard) - Operations vs pattern matching
+- **Shortest Common Supersequence** (Hard) - String manipulation
+- **Interleaving String** (Medium) - Different DP variant

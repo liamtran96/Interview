@@ -1,0 +1,9 @@
+{
+  "label": "Stack",
+  "position": 4,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "description": "Master LIFO data structure for parsing, monotonic stacks, and more."
+  }
+}

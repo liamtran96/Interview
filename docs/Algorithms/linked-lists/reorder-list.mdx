@@ -1,0 +1,471 @@
+---
+sidebar_position: 8
+difficulty: Medium
+tags: [linked-lists, two-pointers, reversal, amazon, google]
+leetcode_url: https://leetcode.com/problems/reorder-list/
+companies: [Amazon, Google, Microsoft, Meta, Apple]
+pattern: "Linked Lists"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Reorder List
+
+<AlgorithmProblem
+  title="Reorder List"
+  difficulty="Medium"
+  description={`
+<p>You are given the head of a singly linked list. The list can be represented as:
+<code>L<sub>0</sub> → L<sub>1</sub> → L<sub>2</sub> → ... → L<sub>n - 1</sub> → L<sub>n</sub></code></p>
+<p><em>Reorder the list to be on the following form:</em></p>
+<p><code>L<sub>0</sub> → L<sub>n</sub> → L<sub>1</sub> → L<sub>n - 1</sub> → L<sub>2</sub> → L<sub>n - 2</sub> → ...</code></p>
+<p>You may <strong>not modify the values</strong> in the list's nodes, only nodes themselves may be changed.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>The number of nodes in the list is in the range [1, 5 × 10<sup>4</sup>]</li>
+  <li>1 ≤ node.val ≤ 100</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'head = [1,2,3,4]',
+      output: '[1,4,2,3]',
+      explanation: 'Reorder to alternate first and last'
+    },
+    {
+      input: 'head = [1,2,3,4,5]',
+      output: '[1,5,2,4,3]',
+      explanation: 'Reorder to alternate first and last'
+    },
+    {
+      input: 'head = [1]',
+      output: '[1]',
+      explanation: 'Single node, no reordering needed'
+    }
+  ]}
+  starterCode={`class ListNode {
+  constructor(val = 0, next = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+function reorderList(head) {
+  // TODO: Reorder the list
+  // Modify the list in-place
+}`}
+  solution={`class ListNode {
+  constructor(val = 0, next = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+function reorderList(head) {
+  if (!head || !head.next) return;
+
+  // Step 1: Find middle of list using slow/fast pointers
+  let slow = head, fast = head;
+  while (fast && fast.next) {
+    slow = slow.next;
+    fast = fast.next.next;
+  }
+
+  // Step 2: Reverse second half
+  let second = slow.next;
+  slow.next = null;  // Break the list
+  second = reverseList(second);
+
+  // Step 3: Merge first and reversed second half
+  let first = head;
+  while (second) {
+    const temp1 = first.next;
+    const temp2 = second.next;
+
+    first.next = second;
+    second.next = temp1;
+
+    first = temp1;
+    second = temp2;
+  }
+}
+
+// Helper function to reverse list
+function reverseList(head) {
+  let prev = null;
+  let curr = head;
+
+  while (curr) {
+    const temp = curr.next;
+    curr.next = prev;
+    prev = curr;
+    curr = temp;
+  }
+
+  return prev;
+}`}
+  testCases={[
+    {
+      input: [[1, 2, 3, 4]],
+      expected: [1, 4, 2, 3],
+      description: 'Reorder even-length list'
+    },
+    {
+      input: [[1, 2, 3, 4, 5]],
+      expected: [1, 5, 2, 4, 3],
+      description: 'Reorder odd-length list'
+    },
+    {
+      input: [[1]],
+      expected: [1],
+      description: 'Single node'
+    },
+    {
+      input: [[1, 2]],
+      expected: [1, 2],
+      description: 'Two nodes'
+    },
+    {
+      input: [[1, 2, 3]],
+      expected: [1, 3, 2],
+      description: 'Three nodes'
+    },
+    {
+      input: [[1, 2, 3, 4, 5, 6]],
+      expected: [1, 6, 2, 5, 3, 4],
+      description: 'Reorder six-node list'
+    }
+  ]}
+  functionName="reorderList"
+/>
+
+## Solution Explanation
+
+### Approach 1: Reverse Half & Merge (Optimal) ✅
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1) - if not counting recursion stack for reversal
+
+Three steps: find middle, reverse second half, merge:
+
+```javascript
+function reorderList(head) {
+  if (!head || !head.next) return;
+
+  // Step 1: Find middle using slow/fast pointers
+  let slow = head, fast = head;
+  while (fast && fast.next) {
+    slow = slow.next;
+    fast = fast.next.next;
+  }
+
+  // Step 2: Reverse second half
+  let second = slow.next;
+  slow.next = null;  // Important: break the connection
+  second = reverseList(second);
+
+  // Step 3: Merge first half and reversed second half
+  let first = head;
+  while (second) {
+    const temp1 = first.next;
+    const temp2 = second.next;
+
+    first.next = second;    // Connect from first
+    second.next = temp1;    // Connect from second
+
+    first = temp1;
+    second = temp2;
+  }
+}
+
+function reverseList(head) {
+  let prev = null;
+  let curr = head;
+
+  while (curr) {
+    const temp = curr.next;
+    curr.next = prev;
+    prev = curr;
+    curr = temp;
+  }
+
+  return prev;
+}
+```
+
+**How it works:**
+
+```
+Original: 1 → 2 → 3 → 4 → 5 → null
+
+Step 1: Find middle (slow/fast pointers)
+  slow reaches 3 (middle)
+  fast reaches 5 (end)
+
+Step 2: Split and reverse second half
+  First half:  1 → 2 → 3 → null
+  Second half: 5 → 4 → null (reversed from 4 → 5)
+
+Step 3: Merge
+  Initial: first=1, second=5
+  Link: 1 → 5
+        1 → 5 → 2
+  Advance: first=2, second=4
+  Link: 2 → 4
+        1 → 5 → 2 → 4 → 3
+
+Result: 1 → 5 → 2 → 4 → 3
+```
+
+**Key steps:**
+1. Find the exact middle (slow pointer)
+2. Reverse the second half completely
+3. Interleave: first → second → first → second...
+
+### Approach 2: Store in Array
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(n)
+
+Store all nodes, then rearrange pointers:
+
+```javascript
+function reorderList(head) {
+  const nodes = [];
+  let curr = head;
+
+  // Store all nodes
+  while (curr) {
+    nodes.push(curr);
+    curr = curr.next;
+  }
+
+  // Rearrange pointers
+  let left = 0, right = nodes.length - 1;
+  while (left < right) {
+    nodes[left].next = nodes[right];
+    left++;
+
+    nodes[right].next = nodes[left];
+    right--;
+  }
+
+  // Last node points to null
+  nodes[left].next = null;
+}
+```
+
+**Process:**
+1. Store all nodes in array
+2. Use two pointers (left, right)
+3. Alternate connections: left → right → left → right...
+
+### Approach 3: Using Stack
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(n)
+
+Use stack to get nodes in reverse order:
+
+```javascript
+function reorderList(head) {
+  const stack = [];
+  let curr = head;
+
+  // Push all nodes onto stack
+  while (curr) {
+    stack.push(curr);
+    curr = curr.next;
+  }
+
+  curr = head;
+  let count = 0;
+
+  while (curr && stack.length > 0) {
+    const last = stack.pop();
+
+    // Don't cross in middle
+    if (curr === last || curr.next === last) {
+      curr.next = null;
+      break;
+    }
+
+    curr.next = last;
+    last.next = curr.next;
+    curr = curr.next;
+
+    count += 2;
+  }
+}
+```
+
+## Comparison of Approaches
+
+| Approach | Time | Space | Simplicity | Best For |
+|----------|------|-------|-----------|----------|
+| Reverse & Merge | O(n) | O(1)* | Medium | **Recommended** |
+| Array Storage | O(n) | O(n) | Easy | Learning |
+| Stack | O(n) | O(n) | Complex | Partial use |
+
+*O(1) if not counting recursion stack
+
+## Common Mistakes
+
+❌ **Not breaking the list properly:**
+```javascript
+// Reversing second half without breaking connection
+let second = slow.next;
+second = reverseList(second);
+// slow.next still points forward, list might loop!
+```
+
+✅ **Always break the connection:**
+```javascript
+let second = slow.next;
+slow.next = null;  // IMPORTANT: break the link
+second = reverseList(second);
+```
+
+---
+
+❌ **Wrong merging order:**
+```javascript
+// This creates wrong interleaving
+while (second) {
+  first.next = second;
+  first = first.next;  // Skip second, goes to its.next
+  second = second.next;
+}
+```
+
+✅ **Proper merging:**
+```javascript
+while (second) {
+  const temp1 = first.next;
+  const temp2 = second.next;
+
+  first.next = second;    // First → Second
+  second.next = temp1;    // Second → First's next
+  first = temp1;
+  second = temp2;
+}
+```
+
+---
+
+❌ **Not handling last node:**
+```javascript
+// If left === right at end, it's the middle node
+// Set its next to null to terminate
+nodes[left].next = null;  // Must do this!
+```
+
+✅ **Terminate the list:**
+```javascript
+while (left < right) {
+  // merging logic
+}
+nodes[left].next = null;  // Ensure proper termination
+```
+
+---
+
+❌ **Wrong condition for merge termination:**
+```javascript
+while (first && second) {  // Might miss the middle node
+  // ...
+}
+```
+
+✅ **Check if they're adjacent:**
+```javascript
+while (second && (first !== second && first.next !== second)) {
+  // or use loop and set .next = null when done
+}
+```
+
+## Interview Tips
+
+**What to mention:**
+1. **Find middle:** Use slow/fast pointers for O(1) space
+2. **Reverse half:** Reuse reverse linked list logic
+3. **Merge:** Interleave first and second halves
+4. **Breaking connection:** Critical to avoid infinite loops
+
+**Follow-up questions:**
+
+**Q: Can you do this without modifying the original list?**
+A: Store nodes in array/stack, but uses O(n) space.
+
+**Q: What if the list is already reordered?**
+A: The algorithm still works correctly.
+
+**Q: How would you reorder in reverse?**
+A: Start from the reversed second half from the right side.
+
+**Q: What about very large lists?**
+A: This solution is O(n) time, O(1) space - optimal!
+
+## Edge Cases
+
+```javascript
+// Single node
+[1] → [1]
+
+// Two nodes
+[1, 2] → [1, 2]
+
+// Three nodes
+[1, 2, 3] → [1, 3, 2]
+
+// Even length
+[1, 2, 3, 4] → [1, 4, 2, 3]
+
+// Odd length
+[1, 2, 3, 4, 5] → [1, 5, 2, 4, 3]
+
+// Already reordered
+[1, 5, 2, 4, 3] → [1, 5, 2, 4, 3]
+
+// Large list
+[1,2,3,4,5,6,7,8] → [1,8,2,7,3,6,4,5]
+```
+
+## Visualization
+
+```
+Original list: 1 → 2 → 3 → 4 → 5
+
+Find middle with slow/fast:
+  slow at 3, fast at 5
+
+Split:
+  First:  1 → 2 → 3
+  Second: 4 → 5
+
+Reverse second:
+  Second becomes: 5 → 4
+
+Merge:
+  1 → 5 → 2 → 4 → 3
+
+Interleaving pattern:
+  Take one from first, one from second (reversed)
+  Then their next from first, then their next from second
+```
+
+## Key Insight
+
+This problem combines multiple techniques:
+1. **Slow/fast pointer** - find middle in one pass
+2. **List reversal** - reverse the second half
+3. **Pointer manipulation** - interleave two lists
+
+Perfect problem to practice these core linked list skills!
+
+## Related Problems
+
+- **Palindrome Linked List** (Easy) - Uses similar approach (reverse half)
+- **Odd Even Linked List** (Medium) - Separate odd/even positions
+- **Partition List** (Medium) - Rearrange by value
+- **Reverse Nodes in k-Group** (Hard) - Reverse in groups

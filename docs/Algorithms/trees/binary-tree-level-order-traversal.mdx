@@ -1,0 +1,415 @@
+---
+sidebar_position: 9
+difficulty: Medium
+tags: [trees, bfs, level-order, traversal, amazon, google]
+leetcode_url: https://leetcode.com/problems/binary-tree-level-order-traversal/
+companies: [Amazon, Google, Microsoft, Meta, Apple]
+pattern: "Trees"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Binary Tree Level Order Traversal
+
+<AlgorithmProblem
+  title="Binary Tree Level Order Traversal"
+  difficulty="Medium"
+  description={`
+<p>Given the <code>root</code> of a binary tree, return the <strong>level order traversal</strong> of its nodes' values. (i.e., from left to right, level by level).</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>The number of nodes in the tree is in the range [0, 2000]</li>
+  <li>-1000 ≤ Node.val ≤ 1000</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'root = [3,9,20,null,null,15,7]',
+      output: '[[3],[9,20],[15,7]]'
+    },
+    {
+      input: 'root = [1]',
+      output: '[[1]]'
+    },
+    {
+      input: 'root = []',
+      output: '[]'
+    }
+  ]}
+  starterCode={`class TreeNode {
+  constructor(val = 0, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+function levelOrder(root) {
+  // TODO: Return level order traversal of tree
+  return [];
+}`}
+  solution={`class TreeNode {
+  constructor(val = 0, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+function levelOrder(root) {
+  if (root === null) return [];
+
+  const result = [];
+  const queue = [root];
+
+  while (queue.length &gt; 0) {
+    const levelSize = queue.length;
+    const currentLevel = [];
+
+    // Process all nodes at current level
+    for (let i = 0; i &lt; levelSize; i++) {
+      const node = queue.shift();
+      currentLevel.push(node.val);
+
+      // Add children to queue for next level
+      if (node.left) queue.push(node.left);
+      if (node.right) queue.push(node.right);
+    }
+
+    result.push(currentLevel);
+  }
+
+  return result;
+}`}
+  testCases={[
+    {
+      input: [[[3, 9, 20, null, null, 15, 7]]],
+      expected: [[3], [9, 20], [15, 7]],
+      description: 'Standard level order traversal'
+    },
+    {
+      input: [[[1]]],
+      expected: [[1]],
+      description: 'Single node'
+    },
+    {
+      input: [null],
+      expected: [],
+      description: 'Empty tree'
+    },
+    {
+      input: [[[1, 2, 3, 4, 5, 6, 7]]],
+      expected: [[1], [2, 3], [4, 5, 6, 7]],
+      description: 'Perfect binary tree'
+    },
+    {
+      input: [[[1, 2, 3, null, 4]]],
+      expected: [[1], [2, 3], [4]],
+      description: 'Unbalanced tree'
+    },
+    {
+      input: [[[1, null, 2, null, 3, null, 4]]],
+      expected: [[1], [2], [3], [4]],
+      description: 'Skewed right tree'
+    }
+  ]}
+  functionName="levelOrder"
+/>
+
+## Solution Explanation
+
+### Approach 1: BFS with Queue (Most Common) ✅
+
+**Time Complexity:** O(n) - visit each node once
+**Space Complexity:** O(w) - queue width (max nodes in one level)
+
+Use queue to process nodes level by level:
+
+```javascript
+function levelOrder(root) {
+  if (root === null) return [];
+
+  const result = [];
+  const queue = [root];
+
+  while (queue.length &gt; 0) {
+    const levelSize = queue.length;  // Key: size of current level
+    const currentLevel = [];
+
+    // Process exactly levelSize nodes (current level only)
+    for (let i = 0; i &lt; levelSize; i++) {
+      const node = queue.shift();
+      currentLevel.push(node.val);
+
+      // Add children (next level) to queue
+      if (node.left) queue.push(node.left);
+      if (node.right) queue.push(node.right);
+    }
+
+    result.push(currentLevel);
+  }
+
+  return result;
+}
+```
+
+**How it works:**
+
+```
+Tree:       3
+           / \
+          9   20
+             /  \
+            15   7
+
+Initial: queue = [3], result = []
+
+Level 1:
+  levelSize = 1
+  Process node 3: currentLevel = [3]
+  Add 9, 20 to queue
+  queue = [9, 20], result = [[3]]
+
+Level 2:
+  levelSize = 2
+  Process node 9: currentLevel = [9]
+  Queue is now [20] (9 shifted out)
+  Process node 20: currentLevel = [9, 20]
+  Add 15, 7 to queue
+  queue = [15, 7], result = [[3], [9, 20]]
+
+Level 3:
+  levelSize = 2
+  Process node 15: currentLevel = [15]
+  Process node 7: currentLevel = [15, 7]
+  No children
+  queue = [], result = [[3], [9, 20], [15, 7]]
+
+Return result ✅
+```
+
+### Approach 2: DFS with Depth Tracking (Recursive)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(h) - recursion stack
+
+Track depth and add to corresponding level:
+
+```javascript
+function levelOrder(root) {
+  const result = [];
+
+  function dfs(node, depth) {
+    if (node === null) return;
+
+    // Ensure result array has this depth
+    if (!result[depth]) {
+      result[depth] = [];
+    }
+
+    // Add node value to its level
+    result[depth].push(node.val);
+
+    // Recurse to children with depth + 1
+    dfs(node.left, depth + 1);
+    dfs(node.right, depth + 1);
+  }
+
+  dfs(root, 0);
+  return result;
+}
+```
+
+### Approach 3: Two Queues (Alternative BFS)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(w)
+
+Use two queues (current level and next level):
+
+```javascript
+function levelOrder(root) {
+  if (root === null) return [];
+
+  const result = [];
+  let current = [root];
+
+  while (current.length &gt; 0) {
+    const next = [];
+    const values = [];
+
+    for (const node of current) {
+      values.push(node.val);
+      if (node.left) next.push(node.left);
+      if (node.right) next.push(node.right);
+    }
+
+    result.push(values);
+    current = next;
+  }
+
+  return result;
+}
+```
+
+## Comparison of Approaches
+
+| Approach | Time | Space | Best For | Simplicity |
+|----------|------|-------|----------|-----------|
+| BFS Queue | O(n) | O(w) | **Most intuitive** | Easy |
+| DFS | O(n) | O(h) | If prefer recursion | Medium |
+| Two Queues | O(n) | O(w) | Cleaner iterations | Medium |
+
+## Common Mistakes
+
+❌ **Not tracking level size separately:**
+```javascript
+function levelOrder(root) {
+  const result = [];
+  const queue = [root];
+
+  while (queue.length &gt; 0) {
+    const node = queue.shift();
+    result.push([node.val]);  // Each node becomes its own level!
+
+    if (node.left) queue.push(node.left);
+    if (node.right) queue.push(node.right);
+  }
+
+  return result;
+}
+// Returns [3], [9], [20], [15], [7] instead of [[3], [9, 20], ...]
+```
+
+✅ **Track level size before processing:**
+```javascript
+function levelOrder(root) {
+  const result = [];
+  const queue = [root];
+
+  while (queue.length &gt; 0) {
+    const levelSize = queue.length;  // Size of CURRENT level
+    const currentLevel = [];
+
+    for (let i = 0; i &lt; levelSize; i++) {
+      const node = queue.shift();
+      currentLevel.push(node.val);
+      if (node.left) queue.push(node.left);
+      if (node.right) queue.push(node.right);
+    }
+
+    result.push(currentLevel);
+  }
+
+  return result;
+}
+```
+
+---
+
+❌ **Processing new nodes in same loop iteration:**
+```javascript
+const queue = [root];
+
+while (queue.length &gt; 0) {
+  const node = queue.shift();
+  // If we don't track levelSize, we might process children
+  // added in this iteration as part of current level!
+  const currentLevel = [node.val];
+
+  if (node.left) queue.push(node.left);  // These shouldn't be in currentLevel
+  if (node.right) queue.push(node.right);
+
+  result.push(currentLevel);
+}
+```
+
+✅ **Use levelSize to process only current level:**
+```javascript
+while (queue.length &gt; 0) {
+  const levelSize = queue.length;  // Only process this many nodes
+  const currentLevel = [];
+
+  for (let i = 0; i &lt; levelSize; i++) {  // Exactly levelSize iterations
+    const node = queue.shift();
+    currentLevel.push(node.val);
+    if (node.left) queue.push(node.left);   // Added after loop boundary
+    if (node.right) queue.push(node.right);
+  }
+
+  result.push(currentLevel);
+}
+```
+
+---
+
+❌ **Using queue.length in loop condition:**
+```javascript
+for (let i = 0; i &lt; queue.length; i++) {  // WRONG: queue.length changes!
+  const node = queue.shift();
+  // ...
+  if (node.left) queue.push(node.left);  // Increases queue.length
+}
+```
+
+✅ **Store levelSize before loop:**
+```javascript
+const levelSize = queue.length;  // Store BEFORE loop
+for (let i = 0; i &lt; levelSize; i++) {  // Use stored value
+  const node = queue.shift();
+  // ...
+}
+```
+
+## Interview Tips
+
+**What to mention:**
+1. **BFS approach:** Queue is perfect for level-order
+2. **Key insight:** Must track level size to know when level ends
+3. **Breadth-first:** Process all nodes at depth d before d+1
+4. **Space complexity:** O(w) where w is max width
+
+**Follow-up questions:**
+
+**Q: Can you do it without a queue (DFS only)?**
+A: Yes, use DFS with depth tracking to assign nodes to levels.
+
+**Q: What if you want right-to-left order instead?**
+A: Reverse the order in currentLevel before adding to result.
+
+**Q: How would you do zig-zag level order?**
+A: Alternate direction (left-to-right, right-to-left) for each level.
+
+## Edge Cases
+
+```javascript
+// Empty tree
+levelOrder(null) → []
+
+// Single node
+levelOrder([1]) → [[1]]
+
+// Two nodes
+levelOrder([1, 2]) → [[1], [2]]
+
+// Complete binary tree
+levelOrder([1,2,3,4,5,6,7]) → [[1], [2,3], [4,5,6,7]]
+
+// Skewed left
+levelOrder([1,2,null,3]) → [[1], [2], [3]]
+
+// Skewed right
+levelOrder([1,null,2,null,3]) → [[1], [2], [3]]
+
+// One-child pattern
+levelOrder([1,2,3,null,4]) → [[1], [2,3], [4]]
+```
+
+## Related Problems
+
+- **Vertical Order Traversal of Binary Tree** (Hard) - Column-based order
+- **Binary Tree Zigzag Level Order Traversal** (Medium) - Alternating direction
+- **Average of Levels in Binary Tree** (Easy) - Calculate average per level
+- **N-ary Tree Level Order Traversal** (Medium) - General n children
+- **Binary Tree Right Side View** (Medium) - Right-most node per level
+

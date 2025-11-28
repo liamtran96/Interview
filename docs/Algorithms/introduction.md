@@ -240,4 +240,81 @@ function hasCycle(head) {
 - Books: "Cracking the Coding Interview", "Elements of Programming Interviews"
 - Visualize: VisuAlgo.net for algorithm visualization
 
-Ready to start? Begin with the Array & String problems!
+## Complete 100 LeetCode Problems Collection
+
+This resource includes a carefully curated collection of **100 LeetCode problems** organized by topic and difficulty level. Each problem includes:
+
+- **Problem statement** with clear explanation
+- **Interactive code editor** (LeetCode-style, built with Monaco Editor)
+- **Multiple test cases** to verify your solution
+- **Solution explanations** with multiple approaches
+- **Complexity analysis** (Time and Space)
+- **Related problems** for further practice
+
+### Problem Categories & Distribution
+
+| Category | Count | Difficulty |
+|----------|-------|------------|
+| **Arrays & Hashing** | 15 | Easy-Medium |
+| **Two Pointers** | 8 | Easy-Medium |
+| **Sliding Window** | 8 | Easy-Medium |
+| **Stack** | 8 | Easy-Hard |
+| **Binary Search** | 8 | Easy-Medium |
+| **Linked Lists** | 10 | Easy-Hard |
+| **Trees** | 12 | Easy-Hard |
+| **Graphs** | 10 | Medium-Hard |
+| **Dynamic Programming** | 12 | Medium-Hard |
+| **Backtracking & Greedy** | 9 | Medium-Hard |
+| **Other** | 1 | Medium |
+| **TOTAL** | **100** | **All Levels** |
+
+### Browse by Category
+
+#### Fundamental Data Structures
+1. **Arrays & Hashing** - Master array manipulation and hash table operations (15 problems)
+2. **Linked Lists** - Work with linked list structures and operations (10 problems)
+3. **Trees** - Understand binary trees, BSTs, and tree traversals (12 problems)
+4. **Graphs** - Explore graph algorithms, DFS, BFS, and topological sorting (10 problems)
+
+#### Common Techniques & Patterns
+5. **Two Pointers** - Efficient multi-pointer approaches (8 problems)
+6. **Sliding Window** - Optimize substring/subarray problems (8 problems)
+7. **Stack** - Stack-based solutions and monotonic stacks (8 problems)
+8. **Binary Search** - Search and divide-and-conquer problems (8 problems)
+
+#### Advanced Topics
+9. **Dynamic Programming** - Optimal substructure and memoization (12 problems)
+10. **Backtracking & Greedy** - Exhaustive search and greedy algorithms (9 problems)
+
+### Interactive Code Editor
+
+Each problem includes an interactive code editor featuring:
+- **Real-time syntax highlighting** with Monaco Editor (VS Code)
+- **Run code against test cases** without leaving the page
+- **Console output** to see your program's output
+- **Error feedback** for immediate debugging
+- **Multiple language support** preparation
+
+### Getting Started
+
+1. **Choose a category** above that matches your current skill level
+2. **Start with Easy problems** to build confidence
+3. **Use the interactive editor** to write and test your solution
+4. **Review the solution** to learn different approaches
+5. **Progress to Medium and Hard** as you master each category
+
+### Difficulty Progression
+
+- **Easy (35 problems)**: Start here if you're new to DSA
+- **Medium (50 problems)**: Intermediate skills and optimization
+- **Hard (15 problems)**: Advanced concepts and complex problems
+
+### Study Tips
+
+- **Time boxing**: Spend 25-30 minutes per problem
+- **Pattern recognition**: Notice similarities between problems
+- **Optimization**: Try to improve time/space complexity
+- **Discussion**: Explain your approach to a peer
+- **Tracking**: Mark problems as solved and revisit hard ones
+
+Ready to start? Begin by exploring the categories above and choose topics that match your current skill level!

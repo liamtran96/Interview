@@ -1,0 +1,284 @@
+---
+sidebar_position: 3
+difficulty: Easy
+tags: [two-pointers, array, amazon, microsoft, google]
+leetcode_url: https://leetcode.com/problems/remove-duplicates-from-sorted-array/
+companies: [Amazon, Microsoft, Google, Facebook, Adobe]
+pattern: "Two Pointers"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Remove Duplicates from Sorted Array
+
+<AlgorithmProblem
+  title="Remove Duplicates from Sorted Array"
+  difficulty="Easy"
+  description={`
+<p>Given an integer array <code>nums</code> sorted in <strong>non-decreasing order</strong>, remove the duplicates <strong>in-place</strong> such that each unique element appears only <strong>once</strong>. The <strong>relative order</strong> of the elements should be kept the <strong>same</strong>. Then return the number of unique elements in <code>nums</code>.</p>
+<p>Consider the number of unique elements of <code>nums</code> to be <code>k</code>, to get accepted, you need to do the following things:</p>
+<ul>
+  <li>Change the array <code>nums</code> such that the first <code>k</code> elements of <code>nums</code> contain the unique elements in the order they were present in <code>nums</code> initially.</li>
+  <li>The remaining elements of <code>nums</code> are not important as well as the size of <code>nums</code>.</li>
+  <li>Return <code>k</code>.</li>
+</ul>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 ≤ nums.length ≤ 3 × 10<sup>4</sup></li>
+  <li>-100 ≤ nums[i] ≤ 100</li>
+  <li>nums is sorted in <strong>non-decreasing order</strong></li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'nums = [1,1,2]',
+      output: '2, nums = [1,2,_]',
+      explanation: 'Your function should return k = 2, with the first two elements of nums being 1 and 2 respectively. It does not matter what you leave beyond the returned k.'
+    },
+    {
+      input: 'nums = [0,0,1,1,1,2,2,3,3,4]',
+      output: '5, nums = [0,1,2,3,4,_,_,_,_,_]',
+      explanation: 'Your function should return k = 5, with the first five elements of nums being 0, 1, 2, 3, and 4 respectively.'
+    }
+  ]}
+  starterCode={`function removeDuplicates(nums) {
+  // Write your code here
+
+}`}
+  solution={`function removeDuplicates(nums) {
+  // Two pointer approach: O(n) time, O(1) space
+  if (nums.length === 0) return 0;
+
+  // Left pointer: position for next unique element
+  let left = 0;
+
+  // Right pointer: explore array
+  for (let right = 1; right < nums.length; right++) {
+    // Found a new unique element
+    if (nums[right] !== nums[left]) {
+      left++;
+      nums[left] = nums[right];
+    }
+  }
+
+  // Return count of unique elements
+  return left + 1;
+}`}
+  testCases={[
+    {
+      input: [[1, 1, 2]],
+      expected: 2,
+      description: 'Basic case with duplicates'
+    },
+    {
+      input: [[0, 0, 1, 1, 1, 2, 2, 3, 3, 4]],
+      expected: 5,
+      description: 'Multiple duplicates'
+    },
+    {
+      input: [[1]],
+      expected: 1,
+      description: 'Single element'
+    },
+    {
+      input: [[1, 2, 3, 4, 5]],
+      expected: 5,
+      description: 'No duplicates'
+    },
+    {
+      input: [[1, 1, 1, 1, 1]],
+      expected: 1,
+      description: 'All same elements'
+    },
+    {
+      input: [[-3, -1, 0, 0, 0, 3, 3]],
+      expected: 4,
+      description: 'Negative and positive numbers'
+    }
+  ]}
+  functionName="removeDuplicates"
+/>
+
+## Solution Explanation
+
+### Approach 1: Using Set (Not Optimal)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(n)
+
+Use a Set to track unique elements:
+
+```javascript
+function removeDuplicates(nums) {
+  const unique = [...new Set(nums)];
+
+  for (let i = 0; i < unique.length; i++) {
+    nums[i] = unique[i];
+  }
+
+  return unique.length;
+}
+```
+
+**Why not use this?**
+- Uses O(n) extra space
+- Problem requires in-place modification
+- Doesn't take advantage of sorted array
+
+### Approach 2: Two Pointers (Optimal) ✅
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1)
+
+Use two pointers to track unique elements in-place:
+
+```javascript
+function removeDuplicates(nums) {
+  if (nums.length === 0) return 0;
+
+  let left = 0; // Position for next unique element
+
+  for (let right = 1; right < nums.length; right++) {
+    // When we find a new unique element
+    if (nums[right] !== nums[left]) {
+      left++;
+      nums[left] = nums[right];
+    }
+  }
+
+  return left + 1; // Count of unique elements
+}
+```
+
+**How it works:**
+
+1. **Left pointer**: Marks position of last unique element found
+2. **Right pointer**: Explores the array to find new unique elements
+3. **When right finds new unique**:
+   - Increment left
+   - Copy value from right to left position
+4. **Return**: left + 1 (count of unique elements)
+
+**Example walkthrough:**
+
+```
+nums = [0, 0, 1, 1, 1, 2, 2, 3, 3, 4]
+
+Initial state:
+[0, 0, 1, 1, 1, 2, 2, 3, 3, 4]
+ L  R
+left=0, right=1
+
+Step 1: nums[1]=0 === nums[0]=0 → skip
+ R moves to 2
+
+Step 2: nums[2]=1 !== nums[0]=0 → new unique!
+[0, 1, 1, 1, 1, 2, 2, 3, 3, 4]
+    L  R
+left=1, nums[1]=1
+
+Step 3: nums[3]=1 === nums[1]=1 → skip
+Step 4: nums[4]=1 === nums[1]=1 → skip
+
+Step 5: nums[5]=2 !== nums[1]=1 → new unique!
+[0, 1, 2, 1, 1, 2, 2, 3, 3, 4]
+       L     R
+left=2, nums[2]=2
+
+Step 6: nums[6]=2 === nums[2]=2 → skip
+
+Step 7: nums[7]=3 !== nums[2]=2 → new unique!
+[0, 1, 2, 3, 1, 2, 2, 3, 3, 4]
+          L           R
+left=3, nums[3]=3
+
+Step 8: nums[8]=3 === nums[3]=3 → skip
+
+Step 9: nums[9]=4 !== nums[3]=3 → new unique!
+[0, 1, 2, 3, 4, 2, 2, 3, 3, 4]
+             L              R
+left=4, nums[4]=4
+
+Final: return left + 1 = 5
+First 5 elements: [0, 1, 2, 3, 4]
+```
+
+### Key Insights
+
+**Why this works:**
+1. **Sorted array** → duplicates are adjacent
+2. **In-place** → overwrite duplicates with unique values
+3. **Two pointers** → left tracks write position, right reads values
+4. **Order preserved** → we only move forward
+
+**Invariant maintained:**
+- All elements from index 0 to left are unique
+- Right pointer explores remaining array
+
+### Pattern: Fast and Slow Pointers
+
+This is a classic **fast and slow pointer** pattern:
+- **Slow pointer (left)**: Writes unique elements
+- **Fast pointer (right)**: Reads and explores array
+- Fast pointer moves every iteration
+- Slow pointer only moves when finding unique element
+
+## Common Mistakes
+
+❌ **Using extra array:**
+```javascript
+const result = []; // Creates O(n) space
+```
+
+❌ **Trying to splice/delete elements:**
+```javascript
+nums.splice(i, 1); // Inefficient, O(n) for each deletion
+```
+
+❌ **Off-by-one in return value:**
+```javascript
+return left; // Should be left + 1
+```
+
+❌ **Not handling empty array:**
+```javascript
+// Missing check for nums.length === 0
+```
+
+❌ **Comparing with previous instead of left:**
+```javascript
+if (nums[right] !== nums[right - 1]) // Wrong pointer!
+```
+
+## Interview Tips
+
+**Discussion points:**
+1. Recognize this is an in-place array modification problem
+2. Explain why sorted array makes this easier (duplicates adjacent)
+3. Walk through two-pointer approach clearly
+4. Mention that we only care about first k elements
+5. Discuss time/space complexity
+
+**Follow-up questions:**
+- What if array wasn't sorted? → Would need Set or hash map
+- What if we need to keep duplicates up to k times? → Slight modification
+- How would you test this? → Check return value and first k elements
+- Can we do this in one pass? → Yes, that's what we're doing!
+
+**Key points to emphasize:**
+- In-place means O(1) extra space
+- Two pointers: one reads, one writes
+- Fast/slow pointer pattern is common
+- Sorted property makes duplicates adjacent
+
+**Variations you might see:**
+- Remove Duplicates from Sorted Array II (allow up to 2 duplicates)
+- Remove Element (remove specific value)
+- Move Zeroes (variation of in-place modification)
+
+## Related Problems
+
+- **Remove Duplicates from Sorted Array II** (Medium) - Allow duplicates up to twice
+- **Remove Element** (Easy) - Remove all instances of a value
+- **Move Zeroes** (Easy) - Similar two-pointer technique
+- **Remove Duplicates from Sorted List** (Easy) - Linked list version

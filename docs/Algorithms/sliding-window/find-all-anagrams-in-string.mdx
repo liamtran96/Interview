@@ -1,0 +1,424 @@
+---
+sidebar_position: 6
+difficulty: Medium
+tags: [string, sliding-window, hash-table, amazon, google]
+leetcode_url: https://leetcode.com/problems/find-all-anagrams-in-a-string/
+companies: [Amazon, Google, Facebook, Microsoft]
+pattern: "Sliding Window"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Find All Anagrams in String
+
+<AlgorithmProblem
+  title="Find All Anagrams in String"
+  difficulty="Medium"
+  description={`
+<p>Given two strings <code>s</code> and <code>p</code>, return <em>an array of all the start indices of</em> <code>p</code><em>'s anagrams in</em> <code>s</code>. You may return the answer in <strong>any order</strong>.</p>
+<p>An <strong>anagram</strong> is a word or phrase formed by rearranging the letters of a different word or phrase, typically using all the original letters exactly once.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &lt;= s.length, p.length &lt;= 3 × 10<sup>4</sup></li>
+  <li><code>s</code> and <code>p</code> consist of lowercase English letters</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 's = "cbaebabacd", p = "abc"',
+      output: '[0,6]',
+      explanation: 'The substring with start index = 0 is "cba", which is an anagram of "abc". The substring with start index = 6 is "bac", which is an anagram of "abc".'
+    },
+    {
+      input: 's = "abab", p = "ab"',
+      output: '[0,1,2]',
+      explanation: 'The substring with start index = 0 is "ab", which is an anagram of "ab". The substring with start index = 1 is "ba", which is an anagram of "ab". The substring with start index = 2 is "ab", which is an anagram of "ab".'
+    }
+  ]}
+  starterCode={`function findAnagrams(s, p) {
+  // Write your code here
+
+}`}
+  solution={`function findAnagrams(s, p) {
+  // Fixed-size sliding window with frequency array: O(n) time, O(1) space
+  const result = [];
+  if (p.length > s.length) return result;
+
+  const pCount = Array(26).fill(0);
+  const sCount = Array(26).fill(0);
+
+  // Build frequency array for p and first window
+  for (let i = 0; i < p.length; i++) {
+    pCount[p.charCodeAt(i) - 97]++;
+    sCount[s.charCodeAt(i) - 97]++;
+  }
+
+  // Check first window
+  if (arraysEqual(pCount, sCount)) {
+    result.push(0);
+  }
+
+  // Slide the window
+  for (let i = p.length; i < s.length; i++) {
+    // Add new character (right side)
+    sCount[s.charCodeAt(i) - 97]++;
+
+    // Remove old character (left side)
+    sCount[s.charCodeAt(i - p.length) - 97]--;
+
+    // Check if current window is an anagram
+    if (arraysEqual(pCount, sCount)) {
+      result.push(i - p.length + 1);
+    }
+  }
+
+  return result;
+}
+
+function arraysEqual(arr1, arr2) {
+  for (let i = 0; i < 26; i++) {
+    if (arr1[i] !== arr2[i]) return false;
+  }
+  return true;
+}`}
+  testCases={[
+    {
+      input: ['cbaebabacd', 'abc'],
+      expected: [0, 6],
+      description: 'Multiple anagrams: s="cbaebabacd", p="abc"'
+    },
+    {
+      input: ['abab', 'ab'],
+      expected: [0, 1, 2],
+      description: 'Overlapping anagrams: s="abab", p="ab"'
+    },
+    {
+      input: ['baa', 'aa'],
+      expected: [1],
+      description: 'Single anagram at end: s="baa", p="aa"'
+    },
+    {
+      input: ['abcdefg', 'xyz'],
+      expected: [],
+      description: 'No anagrams found: s="abcdefg", p="xyz"'
+    },
+    {
+      input: ['aaaaaaaaaa', 'aaaa'],
+      expected: [0, 1, 2, 3, 4, 5, 6],
+      description: 'All same characters: s="aaaaaaaaaa", p="aaaa"'
+    },
+    {
+      input: ['af', 'be'],
+      expected: [],
+      description: 'No common characters: s="af", p="be"'
+    }
+  ]}
+  functionName="findAnagrams"
+/>
+
+## Solution Explanation
+
+### Approach 1: Brute Force with Sorting (Not Recommended)
+
+**Time Complexity:** O(n × m log m) where n = s.length, m = p.length
+**Space Complexity:** O(m)
+
+Sort p and compare with each sorted window:
+
+```javascript
+function findAnagrams(s, p) {
+  const result = [];
+  if (p.length > s.length) return result;
+
+  const sortedP = p.split('').sort().join('');
+
+  for (let i = 0; i <= s.length - p.length; i++) {
+    const window = s.slice(i, i + p.length);
+    const sortedWindow = window.split('').sort().join('');
+
+    if (sortedP === sortedWindow) {
+      result.push(i);
+    }
+  }
+
+  return result;
+}
+```
+
+**Why not use this?**
+- Sorting each window is O(m log m)
+- For long strings, this becomes very slow
+- We're repeating work on overlapping windows
+
+### Approach 2: Frequency Map with Sliding Window
+
+**Time Complexity:** O(n + m)
+**Space Complexity:** O(1)
+
+Use frequency maps to detect anagrams:
+
+```javascript
+function findAnagrams(s, p) {
+  const result = [];
+  if (p.length > s.length) return result;
+
+  // Build frequency map for p
+  const pMap = new Map();
+  for (const char of p) {
+    pMap.set(char, (pMap.get(char) || 0) + 1);
+  }
+
+  // Build frequency map for first window
+  const windowMap = new Map();
+  for (let i = 0; i < p.length; i++) {
+    windowMap.set(s[i], (windowMap.get(s[i]) || 0) + 1);
+  }
+
+  // Check first window
+  if (mapsEqual(pMap, windowMap)) {
+    result.push(0);
+  }
+
+  // Slide the window
+  for (let i = p.length; i < s.length; i++) {
+    // Add new character
+    const newChar = s[i];
+    windowMap.set(newChar, (windowMap.get(newChar) || 0) + 1);
+
+    // Remove old character
+    const oldChar = s[i - p.length];
+    windowMap.set(oldChar, windowMap.get(oldChar) - 1);
+    if (windowMap.get(oldChar) === 0) {
+      windowMap.delete(oldChar);
+    }
+
+    // Check current window
+    if (mapsEqual(pMap, windowMap)) {
+      result.push(i - p.length + 1);
+    }
+  }
+
+  return result;
+}
+
+function mapsEqual(map1, map2) {
+  if (map1.size !== map2.size) return false;
+  for (const [key, val] of map1) {
+    if (map2.get(key) !== val) return false;
+  }
+  return true;
+}
+```
+
+### Approach 3: Frequency Array (Optimal) ✅
+
+**Time Complexity:** O(n + m)
+**Space Complexity:** O(1) - fixed size 26
+
+Use arrays for faster comparison:
+
+```javascript
+function findAnagrams(s, p) {
+  const result = [];
+  if (p.length > s.length) return result;
+
+  const pCount = Array(26).fill(0);
+  const sCount = Array(26).fill(0);
+
+  // Build frequency arrays
+  for (let i = 0; i < p.length; i++) {
+    pCount[p.charCodeAt(i) - 97]++;
+    sCount[s.charCodeAt(i) - 97]++;
+  }
+
+  // Check first window
+  if (arraysEqual(pCount, sCount)) {
+    result.push(0);
+  }
+
+  // Slide the window
+  for (let i = p.length; i < s.length; i++) {
+    // Add new character (right side)
+    sCount[s.charCodeAt(i) - 97]++;
+
+    // Remove old character (left side)
+    sCount[s.charCodeAt(i - p.length) - 97]--;
+
+    // Check if current window is an anagram
+    if (arraysEqual(pCount, sCount)) {
+      result.push(i - p.length + 1);
+    }
+  }
+
+  return result;
+}
+
+function arraysEqual(arr1, arr2) {
+  for (let i = 0; i < 26; i++) {
+    if (arr1[i] !== arr2[i]) return false;
+  }
+  return true;
+}
+```
+
+**How the Sliding Window works:**
+
+```
+s = "cbaebabacd", p = "abc"
+pCount = [1,1,1,0,0,...] (a=1, b=1, c=1)
+
+Window "cba": [1,1,1,0,...] = pCount ✅ → result=[0]
+Window "bae": [1,1,0,0,1,...] ≠ pCount
+Window "aeb": [1,1,0,0,1,...] ≠ pCount
+Window "eba": [1,1,0,0,1,...] ≠ pCount
+Window "bab": [1,2,0,0,...] ≠ pCount
+Window "aba": [2,1,0,0,...] ≠ pCount
+Window "bac": [1,1,1,0,...] = pCount ✅ → result=[0,6]
+
+Result: [0, 6]
+```
+
+### Advanced: Optimized with Match Counter
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1)
+
+Track matching positions to avoid repeated array comparisons:
+
+```javascript
+function findAnagrams(s, p) {
+  const result = [];
+  if (p.length > s.length) return result;
+
+  const pCount = Array(26).fill(0);
+  const sCount = Array(26).fill(0);
+
+  // Build frequency arrays
+  for (let i = 0; i < p.length; i++) {
+    pCount[p.charCodeAt(i) - 97]++;
+    sCount[s.charCodeAt(i) - 97]++;
+  }
+
+  // Count initial matches
+  let matches = 0;
+  for (let i = 0; i < 26; i++) {
+    if (pCount[i] === sCount[i]) matches++;
+  }
+
+  if (matches === 26) result.push(0);
+
+  // Slide the window
+  for (let i = p.length; i < s.length; i++) {
+    // Add new character
+    const rightIdx = s.charCodeAt(i) - 97;
+    sCount[rightIdx]++;
+    if (sCount[rightIdx] === pCount[rightIdx]) {
+      matches++;
+    } else if (sCount[rightIdx] === pCount[rightIdx] + 1) {
+      matches--;
+    }
+
+    // Remove old character
+    const leftIdx = s.charCodeAt(i - p.length) - 97;
+    sCount[leftIdx]--;
+    if (sCount[leftIdx] === pCount[leftIdx]) {
+      matches++;
+    } else if (sCount[leftIdx] === pCount[leftIdx] - 1) {
+      matches--;
+    }
+
+    if (matches === 26) {
+      result.push(i - p.length + 1);
+    }
+  }
+
+  return result;
+}
+```
+
+**This optimization avoids O(26) comparison on each slide, making it truly O(1) per window.**
+
+### Key Insights
+
+1. **Anagram detection**: Check if character frequencies match
+2. **Fixed-size window**: Window size equals p.length
+3. **Array vs Map**: Arrays are faster for lowercase letters (26 vs Map overhead)
+4. **Match counter optimization**: Avoid comparing entire frequency arrays
+
+## Common Mistakes
+
+❌ Not collecting all indices:
+```javascript
+// Wrong - returns after first match
+if (arraysEqual(pCount, sCount)) {
+  return [i - p.length + 1];  // Should push to array, not return!
+}
+```
+
+❌ Wrong starting index:
+```javascript
+// Wrong - off by one
+result.push(i);  // Should be i - p.length + 1
+```
+
+❌ Not handling overlapping anagrams:
+```javascript
+// Wrong - skips overlapping windows
+for (let i = 0; i < s.length; i += p.length) {
+  // This jumps by p.length, missing overlaps
+}
+```
+
+✅ Correct approach - collect all indices:
+```javascript
+const result = [];
+
+// Check first window
+if (arraysEqual(pCount, sCount)) {
+  result.push(0);
+}
+
+// Slide window by 1 each time
+for (let i = p.length; i < s.length; i++) {
+  // Update window
+  sCount[s.charCodeAt(i) - 97]++;
+  sCount[s.charCodeAt(i - p.length) - 97]--;
+
+  // Check and collect
+  if (arraysEqual(pCount, sCount)) {
+    result.push(i - p.length + 1);
+  }
+}
+
+return result;
+```
+
+## Interview Tips
+
+**When discussing this problem:**
+1. Recognize: "This is finding all permutations of p in s"
+2. Identify: "Fixed-size sliding window with frequency matching"
+3. Optimize: "Use arrays instead of maps for lowercase letters"
+4. Advanced: "Can optimize with match counter to avoid repeated comparisons"
+5. Edge cases: "Handle overlapping anagrams, empty results"
+
+**Key talking points:**
+- "This extends 'Permutation in String' to find all occurrences, not just one"
+- "Fixed-size window of length p slides through s"
+- "Arrays give O(1) space (26 letters) and faster access than maps"
+- "Match counter optimization makes each window check O(1)"
+
+**Complexity analysis:**
+- Time: O(n + m) - build p frequency O(m), slide window O(n)
+- Space: O(1) - fixed size arrays (26 letters)
+
+**Follow-up questions you might get:**
+- **What if we want non-overlapping anagrams?** Skip ahead by p.length after each match
+- **Can we handle uppercase?** Expand array to 52 or convert to lowercase
+- **What about Unicode?** Use Map instead of array for variable character sets
+- **How to optimize match checking?** Use match counter (shown in advanced solution)
+
+**Comparison with similar problems:**
+- **Permutation in String**: Returns boolean (first match)
+- **Find All Anagrams**: Returns all indices (all matches)
+- **Minimum Window Substring**: Variable-size window (different technique)

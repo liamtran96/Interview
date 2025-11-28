@@ -1,0 +1,304 @@
+---
+sidebar_position: 11
+difficulty: Medium
+tags: [string, hash-table, sliding-window, amazon, microsoft]
+leetcode_url: https://leetcode.com/problems/longest-repeating-character-replacement/
+companies: [Amazon, Microsoft, Google, Meta, Apple]
+pattern: "Arrays & Hashing"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Longest Repeating Character Replacement
+
+<AlgorithmProblem
+  title="Longest Repeating Character Replacement"
+  difficulty="Medium"
+  description={`
+<p>You are given a string <code>s</code> and an integer <code>k</code>. You can choose any character of the string and change it to any other uppercase English character. You can perform this operation at most <code>k</code> times.</p>
+<p>Return the length of the longest substring containing the same letter you can get after performing the above operations.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 ≤ s.length ≤ 10<sup>5</sup></li>
+  <li>s consists of only uppercase English letters.</li>
+  <li>0 ≤ k ≤ s.length</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 's = "ABAB", k = 2',
+      output: '4',
+      explanation: 'Replace the two \'A\'s with two \'B\'s or vice versa to get "AAAA" or "BBBB".'
+    },
+    {
+      input: 's = "AABABBA", k = 1',
+      output: '4',
+      explanation: 'Replace the one \'A\' in the middle with \'B\' and form "AABBBBA". The substring "BBBB" has the longest repeating letters, which is 4.'
+    }
+  ]}
+  starterCode={`function characterReplacement(s, k) {
+  // Write your code here
+
+}`}
+  solution={`function characterReplacement(s, k) {
+  const count = new Map();
+  let left = 0;
+  let maxCount = 0;
+  let maxLength = 0;
+
+  for (let right = 0; right < s.length; right++) {
+    // Add current character to window
+    count.set(s[right], (count.get(s[right]) || 0) + 1);
+
+    // Track max frequency in current window
+    maxCount = Math.max(maxCount, count.get(s[right]));
+
+    // If window invalid, shrink from left
+    while (right - left + 1 - maxCount > k) {
+      count.set(s[left], count.get(s[left]) - 1);
+      left++;
+    }
+
+    // Update max length
+    maxLength = Math.max(maxLength, right - left + 1);
+  }
+
+  return maxLength;
+}`}
+  testCases={[
+    {
+      input: ["ABAB", 2],
+      expected: 4,
+      description: 'Replace 2 characters to get "AAAA" or "BBBB"'
+    },
+    {
+      input: ["AABABBA", 1],
+      expected: 4,
+      description: 'Replace 1 A to get "BBBB" substring'
+    },
+    {
+      input: ["AAAA", 0],
+      expected: 4,
+      description: 'Already all same characters'
+    },
+    {
+      input: ["ABCDE", 1],
+      expected: 2,
+      description: 'Can make substring of length 2'
+    },
+    {
+      input: ["AABA", 0],
+      expected: 2,
+      description: 'No replacements allowed'
+    },
+    {
+      input: ["AAABBBCCC", 2],
+      expected: 5,
+      description: 'Replace 2 to extend longest run'
+    }
+  ]}
+  functionName="characterReplacement"
+/>
+
+## Solution Explanation
+
+### Approach 1: Brute Force (Not Optimal)
+
+**Time:** O(n² × 26)
+**Space:** O(26) = O(1)
+
+```javascript
+function characterReplacement(s, k) {
+  let maxLength = 0;
+
+  for (let i = 0; i < s.length; i++) {
+    const count = new Map();
+    let maxCount = 0;
+
+    for (let j = i; j < s.length; j++) {
+      count.set(s[j], (count.get(s[j]) || 0) + 1);
+      maxCount = Math.max(maxCount, count.get(s[j]));
+
+      const length = j - i + 1;
+      if (length - maxCount <= k) {
+        maxLength = Math.max(maxLength, length);
+      }
+    }
+  }
+
+  return maxLength;
+}
+```
+
+**Why not optimal?** Checks every possible substring.
+
+### Approach 2: Sliding Window (Optimal) ✅
+
+**Time:** O(n)
+**Space:** O(26) = O(1)
+
+```javascript
+function characterReplacement(s, k) {
+  const count = new Map();
+  let left = 0;
+  let maxCount = 0; // Max frequency of any character in current window
+  let maxLength = 0;
+
+  for (let right = 0; right < s.length; right++) {
+    // Expand window: add right character
+    count.set(s[right], (count.get(s[right]) || 0) + 1);
+
+    // Update max frequency
+    maxCount = Math.max(maxCount, count.get(s[right]));
+
+    // Window invalid if replacements needed > k
+    // windowSize - maxCount = characters to replace
+    while (right - left + 1 - maxCount > k) {
+      count.set(s[left], count.get(s[left]) - 1);
+      left++;
+    }
+
+    // Update result
+    maxLength = Math.max(maxLength, right - left + 1);
+  }
+
+  return maxLength;
+}
+```
+
+**How it works:**
+
+**Key insight:** For a valid window:
+- `windowSize - maxCount ≤ k`
+- Where `maxCount` = frequency of most common character in window
+- We can replace other characters to match the most common one
+
+**Example walkthrough:**
+
+```
+s = "AABABBA", k = 1
+
+right=0, s[0]='A': count={A:1}, maxCount=1, window="A" (1-0+1=1)
+  1 - 1 = 0 ≤ 1 ✓, maxLength=1
+
+right=1, s[1]='A': count={A:2}, maxCount=2, window="AA" (2-0+1=2)
+  2 - 2 = 0 ≤ 1 ✓, maxLength=2
+
+right=2, s[2]='B': count={A:2,B:1}, maxCount=2, window="AAB" (3-0+1=3)
+  3 - 2 = 1 ≤ 1 ✓, maxLength=3
+
+right=3, s[3]='A': count={A:3,B:1}, maxCount=3, window="AABA" (4-0+1=4)
+  4 - 3 = 1 ≤ 1 ✓, maxLength=4
+
+right=4, s[4]='B': count={A:3,B:2}, maxCount=3, window="AABAB" (5-0+1=5)
+  5 - 3 = 2 > 1 ✗
+  Shrink: left=1, count={A:2,B:2}, window="ABAB" (4-1+1=4)
+  4 - 3 = 1 ≤ 1 ✓, maxLength=4
+
+right=5, s[5]='B': count={A:2,B:3}, maxCount=3, window="ABABB" (5-1+1=5)
+  5 - 3 = 2 > 1 ✗
+  Shrink: left=2, count={A:1,B:3}, window="BABB" (4-2+1=4)
+  4 - 3 = 1 ≤ 1 ✓, maxLength=4
+
+right=6, s[6]='A': count={A:2,B:3}, maxCount=3, window="BABBA" (5-2+1=5)
+  5 - 3 = 2 > 1 ✗
+  Shrink: left=3, count={A:2,B:2}, window="ABBA" (4-3+1=4)
+  4 - 3 = 1 ≤ 1 ✓, maxLength=4
+
+Result: 4 (substring "BBBB" from indices 3-6 after replacing 1 'A')
+```
+
+### Optimization: Avoid Recalculating maxCount
+
+```javascript
+function characterReplacement(s, k) {
+  const count = new Map();
+  let left = 0;
+  let maxCount = 0;
+  let maxLength = 0;
+
+  for (let right = 0; right < s.length; right++) {
+    count.set(s[right], (count.get(s[right]) || 0) + 1);
+    maxCount = Math.max(maxCount, count.get(s[right]));
+
+    // Note: maxCount might not be exact for current window after shrinking,
+    // but it doesn't matter - we only care about finding valid windows
+    if (right - left + 1 - maxCount > k) {
+      count.set(s[left], count.get(s[left]) - 1);
+      left++;
+    }
+
+    maxLength = Math.max(maxLength, right - left + 1);
+  }
+
+  return maxLength;
+}
+```
+
+**Why this works:** We don't need the exact maxCount after shrinking. We only need it to be high enough to identify potentially valid windows.
+
+## Common Mistakes
+
+❌ Recalculating max frequency every iteration
+```javascript
+// Don't do this - too slow!
+maxCount = Math.max(...count.values());
+```
+
+✅ Track max frequency incrementally
+```javascript
+maxCount = Math.max(maxCount, count.get(s[right]));
+```
+
+❌ Wrong window validity check
+```javascript
+if (k >= right - left + 1) // Wrong logic
+```
+
+✅ Correct validity check
+```javascript
+// Characters to replace = windowSize - maxCount
+if (right - left + 1 - maxCount <= k)
+```
+
+❌ Not understanding the problem
+```javascript
+// Problem: make substring with same character
+// NOT: make entire string the same
+```
+
+✅ Find longest valid substring
+```javascript
+// Window is valid if we can replace minority chars
+// to match the majority character using k replacements
+```
+
+## Interview Tips
+
+**When discussing:**
+1. Explain what makes a window valid
+2. Show the key formula: `windowSize - maxCount ≤ k`
+3. Emphasize sliding window pattern
+4. Walk through example showing window expansion/shrinking
+5. Mention optimization of not recalculating maxCount
+
+**Follow-up questions:**
+- What if we want the actual substring? → Track indices at maxLength
+- What about lowercase? → Same approach, bigger charset
+- Can we use less space? → O(26) is already O(1)
+- What if k = 0? → Find longest substring of same character
+- What if k ≥ s.length? → Return s.length
+
+**Key insights:**
+- Window is valid if minority characters ≤ k
+- Most frequent character determines how many replacements needed
+- maxCount doesn't need exact recalculation after shrinking
+- This is a classic sliding window + hash table problem
+- Time complexity O(n) with single pass
+
+**Pattern recognition:**
+Similar sliding window problems:
+- Longest substring without repeating characters
+- Minimum window substring
+- Permutation in string
+- Substring with concatenation of words

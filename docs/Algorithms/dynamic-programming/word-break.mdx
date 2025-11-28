@@ -1,0 +1,415 @@
+---
+sidebar_position: 9
+difficulty: Medium
+tags: [dynamic-programming, string, bfs, hash-set]
+leetcode_url: https://leetcode.com/problems/word-break/
+companies: [Google, Amazon, Meta, Microsoft, Apple]
+pattern: "Dynamic Programming"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Word Break
+
+<AlgorithmProblem
+  title="Word Break"
+  difficulty="Medium"
+  description={`
+<p>Given a string <code>s</code> and a dictionary of strings <code>wordDict</code>, return <code>true</code> if <code>s</code> can be <strong>segmented</strong> into a space-separated sequence of dictionary words.</p>
+<p><strong>Note</strong> that the same word in the dictionary may be reused multiple times in the segmentation.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &le; s.length &le; 300</li>
+  <li>1 &le; wordDict.length &le; 1000</li>
+  <li>1 &le; wordDict[i].length &le; 20</li>
+  <li>s and wordDict[i] consist of only lowercase English letters</li>
+  <li>All the strings of wordDict are <strong>unique</strong></li>
+</ul>
+`}
+  examples={[
+    {
+      input: 's = "leetcode", wordDict = ["leet","code"]',
+      output: 'true',
+      explanation: 'Return true because "leetcode" can be segmented as "leet code"'
+    },
+    {
+      input: 's = "applepenapple", wordDict = ["apple","pen"]',
+      output: 'true',
+      explanation: 'Return true because "applepenapple" can be segmented as "apple pen apple"'
+    },
+    {
+      input: 's = "catsandog", wordDict = ["cat","cats","and","sand","dog"]',
+      output: 'false',
+      explanation: 'Cannot segment catsandog into dictionary words'
+    }
+  ]}
+  starterCode={`function wordBreak(s, wordDict) {
+  // Write your code here
+
+}`}
+  solution={`function wordBreak(s, wordDict) {
+  // DP - Tabulation: O(n^2 * m) time, O(n) space
+  // dp[i] = true if s[0..i-1] can be segmented into dictionary words
+  const dp = new Array(s.length + 1).fill(false);
+  dp[0] = true; // Empty string is always segmentable
+
+  const wordSet = new Set(wordDict); // O(1) lookup
+
+  for (let i = 1; i <= s.length; i++) {
+    // Try all possible last words
+    for (let j = 0; j < i; j++) {
+      // If s[0..j-1] is segmentable and s[j..i-1] is in dictionary
+      if (dp[j] && wordSet.has(s.substring(j, i))) {
+        dp[i] = true;
+        break; // Found a valid segmentation
+      }
+    }
+  }
+
+  return dp[s.length];
+}`}
+  testCases={[
+    {
+      input: ["leetcode", ["leet", "code"]],
+      expected: true,
+      description: 'Can segment as "leet code"'
+    },
+    {
+      input: ["applepenapple", ["apple", "pen"]],
+      expected: true,
+      description: 'Can segment as "apple pen apple"'
+    },
+    {
+      input: ["catsandog", ["cat", "cats", "and", "sand", "dog"]],
+      expected: false,
+      description: 'Cannot be segmented'
+    },
+    {
+      input: ["a", ["a"]],
+      expected: true,
+      description: 'Single word match'
+    },
+    {
+      input: ["a", ["b"]],
+      expected: false,
+      description: 'No match'
+    },
+    {
+      input: ["aaaaaab", ["aaaa", "aaa"]],
+      expected: false,
+      description: 'Cannot form string'
+    }
+  ]}
+  functionName="wordBreak"
+/>
+
+## Solution Explanation
+
+### Approach 1: Brute Force Recursion
+
+**Time Complexity:** O(2<sup>n</sup>)
+**Space Complexity:** O(n) recursive stack
+
+Try all possible segmentations:
+
+```javascript
+function wordBreak(s, wordDict) {
+  const wordSet = new Set(wordDict);
+
+  function canSegment(index) {
+    // Base case: reached end of string
+    if (index === s.length) return true;
+
+    // Try all possible next words
+    for (let i = index + 1; i <= s.length; i++) {
+      const word = s.substring(index, i);
+
+      // If this word is in dictionary and rest can be segmented
+      if (wordSet.has(word) && canSegment(i)) {
+        return true;
+      }
+    }
+
+    return false; // No valid segmentation from this point
+  }
+
+  return canSegment(0);
+}
+
+// Trace: s="aaab", wordDict=["aaa","b"]
+// canSegment(0)
+//   word="a" → not in dict, try next
+//   word="aa" → not in dict, try next
+//   word="aaa" → in dict, canSegment(3)
+//     word="b" → in dict, canSegment(4) → true!
+//   return true
+```
+
+**Why slow?** Many overlapping subproblems.
+
+### Approach 2: Memoization (Better)
+
+**Time Complexity:** O(n² × m)
+**Space Complexity:** O(n)
+
+Cache which indices can start valid segmentations:
+
+```javascript
+function wordBreak(s, wordDict) {
+  const wordSet = new Set(wordDict);
+  const memo = {};
+
+  function canSegment(index) {
+    if (index === s.length) return true;
+
+    if (index in memo) return memo[index];
+
+    for (let i = index + 1; i <= s.length; i++) {
+      const word = s.substring(index, i);
+
+      if (wordSet.has(word) && canSegment(i)) {
+        memo[index] = true;
+        return true;
+      }
+    }
+
+    memo[index] = false;
+    return false;
+  }
+
+  return canSegment(0);
+}
+
+// With memoization:
+// Each index computed once: O(n) states
+// Each state tries all substrings: O(n²)
+// Total: O(n²)
+```
+
+### Approach 3: DP Tabulation (Optimal) ✅
+
+**Time Complexity:** O(n² × m) worst case, O(n) best case
+**Space Complexity:** O(n)
+
+Build DP table bottom-up:
+
+```javascript
+function wordBreak(s, wordDict) {
+  // dp[i] = true if s[0..i-1] can be segmented
+  const dp = new Array(s.length + 1).fill(false);
+  dp[0] = true; // Empty string is always valid
+
+  const wordSet = new Set(wordDict); // O(1) lookup
+
+  for (let i = 1; i <= s.length; i++) {
+    // Try all possible last words
+    for (let j = 0; j < i; j++) {
+      // If s[0..j-1] is valid and s[j..i-1] is a word
+      if (dp[j] && wordSet.has(s.substring(j, i))) {
+        dp[i] = true;
+        break; // Found valid segmentation, no need to check more
+      }
+    }
+  }
+
+  return dp[s.length];
+}
+
+// Trace: s="leetcode", wordDict=["leet","code"]
+// dp[0] = true
+// i=1: j=0, sub="l", not in dict, dp[1]=false
+// i=2: j=0, sub="le", not in dict, dp[2]=false
+// i=3: j=0, sub="lee", not in dict, dp[3]=false
+// i=4: j=0, sub="leet", in dict and dp[0]=true, dp[4]=true ✓
+// i=5: j=0, sub="leetc", not in dict
+//      j=1, dp[1]=false, skip
+//      j=2, dp[2]=false, skip
+//      j=3, dp[3]=false, skip
+//      j=4, dp[4]=true, sub="c", not in dict, dp[5]=false
+// i=6: similar, dp[6]=false
+// i=7: similar, dp[7]=false
+// i=8: j=4, dp[4]=true, sub="code", in dict, dp[8]=true ✓
+// return dp[8] = true
+```
+
+## DP Recurrence Relation
+
+```
+dp[i] = can s[0..i-1] be segmented into dictionary words?
+
+For each position i from 1 to n:
+  For each position j from 0 to i-1:
+    if dp[j] AND s[j..i-1] in dictionary:
+      dp[i] = true
+      break
+
+Where:
+- dp[j] = s[0..j-1] can be segmented
+- s[j..i-1] = candidate word for continuation
+- If both true, we found a valid segmentation
+
+Base case:
+  dp[0] = true (empty string)
+```
+
+## Key Insights
+
+**Why this DP works:**
+
+To know if s[0..i-1] can be segmented:
+1. Find all positions j where dp[j] = true (s[0..j-1] is valid)
+2. Check if s[j..i-1] is in the dictionary
+3. If any such j exists, s[0..i-1] is valid
+
+**Use Set for O(1) lookup:**
+- Dictionary as list: O(m) lookup per word
+- Dictionary as Set: O(1) lookup per word
+- Huge performance difference!
+
+## Visualization: Building the DP Table
+
+```
+s = "leetcode"
+wordDict = ["leet", "code"]
+wordSet = {leet, code}
+
+Index:  0  1  2  3  4  5  6  7  8
+s:      '' l  e  e  t  c  o  d  e
+dp:     T  F  F  F  T  F  F  F  T
+
+Step-by-step:
+i=1: Check all j from 0 to 0
+     j=0: dp[0]=T, sub="l", not in dict → dp[1]=F
+
+i=2: Check all j from 0 to 1
+     j=0: dp[0]=T, sub="le", not in dict
+     j=1: dp[1]=F, skip → dp[2]=F
+
+i=3: All positions have dp[j]=F until j=0
+     j=0: dp[0]=T, sub="lee", not in dict → dp[3]=F
+
+i=4: Finally!
+     j=0: dp[0]=T, sub="leet", IN DICT! → dp[4]=T ✓
+
+i=5-7: All have dp[j]=F for valid j
+
+i=8: Success!
+     j=4: dp[4]=T, sub="code", IN DICT! → dp[8]=T ✓
+
+Answer: dp[8] = true
+```
+
+## Common Mistakes
+
+❌ **Not using a Set for wordDict:**
+```javascript
+// Slow - O(m) lookup per word
+for (const word of wordDict) {
+  if (word === substring) { ... }
+}
+
+// Fast - O(1) lookup
+const wordSet = new Set(wordDict);
+if (wordSet.has(substring)) { ... }
+```
+
+❌ **Forgetting to initialize dp[0]:**
+```javascript
+// Wrong - no base case
+const dp = new Array(s.length + 1).fill(false);
+
+// Correct - empty string is always valid
+const dp = new Array(s.length + 1).fill(false);
+dp[0] = true;
+```
+
+❌ **Wrong substring logic:**
+```javascript
+// Wrong - off-by-one error
+const word = s.substring(j, j + i);
+
+// Correct - from j to i
+const word = s.substring(j, i);
+```
+
+❌ **Not checking both conditions:**
+```javascript
+// Wrong - only checks if word exists
+if (wordSet.has(s.substring(j, i))) {
+  dp[i] = true;
+}
+
+// Correct - must check dp[j] too
+if (dp[j] && wordSet.has(s.substring(j, i))) {
+  dp[i] = true;
+}
+```
+
+✅ **Correct solution:**
+```javascript
+function wordBreak(s, wordDict) {
+  const dp = new Array(s.length + 1).fill(false);
+  dp[0] = true;
+
+  const wordSet = new Set(wordDict);
+
+  for (let i = 1; i <= s.length; i++) {
+    for (let j = 0; j < i; j++) {
+      if (dp[j] && wordSet.has(s.substring(j, i))) {
+        dp[i] = true;
+        break;
+      }
+    }
+  }
+
+  return dp[s.length];
+}
+```
+
+## Interview Tips
+
+**When discussing:**
+1. State: "`dp[i]` = can s[0..i-1] be segmented"
+2. Base: "`dp[0] = true`, empty string is valid"
+3. Transition: "Check all previous positions and words"
+4. Lookup: "Use Set for O(1) dictionary lookup"
+5. Optimize: "Break early once dp[i] becomes true"
+
+**Key talking points:**
+- "Similar to Coin Change but with word matching"
+- "Using Set instead of array for dictionary is crucial"
+- "Build from left to right, ensuring valid prefix"
+- "Key insight: only need to check positions where dp[j] = true"
+
+**Follow-up questions:**
+
+**Q: Return the actual segmentation, not just boolean?**
+A: Backtrack from dp[n], recording which words were used.
+
+**Q: What if words have length limits?**
+A: Only check j where i - j ≤ maxLength.
+
+**Q: Multiple word dictionaries?**
+A: Repeat DP for each dictionary, check if any succeeds.
+
+**Q: Case-insensitive?**
+A: Convert everything to lowercase before processing.
+
+## Edge Cases
+
+```javascript
+wordBreak("a", ["a"]) → true               // Single match
+wordBreak("a", ["b"]) → false              // No match
+wordBreak("", []) → true                   // Empty string
+wordBreak("ab", ["a", "b"]) → true         // Sequential words
+wordBreak("ab", ["ba"]) → false            // Wrong order
+wordBreak("aaaaaab", ["aaaa", "aaa"]) → false  // Uncoverable
+```
+
+## Related Problems
+
+- **Word Break II** (Hard) - Return all segmentations
+- **Unique Paths** (Medium) - Similar DP pattern
+- **Combination Sum** (Medium) - Similar backtracking
+- **Partition Equal Subset Sum** (Medium) - Similar DP
+- **Decode String** (Medium) - String pattern matching

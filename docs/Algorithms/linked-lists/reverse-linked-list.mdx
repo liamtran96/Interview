@@ -1,0 +1,348 @@
+---
+sidebar_position: 1
+difficulty: Easy
+tags: [linked-lists, recursion, iteration, amazon, google]
+leetcode_url: https://leetcode.com/problems/reverse-linked-list/
+companies: [Amazon, Google, Microsoft, Meta, Apple]
+pattern: "Linked Lists"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Reverse Linked List
+
+<AlgorithmProblem
+  title="Reverse Linked List"
+  difficulty="Easy"
+  description={`
+<p>Given the <code>head</code> of a singly linked list, reverse the list, and return the <strong>reversed list</strong>.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>The number of nodes in the list is the range [0, 5000]</li>
+  <li>-5000 ≤ node.val ≤ 5000</li>
+</ul>
+<h4>Follow up:</h4>
+<p>A linked list can be reversed either iteratively or recursively. Could you implement both?</p>
+`}
+  examples={[
+    {
+      input: 'head = [1,2,3,4,5]',
+      output: '[5,4,3,2,1]'
+    },
+    {
+      input: 'head = [1,2]',
+      output: '[2,1]'
+    },
+    {
+      input: 'head = []',
+      output: '[]'
+    }
+  ]}
+  starterCode={`class ListNode {
+  constructor(val = 0, next = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+function reverseList(head) {
+  // TODO: Reverse the linked list
+  return head;
+}`}
+  solution={`class ListNode {
+  constructor(val = 0, next = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+function reverseList(head) {
+  // Iterative approach: reverse pointers as we traverse
+  let prev = null;
+  let curr = head;
+
+  while (curr !== null) {
+    // Save next node before we change the link
+    const temp = curr.next;
+    // Reverse the link
+    curr.next = prev;
+    // Move prev and curr one step forward
+    prev = curr;
+    curr = temp;
+  }
+
+  return prev;
+}`}
+  testCases={[
+    {
+      input: [[1, 2, 3, 4, 5]],
+      expected: [5, 4, 3, 2, 1],
+      description: 'Reverse a list with multiple elements'
+    },
+    {
+      input: [[1, 2]],
+      expected: [2, 1],
+      description: 'Reverse a list with two elements'
+    },
+    {
+      input: [[]],
+      expected: [],
+      description: 'Empty list (edge case)'
+    },
+    {
+      input: [[1]],
+      expected: [1],
+      description: 'Single element list'
+    },
+    {
+      input: [[1, 2, 3, 4, 5, 6]],
+      expected: [6, 5, 4, 3, 2, 1],
+      description: 'Reverse longer list'
+    },
+    {
+      input: [[5, 4, 3, 2, 1]],
+      expected: [1, 2, 3, 4, 5],
+      description: 'Reverse already reversed list'
+    }
+  ]}
+  functionName="reverseList"
+/>
+
+## Solution Explanation
+
+### Approach 1: Iterative (Most Intuitive)
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1)
+
+Keep three pointers: `prev`, `curr`, and `next`. As you traverse:
+1. Save the next node
+2. Reverse the current node's pointer
+3. Move pointers forward
+
+```javascript
+function reverseList(head) {
+  let prev = null;
+  let curr = head;
+
+  while (curr !== null) {
+    // Save next node before we break the link
+    const temp = curr.next;
+    // Reverse the link: point back to prev
+    curr.next = prev;
+    // Move prev and curr forward
+    prev = curr;
+    curr = temp;
+  }
+
+  return prev; // New head
+}
+```
+
+**How it works:**
+
+```
+Initial:  1 → 2 → 3 → null
+          prev=null, curr=1
+
+Step 1:   null ← 1   2 → 3 → null
+          prev=1, curr=2
+
+Step 2:   null ← 1 ← 2   3 → null
+          prev=2, curr=3
+
+Step 3:   null ← 1 ← 2 ← 3
+          prev=3, curr=null
+
+Final: 3 → 2 → 1 → null
+```
+
+### Approach 2: Recursive
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(n) - recursion stack
+
+Recursively reach the end, then reverse pointers on the way back:
+
+```javascript
+function reverseList(head) {
+  // Base case: empty list or last node
+  if (head === null || head.next === null) {
+    return head;
+  }
+
+  // Recurse to the end
+  const newHead = reverseList(head.next);
+
+  // Reverse the link on the way back
+  head.next.next = head;  // point next node's next to current node
+  head.next = null;       // break the original link
+
+  return newHead;
+}
+```
+
+**How it works:**
+
+```
+Forward: 1 → 2 → 3 → null
+Call stack: reverseList(1) → reverseList(2) → reverseList(3) → null (base)
+
+Backward (unwinding):
+  At node 3: newHead = 3 (already at end)
+  At node 2: 3 ← 2, then 2.next = null
+  At node 1: 2 ← 1, then 1.next = null
+
+Result: 3 → 2 → 1 → null
+```
+
+### Approach 3: Stack-Based
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(n)
+
+Use a stack to store all nodes, then rebuild:
+
+```javascript
+function reverseList(head) {
+  if (!head) return null;
+
+  const stack = [];
+  let curr = head;
+
+  // Push all nodes onto stack
+  while (curr) {
+    stack.push(curr);
+    curr = curr.next;
+  }
+
+  // Build reversed list from stack
+  const newHead = stack.pop();
+  let prev = newHead;
+
+  while (stack.length > 0) {
+    const node = stack.pop();
+    prev.next = node;
+    node.next = null;
+    prev = node;
+  }
+
+  return newHead;
+}
+```
+
+## Comparison of Approaches
+
+| Approach | Time | Space | Best For | Difficulty |
+|----------|------|-------|----------|-----------|
+| Iterative | O(n) | O(1) | **Most interviews** | Easy |
+| Recursive | O(n) | O(n) | Follow-up | Medium |
+| Stack | O(n) | O(n) | Educational | Medium |
+
+## Common Mistakes
+
+❌ **Not saving the next pointer before reversing:**
+```javascript
+curr.next = prev;
+curr = curr.next; // ERROR! curr.next is now prev, infinite loop!
+```
+
+✅ **Correct way - save first:**
+```javascript
+const temp = curr.next;  // Save next
+curr.next = prev;        // Reverse
+curr = temp;             // Move to saved next
+```
+
+---
+
+❌ **Returning the wrong node as new head:**
+```javascript
+return head;  // ERROR! head is now pointing backward
+```
+
+✅ **Return the final prev pointer:**
+```javascript
+return prev;  // Correct - this is the new head
+```
+
+---
+
+❌ **Not handling null pointers in recursion:**
+```javascript
+function reverseList(head) {
+  const newHead = reverseList(head.next);  // ERROR if head.next is null!
+  head.next.next = head;
+}
+```
+
+✅ **Check base case first:**
+```javascript
+function reverseList(head) {
+  if (head === null || head.next === null) return head;
+  const newHead = reverseList(head.next);
+  head.next.next = head;
+  head.next = null;
+  return newHead;
+}
+```
+
+---
+
+❌ **Forgetting to set the last node's next to null:**
+```javascript
+// Last node still has dangling pointer
+prev.next = curr;  // Should be null!
+```
+
+✅ **Explicitly set last node's next:**
+```javascript
+// In iterative approach, naturally becomes null
+// In recursive approach, explicitly set: head.next = null
+```
+
+## Interview Tips
+
+**What to mention:**
+1. **Clarify:** Ask if you should modify the original list or create a new one
+2. **Start simple:** Explain iterative approach first (easier to understand)
+3. **Three pointers:** Explain why you need `prev`, `curr`, and `temp`
+4. **Offer recursion:** Mention recursive solution as follow-up
+5. **Draw it out:** Use diagram with arrows to show pointer reversals
+
+**Follow-up questions:**
+
+**Q: Can you do it recursively?**
+A: Yes! Use recursion to reach the end, then reverse pointers while unwinding the stack.
+
+**Q: What if the list is very large?**
+A: Iterative is better (O(1) space vs O(n) for recursion stack).
+
+**Q: How would you reverse only a portion of the list?**
+A: Reverse between two positions using similar technique but with boundary checks.
+
+## Edge Cases
+
+```javascript
+// Empty list
+reverseList(null) → null
+
+// Single node
+reverseList(1) → 1 (unchanged)
+
+// Two nodes
+reverseList(1 → 2) → 2 → 1
+
+// Already reversed
+reverseList(5 → 4 → 3 → 2 → 1) → 1 → 2 → 3 → 4 → 5
+
+// Large list
+reverseList(1 → 2 → ... → 5000) → 5000 → ... → 2 → 1
+```
+
+## Related Problems
+
+- **Palindrome Linked List** - Use reverse + slow/fast pointers
+- **Reverse Linked List II** (Medium) - Reverse only portion of list
+- **Reverse Nodes in k-Group** (Hard) - Reverse every k nodes
+- **Reverse a Linked List between Left and Right** (Medium)

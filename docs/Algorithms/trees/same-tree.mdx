@@ -1,0 +1,338 @@
+---
+sidebar_position: 3
+difficulty: Easy
+tags: [trees, recursion, comparison, amazon]
+leetcode_url: https://leetcode.com/problems/same-tree/
+companies: [Amazon, Google, Microsoft, Meta]
+pattern: "Trees"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Same Tree
+
+<AlgorithmProblem
+  title="Same Tree"
+  difficulty="Easy"
+  description={`
+<p>Given the roots of two binary trees <code>p</code> and <code>q</code>, write a function to check if they are the <strong>same</strong>.</p>
+<p>Two binary trees are considered the same if they are structurally identical, and the nodes have the same value.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>The number of nodes in each tree is in the range [0, 100]</li>
+  <li>-10<sup>4</sup> ≤ Node.val ≤ 10<sup>4</sup></li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'p = [1,2,3], q = [1,2,3]',
+      output: 'true'
+    },
+    {
+      input: 'p = [1,2], q = [1,null,2]',
+      output: 'false'
+    },
+    {
+      input: 'p = [1,2,1], q = [1,1,2]',
+      output: 'false'
+    }
+  ]}
+  starterCode={`class TreeNode {
+  constructor(val = 0, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+function isSameTree(p, q) {
+  // TODO: Check if two trees are the same
+  return false;
+}`}
+  solution={`class TreeNode {
+  constructor(val = 0, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+function isSameTree(p, q) {
+  // Base case: both nodes are null
+  if (p === null && q === null) return true;
+
+  // One is null and other is not
+  if (p === null || q === null) return false;
+
+  // Values don't match
+  if (p.val !== q.val) return false;
+
+  // Recursively check left and right subtrees
+  return isSameTree(p.left, q.left) &amp;&amp; isSameTree(p.right, q.right);
+}`}
+  testCases={[
+    {
+      input: [[[1, 2, 3]], [[1, 2, 3]]],
+      expected: true,
+      description: 'Identical trees'
+    },
+    {
+      input: [[[1, 2]], [[1, null, 2]]],
+      expected: false,
+      description: 'Different structure (left vs right)'
+    },
+    {
+      input: [[[1, 2, 1]], [[1, 1, 2]]],
+      expected: false,
+      description: 'Same structure, different values'
+    },
+    {
+      input: [[null], [null]],
+      expected: true,
+      description: 'Both empty trees'
+    },
+    {
+      input: [[[1]], [null]],
+      expected: false,
+      description: 'One empty, one with node'
+    },
+    {
+      input: [[[1, 2, 3, 4, 5]], [[1, 2, 3, 4, 5]]],
+      expected: true,
+      description: 'Larger identical trees'
+    }
+  ]}
+  functionName="isSameTree"
+/>
+
+## Solution Explanation
+
+### Approach 1: Recursive Comparison (Most Elegant) ✅
+
+**Time Complexity:** O(min(m, n)) - compare minimum of two tree sizes
+**Space Complexity:** O(h) - recursion stack, where h is height
+
+Recursively compare node values and subtrees:
+
+```javascript
+function isSameTree(p, q) {
+  // Both nodes are null - base case
+  if (p === null &amp;&amp; q === null) return true;
+
+  // One is null, other isn't - not same
+  if (p === null || q === null) return false;
+
+  // Values don't match - not same
+  if (p.val !== q.val) return false;
+
+  // Recursively check both subtrees
+  return isSameTree(p.left, q.left) &amp;&amp; isSameTree(p.right, q.right);
+}
+```
+
+**How it works:**
+
+```
+p:           q:
+    1            1
+   / \          / \
+  2   3        2   3
+
+isSameTree(p, q):
+  - Both not null, values match (1 === 1) ✓
+  - Check isSameTree(2, 2):
+    - Both not null, values match (2 === 2) ✓
+    - Check isSameTree(null, null) → true
+    - Check isSameTree(null, null) → true
+    - return true
+  - Check isSameTree(3, 3):
+    - Both not null, values match (3 === 3) ✓
+    - Check isSameTree(null, null) → true
+    - Check isSameTree(null, null) → true
+    - return true
+  - return true ✓
+```
+
+### Approach 2: BFS (Level-Order Comparison)
+
+**Time Complexity:** O(min(m, n))
+**Space Complexity:** O(w) - queue width
+
+Use queues to compare trees level by level:
+
+```javascript
+function isSameTree(p, q) {
+  const queue = [[p, q]];  // [node from p, node from q]
+
+  while (queue.length > 0) {
+    const [node1, node2] = queue.shift();
+
+    // Both null - continue
+    if (node1 === null &amp;&amp; node2 === null) continue;
+
+    // One null or values differ - not same
+    if (node1 === null || node2 === null || node1.val !== node2.val) {
+      return false;
+    }
+
+    // Enqueue children
+    queue.push([node1.left, node2.left]);
+    queue.push([node1.right, node2.right]);
+  }
+
+  return true;
+}
+```
+
+### Approach 3: DFS with Stack (Iterative)
+
+**Time Complexity:** O(min(m, n))
+**Space Complexity:** O(h)
+
+Use stack instead of recursion:
+
+```javascript
+function isSameTree(p, q) {
+  const stack = [[p, q]];
+
+  while (stack.length > 0) {
+    const [node1, node2] = stack.pop();
+
+    // Both null - continue
+    if (node1 === null &amp;&amp; node2 === null) continue;
+
+    // One null or values differ - not same
+    if (node1 === null || node2 === null || node1.val !== node2.val) {
+      return false;
+    }
+
+    // Push children onto stack
+    stack.push([node1.left, node2.left]);
+    stack.push([node1.right, node2.right]);
+  }
+
+  return true;
+}
+```
+
+## Comparison of Approaches
+
+| Approach | Time | Space | Best For | Simplicity |
+|----------|------|-------|----------|-----------|
+| Recursive | O(m,n) | O(h) | **Most interviews** | Easy |
+| BFS | O(m,n) | O(w) | Level-by-level | Medium |
+| DFS Stack | O(m,n) | O(h) | No recursion | Medium |
+
+## Common Mistakes
+
+❌ **Not handling null nodes properly:**
+```javascript
+function isSameTree(p, q) {
+  if (p.val !== q.val) return false;  // ERROR: null.val!
+  return isSameTree(p.left, q.left) &amp;&amp; isSameTree(p.right, q.right);
+}
+```
+
+✅ **Check null cases first:**
+```javascript
+function isSameTree(p, q) {
+  if (p === null &amp;&amp; q === null) return true;
+  if (p === null || q === null) return false;
+  if (p.val !== q.val) return false;
+  return isSameTree(p.left, q.left) &amp;&amp; isSameTree(p.right, q.right);
+}
+```
+
+---
+
+❌ **Using OR (||) instead of AND (&amp;&amp;) for subtrees:**
+```javascript
+function isSameTree(p, q) {
+  if (p === null &amp;&amp; q === null) return true;
+  if (p === null || q === null) return false;
+  if (p.val !== q.val) return false;
+  // ERROR: Both subtrees must match!
+  return isSameTree(p.left, q.left) || isSameTree(p.right, q.right);
+}
+```
+
+✅ **Both subtrees must match:**
+```javascript
+function isSameTree(p, q) {
+  if (p === null &amp;&amp; q === null) return true;
+  if (p === null || q === null) return false;
+  if (p.val !== q.val) return false;
+  // Both left &amp;&amp; right subtrees must be same
+  return isSameTree(p.left, q.left) &amp;&amp; isSameTree(p.right, q.right);
+}
+```
+
+---
+
+❌ **Forgetting to check structure:**
+```javascript
+function isSameTree(p, q) {
+  // Only comparing values, not structure!
+  if (p === null || q === null) return p === q;
+  return p.val === q.val;
+}
+```
+
+✅ **Compare both structure and values:**
+```javascript
+function isSameTree(p, q) {
+  if (p === null &amp;&amp; q === null) return true;
+  if (p === null || q === null) return false;
+  if (p.val !== q.val) return false;
+  return isSameTree(p.left, q.left) &amp;&amp; isSameTree(p.right, q.right);
+}
+```
+
+## Interview Tips
+
+**What to mention:**
+1. **Three checks:** null cases, value comparison, recursive structure check
+2. **Short-circuit evaluation:** Return false early when mismatch found
+3. **AND logic:** Both subtrees must match, not either one
+4. **Time complexity:** O(min(m, n)) - stop at first mismatch
+
+**Follow-up questions:**
+
+**Q: How is this different from deep equality?**
+A: We're checking tree structure AND values, exactly like deep equality.
+
+**Q: What if trees have different size?**
+A: We stop when one tree ends - returns false if other continues.
+
+**Q: Can you do it without recursion?**
+A: Yes! Use BFS or DFS with explicit stack/queue.
+
+## Edge Cases
+
+```javascript
+// Both empty
+isSameTree(null, null) → true
+
+// One empty
+isSameTree(1, null) → false
+
+// Different values, same structure
+isSameTree([1, 2], [1, 3]) → false
+
+// Different structure, same values
+isSameTree([1, 2], [1, null, 2]) → false
+
+// Left vs right swap
+isSameTree([1, 2, 3], [1, 3, 2]) → false
+
+// Identical trees
+isSameTree([1, 2, 3], [1, 2, 3]) → true
+```
+
+## Related Problems
+
+- **Symmetric Tree** - Check if tree is mirror of itself
+- **Invert Binary Tree** - Mirror the tree
+- **Merge Two Binary Trees** - Merge same-structure trees
+- **Binary Tree Longest Consecutive Sequence** - Path matching
+

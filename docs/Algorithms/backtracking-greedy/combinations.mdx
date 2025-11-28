@@ -1,0 +1,427 @@
+---
+sidebar_position: 4
+difficulty: Easy
+tags: [backtracking, array, combinations, amazon, google]
+leetcode_url: https://leetcode.com/problems/combinations/
+companies: [Amazon, Google, Microsoft, Apple]
+pattern: "Backtracking & Greedy"
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Combinations
+
+<AlgorithmProblem
+  title="Combinations"
+  difficulty="Easy"
+  description={`
+<p>Given two integers <code>n</code> and <code>k</code>, return <em>all possible combinations of</em> <code>k</code> <em>numbers out of the range</em> <code>[1, n]</code>.</p>
+<p>You may return the answer in <strong>any order</strong>.</p>
+<h4>Constraints:</h4>
+<ul>
+  <li>1 &le; n &le; 20</li>
+  <li>1 &le; k &le; n</li>
+</ul>
+`}
+  examples={[
+    {
+      input: 'n = 4, k = 2',
+      output: '[[1,2],[1,3],[1,4],[2,3],[2,4],[3,4]]'
+    },
+    {
+      input: 'n = 1, k = 1',
+      output: '[[1]]'
+    }
+  ]}
+  starterCode={`function combine(n, k) {
+  // Write your code here
+
+}`}
+  solution={`function combine(n, k) {
+  // Backtracking: O(C(n,k) * k) time, O(C(n,k)) space
+  const result = [];
+
+  function backtrack(index, currentCombination) {
+    // Found a valid combination
+    if (currentCombination.length === k) {
+      result.push([...currentCombination]);
+      return;
+    }
+
+    // Remaining elements needed
+    const needed = k - currentCombination.length;
+    // Remaining elements available
+    const remaining = n - index + 1;
+
+    // Pruning: if not enough elements left, stop early
+    if (remaining < needed) return;
+
+    // Try each number starting from index
+    for (let i = index; i <= n; i++) {
+      currentCombination.push(i);
+      backtrack(i + 1, currentCombination);
+      currentCombination.pop();
+    }
+  }
+
+  backtrack(1, []);
+  return result;
+}`}
+  testCases={[
+    {
+      input: [4, 2],
+      expected: [[1, 2], [1, 3], [1, 4], [2, 3], [2, 4], [3, 4]],
+      description: 'C(4,2) = 6 combinations'
+    },
+    {
+      input: [1, 1],
+      expected: [[1]],
+      description: 'Single combination'
+    },
+    {
+      input: [3, 2],
+      expected: [[1, 2], [1, 3], [2, 3]],
+      description: 'C(3,2) = 3 combinations'
+    },
+    {
+      input: [5, 3],
+      expected: 10,
+      description: 'C(5,3) = 10 combinations (just verify count)'
+    },
+    {
+      input: [2, 1],
+      expected: [[1], [2]],
+      description: 'C(2,1) = 2 combinations'
+    },
+    {
+      input: [4, 1],
+      expected: [[1], [2], [3], [4]],
+      description: 'Choose 1 from 4'
+    }
+  ]}
+  functionName="combine"
+/>
+
+## Solution Explanation
+
+### Approach 1: Backtracking (Optimal) ✅
+
+**Time Complexity:** O(C(n,k) × k)
+**Space Complexity:** O(C(n,k)) for results
+
+Build combinations by deciding which numbers to include:
+
+```javascript
+function combine(n, k) {
+  const result = [];
+
+  function backtrack(index, currentCombination) {
+    // Base case: found a valid combination
+    if (currentCombination.length === k) {
+      result.push([...currentCombination]);
+      return;
+    }
+
+    // Pruning: if not enough elements left, stop
+    const needed = k - currentCombination.length;
+    const remaining = n - index + 1;
+    if (remaining < needed) return;
+
+    // Try each number from index to n
+    for (let i = index; i <= n; i++) {
+      currentCombination.push(i);
+      backtrack(i + 1, currentCombination);
+      currentCombination.pop();
+    }
+  }
+
+  backtrack(1, []);
+  return result;
+}
+```
+
+**Decision tree for n=4, k=2:**
+
+```
+                           []
+                    /       |       \
+                   1        2        3
+                 / | \    / | \    /
+                2  3  4  3  4  4
+               /  /  /  /  /  /
+              [1,2][1,3][1,4][2,3][2,4][3,4]
+```
+
+**Trace for n=4, k=2:**
+```
+backtrack(1, [])
+
+  i=1:
+    currentCombination = [1]
+    backtrack(2, [1])
+
+      i=2:
+        currentCombination = [1,2]
+        backtrack(3, [1,2])
+          length === 2 → result = [[1,2]]
+
+      i=3:
+        currentCombination = [1,3]
+        backtrack(4, [1,3])
+          length === 2 → result = [[1,2], [1,3]]
+
+      i=4:
+        currentCombination = [1,4]
+        backtrack(5, [1,4])
+          length === 2 → result = [[1,2], [1,3], [1,4]]
+
+  i=2:
+    currentCombination = [2]
+    backtrack(3, [2])
+
+      i=3:
+        currentCombination = [2,3]
+        result = [[1,2], [1,3], [1,4], [2,3]]
+
+      i=4:
+        currentCombination = [2,4]
+        result = [..., [2,4]]
+
+  i=3:
+    currentCombination = [3]
+    backtrack(4, [3])
+
+      i=4:
+        currentCombination = [3,4]
+        result = [..., [3,4]]
+
+  i=4:
+    currentCombination = [4]
+    backtrack(5, [4])
+      needed = 1, remaining = 0
+      Pruning: 0 < 1 → return early
+```
+
+### Approach 2: Without Pruning (Simpler but Slower)
+
+**Time Complexity:** O(C(n,k) × k)
+**Space Complexity:** O(C(n,k))
+
+```javascript
+function combine(n, k) {
+  const result = [];
+
+  function backtrack(index, currentCombination) {
+    if (currentCombination.length === k) {
+      result.push([...currentCombination]);
+      return;
+    }
+
+    for (let i = index; i <= n; i++) {
+      currentCombination.push(i);
+      backtrack(i + 1, currentCombination);
+      currentCombination.pop();
+    }
+  }
+
+  backtrack(1, []);
+  return result;
+}
+```
+
+**Simpler logic:** Explore all paths, let base case handle completion.
+
+### Approach 3: Iterative (Using Indices)
+
+**Time Complexity:** O(C(n,k) × k)
+**Space Complexity:** O(C(n,k))
+
+```javascript
+function combine(n, k) {
+  const result = [];
+  const combination = [];
+
+  function generate(start, index) {
+    if (index === k) {
+      result.push([...combination]);
+      return;
+    }
+
+    for (let i = start; i <= n; i++) {
+      combination[index] = i;
+      generate(i + 1, index + 1);
+    }
+  }
+
+  generate(1, 0);
+  return result;
+}
+```
+
+**Alternative style:** Uses index-based array instead of push/pop.
+
+## Backtracking Template
+
+```javascript
+function combine(n, k) {
+  // 1. Initialize result and tracking
+  const result = [];
+
+  // 2. Define helper function
+  function backtrack(index, currentCombination) {
+    // 3. Base case: combination is complete
+    if (currentCombination.length === k) {
+      result.push([...currentCombination]);
+      return;
+    }
+
+    // 4. Pruning: not enough elements left
+    const needed = k - currentCombination.length;
+    const remaining = n - index + 1;
+    if (remaining < needed) return;
+
+    // 5. Try each choice from current position
+    for (let i = index; i <= n; i++) {
+      // Include
+      currentCombination.push(i);
+
+      // Explore further (i+1 to avoid duplicates)
+      backtrack(i + 1, currentCombination);
+
+      // Exclude (backtrack)
+      currentCombination.pop();
+    }
+  }
+
+  // 6. Start recursion from 1
+  backtrack(1, []);
+
+  return result;
+}
+```
+
+**Key differences from Subsets:**
+- We stop at specific length k (not n)
+- We use loop start at index (not 0)
+- Pruning optimization prevents unnecessary exploration
+
+## Common Mistakes
+
+❌ **Starting loop from 0 instead of index:**
+```javascript
+// Wrong: allows duplicates like [1,1], [2,2]
+for (let i = 0; i < n; i++) {
+  backtrack(i, ...); // Should skip already used
+}
+
+// Correct: start from index to avoid revisiting
+for (let i = index; i <= n; i++) {
+  backtrack(i + 1, ...);
+}
+```
+
+❌ **Not copying the combination when adding to result:**
+```javascript
+// Wrong: all references point to same array
+result.push(currentCombination);
+
+// Correct: independent copy
+result.push([...currentCombination]);
+```
+
+❌ **Forgetting to backtrack (pop):**
+```javascript
+// Wrong: array keeps growing, wrong state for next iteration
+for (let i = index; i <= n; i++) {
+  currentCombination.push(i);
+  backtrack(i + 1, currentCombination);
+  // Missing: currentCombination.pop();
+}
+
+// Correct: restore state
+currentCombination.push(i);
+backtrack(i + 1, currentCombination);
+currentCombination.pop();
+```
+
+❌ **Wrong pruning condition:**
+```javascript
+// Wrong: might prune too early
+if (remaining <= needed) return;
+
+// Correct: only prune if insufficient
+if (remaining < needed) return;
+```
+
+❌ **Using n+1 in loop instead of n:**
+```javascript
+// Wrong: goes beyond n
+for (let i = index; i <= n + 1; i++) {
+
+// Correct: includes n
+for (let i = index; i <= n; i++) {
+```
+
+## Interview Tips
+
+**What to mention:**
+
+1. **Problem intuition:**
+   - Choose k numbers from 1 to n
+   - Order doesn't matter (combination, not permutation)
+   - Total of C(n,k) = n!/(k!(n-k)!) combinations
+
+2. **Algorithm explanation:**
+   - Backtracking explores all valid combinations
+   - Pruning optimization prevents unnecessary branches
+   - Early termination when k items are selected
+
+3. **Complexity analysis:**
+   - Time: O(C(n,k) × k) - generate C(n,k) combinations
+   - Space: O(C(n,k)) for results (unavoidable)
+
+4. **Key optimization:**
+   - Pruning: if not enough elements left, stop early
+   - Saves significant computation for large gaps
+
+**Follow-up questions:**
+
+**Q: What if we need combinations of specific sum?**
+A: Combination Sum - similar approach but with different constraints.
+
+**Q: Can you generate combinations iteratively without recursion?**
+A: Yes, using next_permutation or manual iteration logic.
+
+**Q: How would you handle duplicates in the range?**
+A: Combinations with duplicates - similar to Combination Sum II approach.
+
+## Edge Cases
+
+```javascript
+// Single element
+n=1, k=1 → [[1]]
+
+// All elements
+n=3, k=3 → [[1,2,3]]
+
+// Single selection
+n=5, k=1 → [[1], [2], [3], [4], [5]]
+
+// Pairs
+n=2, k=2 → [[1,2]]
+
+// Large range
+n=20, k=1 → 20 combinations
+n=20, k=20 → 1 combination
+
+// Half
+n=4, k=2 → 6 combinations
+```
+
+## Related Problems
+
+- **Combinations II** (Medium) - With duplicates allowed
+- **Combination Sum** (Medium) - Target sum constraint
+- **Combination Sum II** (Medium) - Duplicates, each used once
+- **Permutations** (Medium) - Order matters
+- **Subsets** (Medium) - All subsets of any size
