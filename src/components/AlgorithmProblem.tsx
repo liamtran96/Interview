@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import SidebarToggle from './SidebarToggle';
+import { useSidebar } from '../contexts/SidebarContext';
 
 interface TestCase {
   input: any[];
@@ -49,6 +50,10 @@ export default function AlgorithmProblem({
   const [isRunning, setIsRunning] = useState(false);
   const [showDescription, setShowDescription] = useState(true);
   const editorRef = useRef<any>(null);
+  const { hideLeftSidebar, hideRightSidebar } = useSidebar();
+
+  // Determine if editor should take full width
+  const shouldExpandEditor = hideLeftSidebar || hideRightSidebar;
 
   const difficultyColor = {
     Easy: '#00b8a3',
@@ -142,7 +147,11 @@ export default function AlgorithmProblem({
   const totalCount = testResults.length;
 
   return (
-    <div style={{ marginTop: '2rem' }}>
+    <div style={{
+      marginTop: '2rem',
+      width: '100%',
+      maxWidth: '100%'
+    }}>
       {/* Sidebar Toggle Buttons */}
       <SidebarToggle />
 
@@ -231,12 +240,18 @@ export default function AlgorithmProblem({
       {/* Two Column Layout: Problem Description | Code Editor */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: showDescription ? '1fr 1fr' : '1fr',
+        gridTemplateColumns: !showDescription
+          ? '1fr'
+          : shouldExpandEditor
+            ? '300px 1fr'
+            : '1fr 1fr',
         gap: 0,
         border: '1px solid var(--ifm-color-emphasis-300)',
         borderRadius: '0 0 8px 8px',
         overflow: 'hidden',
-        minHeight: '600px'
+        minHeight: '600px',
+        width: '100%',
+        transition: 'grid-template-columns 0.3s ease'
       }}>
         {/* Left Column: Problem Description */}
         {showDescription && (
@@ -277,7 +292,8 @@ export default function AlgorithmProblem({
         <div style={{
           backgroundColor: '#1e1e1e',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          width: '100%'
         }}>
           <Editor
             height="600px"
