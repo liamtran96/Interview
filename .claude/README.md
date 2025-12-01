@@ -58,6 +58,21 @@ Nội dung:
 
 ---
 
+### 🏗️ Agent Development Guide
+
+➡️ **[AGENT_DEVELOPMENT_GUIDE.md](./AGENT_DEVELOPMENT_GUIDE.md)**
+
+Nội dung:
+- Agents và Skills có liên quan gì?
+- Review các agents hiện tại
+- Cách build agents tốt
+- Best practices và checklists
+- Improvement recommendations
+
+**Thời gian đọc: 20 phút** (dành cho developers muốn tạo/improve agents)
+
+---
+
 ### ⚡ Quick Reference
 
 ➡️ **[CHEATSHEET.md](./CHEATSHEET.md)**
