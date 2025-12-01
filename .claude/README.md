@@ -44,6 +44,20 @@ Nội dung:
 
 ---
 
+### 🤖 Skills vs Agents - Hiểu sự khác biệt
+
+➡️ **[SKILLS_VS_AGENTS.md](./SKILLS_VS_AGENTS.md)**
+
+Nội dung:
+- Khi nào dùng Skills vs Agents
+- Agents nào có sẵn và mục đích
+- Decision tree
+- Real examples
+
+**Thời gian đọc: 15 phút**
+
+---
+
 ### ⚡ Quick Reference
 
 ➡️ **[CHEATSHEET.md](./CHEATSHEET.md)**
