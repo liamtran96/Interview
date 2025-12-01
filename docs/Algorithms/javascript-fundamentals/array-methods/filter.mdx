@@ -1,0 +1,174 @@
+---
+sidebar_position: 1
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Implement Array.filter()
+
+<AlgorithmProblem
+  title="Implement Array.prototype.filter()"
+  difficulty="Easy"
+  description={`
+<p>Implement your own version of the <code>Array.prototype.filter()</code> method without using the built-in <code>.filter()</code> method.</p>
+
+<p>Your function should accept an array and a callback function, and return a new array containing only the elements for which the callback returns a truthy value.</p>
+
+<h4>Method Signature:</h4>
+<code>myFilter(array, callback)</code>
+
+<h4>Requirements:</h4>
+<ul>
+  <li>Do not use the built-in <code>.filter()</code> method</li>
+  <li>Return a new array (don't mutate the original)</li>
+  <li>Callback receives three parameters: <code>(element, index, array)</code></li>
+  <li>Only include elements where callback returns truthy value</li>
+</ul>
+`}
+  examples={[
+    {
+      input: '[[1, 2, 3, 4, 5], x => x > 3]',
+      output: '[4, 5]',
+      explanation: 'Only elements greater than 3 pass the test'
+    },
+    {
+      input: '[[1, 2, 3, 4, 5], x => x % 2 === 0]',
+      output: '[2, 4]',
+      explanation: 'Only even numbers pass the test'
+    },
+    {
+      input: '[[], x => true]',
+      output: '[]',
+      explanation: 'Empty array returns empty array'
+    }
+  ]}
+  starterCode={`function myFilter(array, callback) {
+  const result = [];
+  // TODO: Add elements that pass the test
+  return result;
+}`}
+  solution={`function myFilter(array, callback) {
+  if (typeof callback !== 'function') {
+    throw new TypeError(callback + ' is not a function');
+  }
+
+  const result = [];
+  for (let i = 0; i < array.length; i++) {
+    if (callback(array[i], i, array)) {
+      result.push(array[i]);
+    }
+  }
+  return result;
+}`}
+  testCases={[
+    {
+      input: [[1, 2, 3, 4, 5], (x) => x > 3],
+      expected: [4, 5],
+      description: 'Basic filtering: elements greater than 3'
+    },
+    {
+      input: [[1, 2, 3, 4, 5], (x) => x % 2 === 0],
+      expected: [2, 4],
+      description: 'Filter even numbers'
+    },
+    {
+      input: [[], (x) => true],
+      expected: [],
+      description: 'Empty array returns empty array'
+    },
+    {
+      input: [[1, 2, 3], (x) => false],
+      expected: [],
+      description: 'No elements pass filter'
+    },
+    {
+      input: [[1, 2, 3], (x, i) => i === 1],
+      expected: [2],
+      description: 'Callback receives index parameter'
+    },
+    {
+      input: [[42], (x) => x > 0],
+      expected: [42],
+      description: 'Single element array'
+    }
+  ]}
+  functionName="myFilter"
+/>
+
+## Solution Explanation
+
+### Approach: Filter Implementation
+
+**Time:** O(n) - iterate through array once
+**Space:** O(n) - worst case, all elements pass the filter
+
+**How it works:**
+
+1. **Validate callback** - Ensure callback is a function
+2. **Initialize result array** - Create empty array for filtered elements
+3. **Iterate through input** - Loop through each element with index
+4. **Test each element** - Call callback with (element, index, array)
+5. **Conditionally add** - If callback returns truthy, add to result
+6. **Return new array** - Original array unchanged
+
+```javascript
+function myFilter(array, callback) {
+  // Step 1: Validate callback is a function
+  if (typeof callback !== 'function') {
+    throw new TypeError(callback + ' is not a function');
+  }
+
+  // Step 2: Initialize result array
+  const result = [];
+
+  // Step 3-5: Iterate and test each element
+  for (let i = 0; i < array.length; i++) {
+    if (callback(array[i], i, array)) {
+      result.push(array[i]);
+    }
+  }
+
+  // Step 6: Return filtered array
+  return result;
+}
+```
+
+**Key points:**
+- Original array is never modified
+- Callback receives element, index, and full array
+- Empty arrays are handled naturally (loop doesn't execute)
+- Result can be shorter than input (or even empty)
+
+## Common Mistakes
+
+❌ **Mutating the original array**
+```javascript
+// Wrong: modifies input
+array.splice(i, 1);
+```
+
+✅ **Creating a new array**
+```javascript
+// Correct: build new array
+result.push(array[i]);
+```
+
+❌ **Not passing all callback parameters**
+```javascript
+// Wrong: only passes element
+callback(array[i])
+```
+
+✅ **Pass element, index, and array**
+```javascript
+// Correct: matches native behavior
+callback(array[i], i, array)
+```
+
+## Interview Tips
+
+- **Start simple** - Get basic filtering working first, add validation later
+- **Mention immutability** - Emphasize you're not modifying the original array
+- **Discuss complexity** - O(n) time is optimal, can't avoid checking each element
+- **Edge cases** - Empty arrays, all pass, none pass, single element
+- **Native behavior** - Your implementation should match `Array.prototype.filter()`

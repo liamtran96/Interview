@@ -1,0 +1,148 @@
+---
+sidebar_position: 2
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Implement Array.forEach()
+
+<AlgorithmProblem
+  title="Implement Array.prototype.forEach()"
+  difficulty="Easy"
+  description={`
+<p>Implement your own version of the <code>Array.prototype.forEach()</code> method without using the built-in <code>.forEach()</code> method.</p>
+
+<p>Your function should execute a provided callback function once for each array element. Unlike <code>map()</code> or <code>filter()</code>, <code>forEach()</code> is used for side effects and returns <code>undefined</code>.</p>
+
+<h4>Method Signature:</h4>
+<code>myForEach(array, callback)</code>
+
+<h4>Requirements:</h4>
+<ul>
+  <li>Do not use the built-in <code>.forEach()</code> method</li>
+  <li>Execute callback for each element</li>
+  <li>Callback receives three parameters: <code>(element, index, array)</code></li>
+  <li>Return <code>undefined</code> (not a new array)</li>
+</ul>
+`}
+  examples={[
+    {
+      input: '[[1, 2, 3], console.log]',
+      output: 'undefined (prints: 1, 2, 3)',
+      explanation: 'Executes callback for each element, returns undefined'
+    },
+    {
+      input: 'let sum = 0; [[1, 2, 3], x => sum += x]',
+      output: 'undefined (sum becomes 6)',
+      explanation: 'Used for side effects like updating external variables'
+    }
+  ]}
+  starterCode={`function myForEach(array, callback) {
+  // TODO: Implement forEach
+}`}
+  solution={`function myForEach(array, callback) {
+  if (typeof callback !== 'function') {
+    throw new TypeError(callback + ' is not a function');
+  }
+
+  for (let i = 0; i < array.length; i++) {
+    callback(array[i], i, array);
+  }
+  // forEach returns undefined
+}`}
+  testCases={[
+    {
+      input: [[1, 2, 3], function() { this.count = (this.count || 0) + 1; }],
+      expected: undefined,
+      description: 'Returns undefined'
+    },
+    {
+      input: [[], (x) => { throw new Error('Should not execute'); }],
+      expected: undefined,
+      description: 'Empty array: callback never executes'
+    },
+    {
+      input: [[42], (x) => x],
+      expected: undefined,
+      description: 'Single element: returns undefined'
+    }
+  ]}
+  functionName="myForEach"
+/>
+
+## Solution Explanation
+
+### Approach: forEach Implementation
+
+**Time:** O(n) - iterate through array once
+**Space:** O(1) - no additional space (side effects only)
+
+**How it works:**
+
+1. **Validate callback** - Ensure callback is a function
+2. **Iterate through array** - Loop through each element with index
+3. **Execute callback** - Call callback with (element, index, array)
+4. **Return undefined** - forEach doesn't return a value
+
+```javascript
+function myForEach(array, callback) {
+  // Step 1: Validate callback
+  if (typeof callback !== 'function') {
+    throw new TypeError(callback + ' is not a function');
+  }
+
+  // Step 2-3: Iterate and execute callback
+  for (let i = 0; i < array.length; i++) {
+    callback(array[i], i, array);
+  }
+
+  // Step 4: Return undefined (implicit)
+}
+```
+
+**Key points:**
+- Used for side effects (logging, updating external state)
+- Always returns `undefined`
+- Callback receives element, index, and full array
+- Cannot break/stop execution (unlike regular for loop)
+
+## Common Mistakes
+
+❌ **Returning an array**
+```javascript
+// Wrong: forEach doesn't return anything
+const result = [];
+for (let i = 0; i < array.length; i++) {
+  result.push(callback(array[i], i, array));
+}
+return result; // Wrong!
+```
+
+✅ **Just execute callback**
+```javascript
+// Correct: execute callback, return undefined
+for (let i = 0; i < array.length; i++) {
+  callback(array[i], i, array);
+}
+```
+
+❌ **Confusing with map**
+```javascript
+// forEach is for side effects, not transformation
+array.forEach(x => x * 2); // Result is lost!
+```
+
+✅ **Use for side effects**
+```javascript
+// Correct usage
+array.forEach(x => console.log(x));
+array.forEach(x => sum += x);
+```
+
+## Interview Tips
+
+- **Emphasize side effects** - forEach is for actions, not transformations
+- **Return undefined** - Explicitly mention this difference from map/filter
+- **When to use** - Logging, updating counters, DOM manipulation
+- **When NOT to use** - If you need the result, use map/filter/reduce instead
+- **Callback params** - Still needs (element, index, array) like other methods

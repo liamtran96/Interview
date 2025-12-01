@@ -1,0 +1,178 @@
+---
+sidebar_position: 3
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Implement Array.map()
+
+<AlgorithmProblem
+  title="Implement Array.prototype.map()"
+  difficulty="Easy"
+  description={`
+<p>Implement your own version of the <code>Array.prototype.map()</code> method without using the built-in <code>.map()</code> method.</p>
+
+<p>Your function should accept an array and a callback function, and return a new array where each element is the result of calling the callback on the corresponding element from the input array.</p>
+
+<h4>Method Signature:</h4>
+<code>myMap(array, callback)</code>
+
+<h4>Requirements:</h4>
+<ul>
+  <li>Do not use the built-in <code>.map()</code> method</li>
+  <li>Return a new array (don't mutate the original)</li>
+  <li>Callback receives three parameters: <code>(element, index, array)</code></li>
+  <li>New array has same length as input array</li>
+</ul>
+`}
+  examples={[
+    {
+      input: '[[1, 2, 3], x => x * 2]',
+      output: '[2, 4, 6]',
+      explanation: 'Each element is doubled'
+    },
+    {
+      input: '[[1, 2, 3], (x, i) => x + i]',
+      output: '[1, 3, 5]',
+      explanation: 'Each element is added to its index'
+    },
+    {
+      input: '[[], x => x * 2]',
+      output: '[]',
+      explanation: 'Empty array returns empty array'
+    }
+  ]}
+  starterCode={`function myMap(array, callback) {
+  const result = [];
+  // TODO: Loop through array and apply callback
+  return result;
+}`}
+  solution={`function myMap(array, callback) {
+  if (typeof callback !== 'function') {
+    throw new TypeError(callback + ' is not a function');
+  }
+
+  const result = [];
+  for (let i = 0; i < array.length; i++) {
+    result[i] = callback(array[i], i, array);
+  }
+  return result;
+}`}
+  testCases={[
+    {
+      input: [[1, 2, 3], (x) => x * 2],
+      expected: [2, 4, 6],
+      description: 'Basic transformation: double each number'
+    },
+    {
+      input: [[1, 2, 3], (x, i) => x + i],
+      expected: [1, 3, 5],
+      description: 'Callback receives index parameter'
+    },
+    {
+      input: [[], (x) => x * 2],
+      expected: [],
+      description: 'Empty array returns empty array'
+    },
+    {
+      input: [[1, 2, 3], (x) => String(x)],
+      expected: ['1', '2', '3'],
+      description: 'Type transformation: numbers to strings'
+    },
+    {
+      input: [[1, 2, 3], (x, i, arr) => arr.length],
+      expected: [3, 3, 3],
+      description: 'Callback receives array parameter'
+    },
+    {
+      input: [[42], (x) => x * 2],
+      expected: [84],
+      description: 'Single element array'
+    }
+  ]}
+  functionName="myMap"
+/>
+
+## Solution Explanation
+
+### Approach: Map Implementation
+
+**Time:** O(n) - iterate through array once
+**Space:** O(n) - new array with same length as input
+
+**How it works:**
+
+1. **Validate callback** - Ensure callback is a function
+2. **Initialize result array** - Create empty array for transformed elements
+3. **Iterate through input** - Loop through each element with index
+4. **Transform each element** - Call callback with (element, index, array)
+5. **Store in result** - Assign transformed value to result[i]
+6. **Return new array** - Original array unchanged
+
+```javascript
+function myMap(array, callback) {
+  // Step 1: Validate callback
+  if (typeof callback !== 'function') {
+    throw new TypeError(callback + ' is not a function');
+  }
+
+  // Step 2: Initialize result array
+  const result = [];
+
+  // Step 3-5: Iterate and transform each element
+  for (let i = 0; i < array.length; i++) {
+    result[i] = callback(array[i], i, array);
+  }
+
+  // Step 6: Return transformed array
+  return result;
+}
+```
+
+**Key points:**
+- Result array has same length as input
+- Each element is transformed independently
+- Original array is never modified
+- Callback receives element, index, and full array
+
+## Common Mistakes
+
+❌ **Modifying original array**
+```javascript
+// Wrong: mutates input
+for (let i = 0; i < array.length; i++) {
+  array[i] = callback(array[i], i, array);
+}
+return array;
+```
+
+✅ **Creating new array**
+```javascript
+// Correct: build new array
+const result = [];
+for (let i = 0; i < array.length; i++) {
+  result[i] = callback(array[i], i, array);
+}
+return result;
+```
+
+❌ **Using push (creates wrong behavior with undefined)**
+```javascript
+// Problematic: changes behavior with sparse arrays
+result.push(callback(array[i], i, array));
+```
+
+✅ **Direct index assignment**
+```javascript
+// Correct: preserves sparse array behavior
+result[i] = callback(array[i], i, array);
+```
+
+## Interview Tips
+
+- **Most common method** - map is frequently asked in interviews
+- **Transformation** - Emphasize map transforms each element
+- **Immutability** - Original array is never modified
+- **Length preservation** - Result has same length as input
+- **Use cases** - Data transformation, type conversion, extraction
+- **Comparison** - Mention difference from filter (length) and forEach (returns array)

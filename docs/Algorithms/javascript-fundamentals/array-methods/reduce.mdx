@@ -1,0 +1,209 @@
+---
+sidebar_position: 4
+---
+
+import AlgorithmProblem from '@site/src/components/AlgorithmProblem';
+
+# Implement Array.reduce()
+
+<AlgorithmProblem
+  title="Implement Array.prototype.reduce()"
+  difficulty="Medium"
+  description={`
+<p>Implement your own version of the <code>Array.prototype.reduce()</code> method without using the built-in <code>.reduce()</code> method.</p>
+
+<p>Your function should execute a reducer callback function on each element of the array, passing in the return value from the calculation on the preceding element. The final result is a single value.</p>
+
+<h4>Method Signature:</h4>
+<code>myReduce(array, callback, initialValue)</code>
+
+<h4>Requirements:</h4>
+<ul>
+  <li>Do not use the built-in <code>.reduce()</code> method</li>
+  <li>Callback receives four parameters: <code>(accumulator, element, index, array)</code></li>
+  <li>Support optional <code>initialValue</code> parameter</li>
+  <li>If no <code>initialValue</code> and array is empty, throw TypeError</li>
+  <li>If no <code>initialValue</code>, use first element as initial accumulator</li>
+</ul>
+`}
+  examples={[
+    {
+      input: '[[1, 2, 3, 4], (acc, x) => acc + x, 0]',
+      output: '10',
+      explanation: 'Sum all numbers: 0 + 1 + 2 + 3 + 4 = 10'
+    },
+    {
+      input: '[[1, 2, 3, 4], (acc, x) => acc * x, 1]',
+      output: '24',
+      explanation: 'Product of all numbers: 1 * 1 * 2 * 3 * 4 = 24'
+    },
+    {
+      input: '[[1, 2, 3, 4], (acc, x) => acc + x]',
+      output: '10',
+      explanation: 'Sum without initial value: starts with first element (1)'
+    }
+  ]}
+  starterCode={`function myReduce(array, callback, initialValue) {
+  // TODO: Handle accumulator logic
+}`}
+  solution={`function myReduce(array, callback, initialValue) {
+  if (typeof callback !== 'function') {
+    throw new TypeError(callback + ' is not a function');
+  }
+
+  if (array.length === 0 && initialValue === undefined) {
+    throw new TypeError('Reduce of empty array with no initial value');
+  }
+
+  let accumulator;
+  let startIndex;
+
+  if (initialValue !== undefined) {
+    accumulator = initialValue;
+    startIndex = 0;
+  } else {
+    accumulator = array[0];
+    startIndex = 1;
+  }
+
+  for (let i = startIndex; i < array.length; i++) {
+    accumulator = callback(accumulator, array[i], i, array);
+  }
+
+  return accumulator;
+}`}
+  testCases={[
+    {
+      input: [[1, 2, 3, 4], (acc, x) => acc + x, 0],
+      expected: 10,
+      description: 'Sum with initial value'
+    },
+    {
+      input: [[1, 2, 3, 4], (acc, x) => acc * x, 1],
+      expected: 24,
+      description: 'Product with initial value'
+    },
+    {
+      input: [[1, 2, 3, 4], (acc, x) => acc + x],
+      expected: 10,
+      description: 'Sum without initial value'
+    },
+    {
+      input: [[5], (acc, x) => acc + x, 10],
+      expected: 15,
+      description: 'Single element with initial value'
+    },
+    {
+      input: [[42], (acc, x) => acc + x],
+      expected: 42,
+      description: 'Single element without initial value'
+    },
+    {
+      input: [[], (acc, x) => acc + x, 0],
+      expected: 0,
+      description: 'Empty array with initial value'
+    }
+  ]}
+  functionName="myReduce"
+/>
+
+## Solution Explanation
+
+### Approach: Reduce Implementation
+
+**Time:** O(n) - iterate through array once
+**Space:** O(1) - only accumulator variable
+
+**How it works:**
+
+1. **Validate callback** - Ensure callback is a function
+2. **Check edge case** - Empty array without initial value throws error
+3. **Initialize accumulator** - Use initialValue if provided, else first element
+4. **Set start index** - 0 if initialValue provided, else 1
+5. **Iterate and accumulate** - Call callback with (accumulator, element, index, array)
+6. **Return final value** - Accumulated result
+
+```javascript
+function myReduce(array, callback, initialValue) {
+  // Step 1: Validate callback
+  if (typeof callback !== 'function') {
+    throw new TypeError(callback + ' is not a function');
+  }
+
+  // Step 2: Check edge case
+  if (array.length === 0 && initialValue === undefined) {
+    throw new TypeError('Reduce of empty array with no initial value');
+  }
+
+  // Step 3-4: Initialize accumulator and start index
+  let accumulator;
+  let startIndex;
+
+  if (initialValue !== undefined) {
+    accumulator = initialValue;
+    startIndex = 0;
+  } else {
+    accumulator = array[0];
+    startIndex = 1;
+  }
+
+  // Step 5: Iterate and accumulate
+  for (let i = startIndex; i < array.length; i++) {
+    accumulator = callback(accumulator, array[i], i, array);
+  }
+
+  // Step 6: Return accumulated value
+  return accumulator;
+}
+```
+
+**Key points:**
+- Most powerful array method (can implement map/filter with reduce)
+- Callback receives accumulator as first parameter
+- Initial value is optional but recommended
+- Empty array without initial value throws TypeError
+- Returns single value (can be any type: number, object, array, etc.)
+
+## Common Mistakes
+
+❌ **Not handling missing initial value**
+```javascript
+// Wrong: always starts at index 0
+let accumulator = initialValue;
+for (let i = 0; i < array.length; i++) {
+  accumulator = callback(accumulator, array[i], i, array);
+}
+```
+
+✅ **Conditional start based on initial value**
+```javascript
+// Correct: adjust start index if no initial value
+let startIndex = initialValue !== undefined ? 0 : 1;
+let accumulator = initialValue !== undefined ? initialValue : array[0];
+```
+
+❌ **Not throwing error for empty array**
+```javascript
+// Wrong: returns undefined silently
+if (array.length === 0) {
+  return undefined;
+}
+```
+
+✅ **Throw TypeError like native reduce**
+```javascript
+// Correct: matches native behavior
+if (array.length === 0 && initialValue === undefined) {
+  throw new TypeError('Reduce of empty array with no initial value');
+}
+```
+
+## Interview Tips
+
+- **Most complex method** - reduce is the hardest to implement correctly
+- **Initial value matters** - Explain the two different behaviors
+- **Edge cases critical** - Empty array handling is key differentiator
+- **Versatile** - Can implement map, filter, flatten with reduce
+- **Common uses** - Sum, product, max/min, grouping, flattening
+- **Callback params** - Note accumulator comes first (different from map/filter)
+- **Return value** - Returns the final accumulated value, not an array
