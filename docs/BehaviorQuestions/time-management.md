@@ -103,6 +103,101 @@ Time management questions assess how you prioritize work, handle competing deman
 
 ---
 
+### Q6: Tell me about a time you had to balance short-term needs with long-term goals.
+
+**What they're looking for:**
+- Strategic thinking
+- Not sacrificing future for present
+- Making conscious trade-offs
+
+**Example Answer (STAR):**
+
+> **Situation:** We had a critical production bug that needed fixing ASAP, but I was also in the middle of refactoring our authentication system to prevent security vulnerabilities. Both were important.
+>
+> **Task:** I needed to address the immediate bug without abandoning the refactoring that would prevent bigger problems down the road.
+>
+> **Action:** I assessed the bug and realized I could apply a quick tactical fix in two hours that would resolve it, even though it wasn't the "clean" solution. I documented why it was a temporary fix and created a ticket for the proper solution. I communicated to my manager that I was pausing the refactoring for one day to handle the bug, but would resume immediately after. I also explained why abandoning the refactoring entirely would be costly in the long run.
+>
+> **Result:** The bug was fixed within a day with minimal customer impact. I completed the security refactoring the following week, which prevented three potential vulnerabilities flagged in our next security audit. My manager appreciated that I balanced urgency with strategic work. I learned that you can address short-term needs without derailing long-term goals if you're explicit about the trade-offs.
+
+---
+
+### Q7: Describe how you handle interruptions during focused work.
+
+**What they're looking for:**
+- Ability to protect deep work time
+- Handling urgent requests appropriately
+- Communication about availability
+
+**Example Answer (STAR):**
+
+> **Situation:** I was working on a complex algorithmic optimization that required deep concentration, but I was also on-call and the team's go-to person for production questions.
+>
+> **Task:** I needed to make progress on the optimization while still being responsive to the team.
+>
+> **Action:** I blocked specific "focus time" on my calendar—9am to 12pm daily—and set my Slack status to "In deep work, urgent only." I communicated to the team that during this time I'd only respond to production issues. For other questions, I committed to responding within 2 hours after my focus block. I also created a FAQ document for the most common questions I was getting, reducing interruptions. For truly urgent production issues, I had clear criteria: customer-facing errors, data corruption, or security issues got immediate attention; everything else could wait.
+>
+> **Result:** I completed the optimization in five days instead of the estimated two weeks. The FAQ reduced my daily interruptions by 60%. The team respected the focus time because they knew exactly when I'd be available and that true emergencies would still get immediate attention. I learned that setting boundaries requires both protecting your time AND being reliably available during designated times.
+
+---
+
+### Q8: Tell me about a time you underestimated how long something would take.
+
+**What they're looking for:**
+- Learning from estimation mistakes
+- How you handle scope creep
+- Improving estimation skills
+
+**Example Answer (STAR):**
+
+> **Situation:** I estimated a database migration would take one week but it ended up taking three weeks, causing delays in dependent projects.
+>
+> **Task:** I needed to deliver the migration, manage stakeholder expectations, and understand why my estimate was so far off.
+>
+> **Action:** As soon as I realized the delay, I communicated it—with one week elapsed and two remaining rather than being "done" as promised. I explained what I'd discovered: the legacy data had quality issues that required extensive cleanup, and the migration scripts needed more validation than anticipated. I provided a revised timeline with buffer and daily progress updates. After completion, I did a post-mortem on my estimation: I had estimated the happy path and ignored data quality risk. I created a new estimation template that includes explicit time for unknowns and validation.
+>
+> **Result:** Stakeholders were disappointed but appreciated the early communication and updates. The migration completed successfully with the revised timeline. My new estimation approach has been accurate within 20% on subsequent projects. I learned that underestimating happens to everyone—the key is transparent communication when you discover it and systematic improvement to your process.
+
+---
+
+### Q9: Describe a situation where you helped others prioritize or manage their time.
+
+**What they're looking for:**
+- Helping team be effective
+- Sharing time management practices
+- Leadership in process improvement
+
+**Example Answer (STAR):**
+
+> **Situation:** Our team was constantly firefighting and missing deadlines. People were working late but not on the right things. As the tech lead, I noticed we lacked a clear prioritization framework.
+>
+> **Task:** I wanted to help the team work more effectively without micromanaging their time.
+>
+> **Action:** I introduced a simple prioritization framework in our weekly planning: categorize all work as P0 (customer-blocking), P1 (important for roadmap), P2 (nice-to-have), or P3 (can defer). We agreed P0s get immediate attention, P1s are sprint commitments, P2s are best-effort, and P3s go in the backlog. I coached team members on saying no to P2/P3 work when P0/P1 work was at risk. I also introduced WIP limits—max 2 tasks in progress per person. In our standups, I explicitly asked "What can you stop doing to finish what you've started?"
+>
+> **Result:** Sprint completion rate went from 60% to 85%. Team members reported feeling less scattered. Overtime dropped by 40% because we weren't context-switching constantly. The framework spread to other teams. I learned that helping others manage time is less about efficiency tips and more about clear prioritization and permission to say no.
+
+---
+
+### Q10: Tell me about a time when you had to work on something that wasn't your top priority.
+
+**What they're looking for:**
+- Flexibility and adaptability
+- Team player attitude
+- Managing competing demands
+
+**Example Answer (STAR):**
+
+> **Situation:** I was deep into performance optimization work when leadership asked me to help with a customer demo for a major prospect. The demo wasn't related to my current work and would take 2-3 days.
+>
+> **Task:** I needed to contribute to the demo without derailing my optimization work or coming across as unwilling to help.
+>
+> **Action:** I didn't resist or complain. Instead, I asked clarifying questions: what specifically did they need from me? When was the demo? Could any of it be done in parallel with my current work? I learned they needed a specific feature polished and some API documentation. I proposed handling the documentation immediately (1 day) and the feature polish the day before the demo. I also made my manager aware that the optimization would be delayed by 3 days and confirmed that was acceptable. I timboxed the demo work strictly to avoid scope creep.
+>
+> **Result:** The demo went well and the company closed the deal. My optimization was delayed but I delivered it the following week with no quality compromise. Leadership appreciated my flexibility, and I earned goodwill that helped when I later needed resources for my own projects. I learned that occasionally deprioritizing your work for the company's benefit builds trust and demonstrates you understand the bigger picture.
+
+---
+
 ## Key Themes to Demonstrate
 
 | Theme | How to Show It |
@@ -128,6 +223,23 @@ When asked how you prioritize, demonstrate a clear approach:
 | **Important** | Do First | Schedule |
 | **Not Important** | Delegate | Eliminate |
 
+## Common Mistakes to Avoid
+
+### ❌ Glorifying Overwork
+**Bad:** "I worked 80-hour weeks and delivered everything."
+
+**Good:** "I prioritized ruthlessly, focused on the critical path, and delivered the must-haves on time while deferring nice-to-haves."
+
+### ❌ Blaming Poor Time Management on Others
+**Bad:** "I missed the deadline because people kept interrupting me."
+
+**Good:** "I improved my time management by blocking focus time and setting clear expectations about my availability."
+
+### ❌ Never Saying No
+**Bad:** "I always say yes to everything and figure it out."
+
+**Good:** "I evaluate requests against priorities and push back professionally when needed, offering alternatives when I can't take something on."
+
 ## Stories to Prepare
 
 Have at least 2-3 stories ready that demonstrate:
@@ -137,3 +249,8 @@ Have at least 2-3 stories ready that demonstrate:
 - [ ] Pushing back on unreasonable requests
 - [ ] Your approach to prioritization
 - [ ] Handling a missed deadline professionally
+- [ ] Balancing short-term and long-term work
+- [ ] Managing interruptions effectively
+- [ ] Learning from estimation mistakes
+- [ ] Helping others with time management
+- [ ] Flexibility when priorities shift
