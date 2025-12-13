@@ -103,6 +103,101 @@ Problem-solving questions assess your analytical thinking, creativity, and appro
 
 ---
 
+### Q6: Tell me about a time you had to solve a problem that kept recurring.
+
+**What they're looking for:**
+- Root cause analysis
+- Long-term thinking vs. quick fixes
+- Systematic problem-solving
+
+**Example Answer (STAR):**
+
+> **Situation:** Our deployment pipeline kept failing intermittently with timeout errors. We'd restart it and it would work, but the problem happened 2-3 times per week.
+>
+> **Task:** I was tired of the band-aid fixes and wanted to eliminate the root cause permanently.
+>
+> **Action:** Instead of just restarting when it failed, I started collecting data: time of day, which services were deploying, resource usage patterns. After two weeks, I noticed the failures correlated with our automated test suite running in parallel. I dug deeper and found our CI runner was getting resource-starved when both happened simultaneously. The "solution" wasn't fixing timeouts—it was separating deployment and test workloads onto different runner pools.
+>
+> **Result:** Deployment failures dropped to zero. Build times also improved by 20% because resources weren't shared. The team saved about 5 hours per week previously spent debugging failed deployments. I learned that recurring problems are usually symptoms, not the actual problem—you have to dig deeper.
+
+---
+
+### Q7: Describe a time you solved a problem in a creative or unconventional way.
+
+**What they're looking for:**
+- Thinking outside the box
+- Resourcefulness
+- Challenging assumptions
+
+**Example Answer (STAR):**
+
+> **Situation:** We needed to migrate millions of records from our old database to a new schema, but a traditional migration would require hours of downtime that the business couldn't accept.
+>
+> **Task:** I needed to find a way to migrate the data without taking the system offline.
+>
+> **Action:** Instead of a big-bang migration, I designed a "dual-write" approach: write to both old and new databases simultaneously, with the application still reading from the old one. I ran a background job to backfill historical data into the new database. Once the new database was fully populated and validated, I added a feature flag to gradually shift reads from old to new, starting with 1% of traffic. We monitored for a week, then ramped to 100%. Finally, we removed the old database writes.
+>
+> **Result:** Zero downtime migration completed over three weeks instead of a risky 8-hour maintenance window. We caught several edge cases during the gradual rollout that would have been critical bugs in a big-bang approach. The dual-write pattern became our standard for risky migrations. I learned that when the obvious solution is too risky, there's usually a creative incremental approach.
+
+---
+
+### Q8: Tell me about a time you had to make a decision with incomplete or conflicting data.
+
+**What they're looking for:**
+- Decision-making under uncertainty
+- Risk assessment
+- Knowing when "good enough" information is enough
+
+**Example Answer (STAR):**
+
+> **Situation:** We had to choose between two caching solutions. One had better performance benchmarks but less mature documentation. The other was well-established but showed concerning performance at our scale. Each vendor gave us conflicting information about the other.
+>
+> **Task:** I needed to make a recommendation without being able to fully test at our production scale or trust vendor claims.
+>
+> **Action:** I focused on what I could verify. I set up realistic load tests with our actual data patterns for both solutions. I reached out to engineers at companies similar to ours who used each solution. I made a decision matrix: performance, operational complexity, community support, and migration effort. When the data still wasn't conclusive, I proposed an experiment: implement the higher-risk option with a clear rollback plan and success criteria. We'd evaluate after one month.
+>
+> **Result:** The experiment revealed issues our testing hadn't caught, but the rollback plan worked perfectly. We went with the safer option and optimized it to acceptable performance levels. I learned that when data is incomplete, reducing the cost of being wrong (via rollback plans, experiments, or phased rollouts) is more valuable than trying to gather perfect information.
+
+---
+
+### Q9: Describe how you approached a problem where the requirements kept changing.
+
+**What they're looking for:**
+- Adaptability to changing requirements
+- Communication about impact of changes
+- Building flexibility into solutions
+
+**Example Answer (STAR):**
+
+> **Situation:** I was building an analytics dashboard, but the product manager kept changing what metrics they wanted to see. Every time I thought it was done, new requirements appeared.
+>
+> **Task:** I needed to deliver value while accommodating the changing requirements without constant rework.
+>
+> **Action:** I stepped back and had a conversation about the underlying goal: they were trying to figure out which metrics actually mattered by seeing them. Instead of building a rigid dashboard, I built a flexible framework where adding new metrics was a configuration change, not a code change. I created a library of reusable visualization components and a simple JSON schema for defining new metrics. I also set expectations: I'd ship the framework in two weeks, then they could iterate on metrics without needing engineering.
+>
+> **Result:** The PM was able to experiment with dozens of metric combinations over the next month without filing new tickets. They found the insights they needed, and the flexible system became our standard for all dashboards. I learned that when requirements are uncertain, building flexibility is smarter than trying to nail down perfect specs.
+
+---
+
+### Q10: Tell me about a time you solved a problem that others had given up on.
+
+**What they're looking for:**
+- Persistence and determination
+- Fresh perspective on old problems
+- Willingness to tackle hard challenges
+
+**Example Answer (STAR):**
+
+> **Situation:** We had a memory leak in our application that had been an open issue for 8 months. Multiple engineers had investigated and given up, concluding it was "probably in a third-party library we can't control."
+>
+> **Task:** The leak was getting worse and affecting our production stability. I volunteered to take one more shot at it.
+>
+> **Action:** I started by questioning the assumption that it was in third-party code. I used memory profiling tools to take snapshots over time and built a visualization of object growth. I noticed that a specific object type was accumulating. I traced where those objects were created—it led to our own event emitter pattern where we registered listeners but never unregistered them. Previous investigators had looked at the third-party event library, but the bug was in how we used it.
+>
+> **Result:** A 10-line fix resolved the leak completely. Memory usage stabilized and we could extend the time between restarts from daily to monthly. I learned that "someone already tried" doesn't mean the problem is unsolvable—it often means approaching it from a different angle or questioning different assumptions.
+
+---
+
 ## Key Themes to Demonstrate
 
 | Theme | How to Show It |
@@ -124,6 +219,23 @@ When facing a problem, demonstrate this approach:
 5. **Solve** - Implement and verify the solution
 6. **Prevent** - Ensure it doesn't happen again
 
+## Common Mistakes to Avoid
+
+### ❌ Focusing Only on the Solution
+**Bad:** "I fixed it by changing the configuration."
+
+**Good:** "I investigated by analyzing logs, identified the root cause as a race condition, then fixed it with proper locking."
+
+### ❌ Making It Sound Too Easy
+**Bad:** "The solution was obvious once I looked at it."
+
+**Good:** "After trying three different approaches and consulting with the database team, I discovered the issue was..."
+
+### ❌ Solving in Isolation
+**Bad:** "I figured it out on my own."
+
+**Good:** "I collaborated with the networking team for their expertise and consulted Stack Overflow for similar patterns."
+
 ## Stories to Prepare
 
 Have at least 2-3 stories ready that demonstrate:
@@ -133,3 +245,7 @@ Have at least 2-3 stories ready that demonstrate:
 - [ ] Improving an existing process or system
 - [ ] Making decisions with incomplete information
 - [ ] Identifying and preventing potential problems
+- [ ] Solving a recurring problem permanently
+- [ ] Using creative or unconventional approaches
+- [ ] Adapting to changing requirements
+- [ ] Tackling problems others gave up on

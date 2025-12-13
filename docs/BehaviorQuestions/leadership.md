@@ -103,6 +103,101 @@ Leadership questions assess your ability to influence others, take initiative, a
 
 ---
 
+### Q6: Tell me about a time you took initiative on something outside your job description.
+
+**What they're looking for:**
+- Proactive mindset
+- Going beyond assigned responsibilities
+- Creating value without being asked
+
+**Example Answer (STAR):**
+
+> **Situation:** I noticed our onboarding documentation was outdated and new hires were asking the same questions repeatedly, slowing their ramp-up time and taking up team bandwidth.
+>
+> **Task:** Though documentation wasn't my responsibility, I decided to improve it to help future hires and reduce team interruptions.
+>
+> **Action:** I spent my first Friday afternoon of each month updating the docs based on recent questions I'd heard. I interviewed the last three new hires about what confused them most. I reorganized the content to follow their actual onboarding journey rather than by technical topic. I added a troubleshooting section for common setup issues. I proposed my updates to the team lead and got buy-in to make it official.
+>
+> **Result:** New hire time-to-first-commit dropped from 2 weeks to 1 week. The team's onboarding documentation became a template for other teams. I was asked to join the developer experience working group based on this initiative. I learned that small, consistent improvements compound—you don't need permission to make things better.
+
+---
+
+### Q7: Describe a time you had to lead through a major change.
+
+**What they're looking for:**
+- Change management skills
+- Communication during uncertainty
+- Maintaining team morale through transitions
+
+**Example Answer (STAR):**
+
+> **Situation:** Our company was acquired, and the new parent company mandated we migrate from our tech stack to theirs within six months. The team was anxious about job security and frustrated about abandoning our recent work.
+>
+> **Task:** As tech lead, I needed to keep the team motivated and productive during a period of uncertainty and major change.
+>
+> **Action:** I started with transparency—shared what I knew and admitted what I didn't. I set up weekly Q&A sessions where team members could voice concerns. I reframed the migration as a learning opportunity and highlighted transferable skills. I advocated with leadership for retention bonuses and got commitments about job security. I broke the migration into phases with clear wins, celebrating each milestone. I also made sure people weren't working unsustainable hours—change is hard enough without burnout.
+>
+> **Result:** We completed the migration in five months with zero attrition. Team engagement scores actually improved during the transition. Three engineers were promoted to roles at the parent company based on skills they developed during the migration. I learned that during change, people need clarity, honesty, and visible progress more than optimistic platitudes.
+
+---
+
+### Q8: Tell me about a time you empowered others to make decisions.
+
+**What they're looking for:**
+- Delegation and trust
+- Developing others' decision-making skills
+- Not micromanaging
+
+**Example Answer (STAR):**
+
+> **Situation:** I was leading a team where every technical decision came to me for approval, creating a bottleneck and preventing the team from developing their judgment.
+>
+> **Task:** I needed to distribute decision-making authority while ensuring quality and alignment.
+>
+> **Action:** I created a decision framework: decisions affecting user data or security required group discussion; architectural decisions required RFC with two reviews; implementation details were up to the engineer. I explicitly told the team "you own these decisions—I trust you." When they came to me, I'd ask "what do you think we should do?" and "what information do you need to decide?" instead of giving answers. When someone made a suboptimal decision, I used it as a coaching moment rather than taking back authority.
+>
+> **Result:** Team velocity increased because decisions happened faster. Engineers reported higher satisfaction and growth. One junior engineer told me the empowerment was why they stayed when they got a competing offer. I learned that leaders who can't delegate create dependency, while leaders who delegate create more leaders.
+
+---
+
+### Q9: Describe a situation where you had to advocate for your team.
+
+**What they're looking for:**
+- Supporting and defending your team
+- Upward management
+- Balancing team needs with business needs
+
+**Example Answer (STAR):**
+
+> **Situation:** Leadership wanted my team to take on an urgent project that would require us to drop our current roadmap and work overtime for a month. The team was already stretched and this would be the third time in four months we'd been pulled off our work.
+>
+> **Task:** I needed to advocate for my team's well-being and sustainable pace while not appearing unwilling to help the business.
+>
+> **Action:** I requested a meeting with leadership and came prepared with data: our overtime hours over the past quarter, turnover risk based on 1:1 conversations, and the cost of context-switching. I didn't say no—instead I proposed alternatives. We could handle the urgent project if we hired a contractor, extended the timeline by two weeks, or reduced scope. I also proposed a policy: one emergency per quarter, otherwise we stick to the roadmap.
+>
+> **Result:** Leadership approved a contractor and a timeline extension. They also adopted the emergency policy going forward. No one on my team quit that quarter, and several mentioned in 360 feedback that they appreciated how I protected their time. I learned that advocacy with data and alternatives is more effective than complaints.
+
+---
+
+### Q10: Tell me about a time you had to course-correct when your initial approach wasn't working.
+
+**What they're looking for:**
+- Adaptability and self-awareness
+- Admitting when strategy needs to change
+- Learning from mistakes in real-time
+
+**Example Answer (STAR):**
+
+> **Situation:** I was leading our team's transition to Scrum. Three sprints in, velocity was declining, team morale was low, and people were complaining about "meetings for meetings' sake."
+>
+> **Task:** I needed to figure out what was going wrong and adjust our approach rather than pushing through with what wasn't working.
+>
+> **Action:** I ran a retrospective focused on the process itself. I learned that the team valued the transparency of Kanban but felt Scrum ceremonies were overhead that didn't help them. Rather than defending Scrum, I acknowledged we'd chosen wrong. We switched to Scrumban—Kanban board with weekly planning and retrospectives. I admitted openly that my initial push for Scrum was based on what worked at my previous company, not what fit this team.
+>
+> **Result:** Velocity recovered and exceeded our Scrum numbers. Team satisfaction improved. More importantly, the team trusted that I'd listen when something wasn't working. I learned that stubbornly sticking to your plan despite evidence is the opposite of leadership—good leaders adjust based on what they learn.
+
+---
+
 ## Key Themes to Demonstrate
 
 | Theme | How to Show It |
@@ -123,6 +218,23 @@ You don't need to be a manager to demonstrate leadership:
 - **Improve processes** - Make the team more effective
 - **Own outcomes** - Take responsibility for results, not just tasks
 
+## Common Mistakes to Avoid
+
+### ❌ Taking All the Credit
+**Bad:** "I led the project and delivered great results."
+
+**Good:** "I organized the team and removed blockers. The engineers did exceptional work implementing the solution."
+
+### ❌ Confusing Leadership with Authority
+**Bad:** "I told them what to do and they did it."
+
+**Good:** "I built consensus around the approach by presenting data and incorporating feedback."
+
+### ❌ Only Leading Success Stories
+**Bad:** Never mentioning challenges or mistakes in leadership.
+
+**Good:** "I initially approached it wrong, learned from team feedback, and adjusted my leadership style."
+
 ## Stories to Prepare
 
 Have at least 2-3 stories ready that demonstrate:
@@ -132,3 +244,8 @@ Have at least 2-3 stories ready that demonstrate:
 - [ ] Mentoring or developing others
 - [ ] Making tough decisions under pressure
 - [ ] Rallying a team through difficulty
+- [ ] Taking initiative beyond your role
+- [ ] Leading through organizational change
+- [ ] Empowering others and delegating effectively
+- [ ] Advocating for your team
+- [ ] Adapting your leadership approach
