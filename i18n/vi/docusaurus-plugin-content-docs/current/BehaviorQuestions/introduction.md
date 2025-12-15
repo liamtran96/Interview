@@ -32,15 +32,10 @@ Phỏng vấn hành vi đánh giá cách bạn đã xử lý các tình huống 
 4. **Luyện tập thành tiếng** - Câu trả lời nên dài 2-3 phút, không lan man
 5. **Trung thực** - Người phỏng vấn có thể phát hiện câu chuyện học thuộc lòng hoặc bịa đặt
 
-## Các Nhóm Câu Hỏi Phổ Biến
+## Tài Liệu Tham Khảo
 
 - [Phương Pháp STAR](./star-method) - Khung để cấu trúc câu trả lời của bạn
-- [Làm Việc Nhóm & Cộng Tác](./teamwork-collaboration) - Làm việc với người khác
-- [Giải Quyết Xung Đột](./conflict-resolution) - Xử lý bất đồng
-- [Lãnh Đạo](./leadership) - Chủ động và ảnh hưởng người khác
-- [Xử Lý Thất Bại](./handling-failure) - Học hỏi từ sai lầm
-- [Giải Quyết Vấn Đề](./problem-solving) - Thách thức kỹ thuật và phi kỹ thuật
-- [Quản Lý Thời Gian](./time-management) - Ưu tiên và deadline
+- [Hướng Dẫn Phỏng Vấn Toàn Diện](./comprehensive-guide) - Chuẩn bị câu hỏi & trả lời hoàn chỉnh với tất cả các câu hỏi hành vi phổ biến
 
 ## Mẹo Để Thành Công
 
