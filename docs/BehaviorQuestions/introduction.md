@@ -32,15 +32,10 @@ Behavioral interviews assess how you've handled situations in the past to predic
 4. **Practice out loud** - Responses should be 2-3 minutes, not rambling
 5. **Be authentic** - Interviewers can detect rehearsed or fabricated stories
 
-## Common Question Categories
+## Resources
 
 - [STAR Method](./star-method) - The framework for structuring your answers
-- [Teamwork & Collaboration](./teamwork-collaboration) - Working with others
-- [Conflict Resolution](./conflict-resolution) - Handling disagreements
-- [Leadership](./leadership) - Taking initiative and influencing others
-- [Handling Failure](./handling-failure) - Learning from mistakes
-- [Problem Solving](./problem-solving) - Technical and non-technical challenges
-- [Time Management](./time-management) - Prioritization and deadlines
+- [Comprehensive Interview Guide](./comprehensive-guide) - Complete Q&A preparation with all common behavioral questions
 
 ## Tips for Success
 
