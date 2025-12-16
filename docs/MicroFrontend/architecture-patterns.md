@@ -1276,7 +1276,7 @@ graph TD
 
 | Factor | Micro Frontends | Monolithic Frontend |
 |--------|-----------------|---------------------|
-| **Team Size** | Multiple teams (10+ developers) | Single team (<10 developers) |
+| **Team Size** | Multiple teams (10+ developers) | Single team (&lt;10 developers) |
 | **Deployment** | Independent, frequent | Coordinated, less frequent |
 | **Technology** | Can differ per team | Shared stack |
 | **Build Time** | Faster (per MFE) | Slower (entire app) |
