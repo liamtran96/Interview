@@ -1,0 +1,8 @@
+{
+  "label": "Micro Frontend",
+  "position": 8,
+  "link": {
+    "type": "generated-index",
+    "description": "Master micro frontend architecture patterns, module federation, routing strategies, state management, and deployment approaches for scalable web applications."
+  }
+}
