@@ -19,6 +19,8 @@ This comprehensive guide covers essential interview topics for fullstack develop
 - **HTML & CSS (Modern)** - Semantic HTML, Flexbox, Grid, Responsive Design
 - **Tailwind CSS v4** - CSS Config, OKLCH Colors, Container Queries, 5x Faster Builds
 - **Next.js 16** - Turbopack, App Router, Server Components, SSR, SSG, ISR
+- **Security** - JWT Authentication, XSS/CSRF Protection, Secure Data Handling, HTTPS/CORS
+- **Micro Frontend** - Architecture Patterns, Module Federation, Routing, State Management
 
 ## How to Use This Guide
 
@@ -42,8 +44,10 @@ Focus on practical implementation:
 Master advanced concepts:
 1. **Async patterns** and performance optimization
 2. **MongoDB** aggregation pipeline and indexing strategies
-3. **Next.js 14** App Router and Server Components
-4. **System design** considerations
+3. **Next.js 16** App Router and Server Components
+4. **Security** best practices (JWT, XSS/CSRF, secure data handling)
+5. **Micro Frontend** architecture and deployment strategies
+6. **System design** considerations
 
 ## Learning Path
 
@@ -80,6 +84,8 @@ Use the sidebar to navigate to any topic. All content is organized by technology
 - **HTML & CSS** - Flexbox, Grid, Responsive Design
 - **Tailwind CSS v4** - CSS Config, OKLCH Colors, Container Queries
 - **Next.js 16** - Turbopack, Proxy System, App Router, Server Components
+- **Security** - JWT, XSS/CSRF, Secure Data Handling, HTTPS/CORS, Best Practices
+- **Micro Frontend** - Architecture Patterns, Module Federation, Routing, State Management
 
 ## Content Structure
 
