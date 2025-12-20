@@ -112,8 +112,8 @@ i18n/vi/docusaurus-plugin-content-docs/current/
 - Key points to emphasize
 
 ### Further Reading:
-- [Official documentation](url)
-- [Relevant article](url)
+- [Official documentation](#)
+- [Relevant article](#)
 ```
 
 ### Example Q&A
