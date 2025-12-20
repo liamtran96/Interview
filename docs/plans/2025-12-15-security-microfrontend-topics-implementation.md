@@ -1116,6 +1116,7 @@ module.exports = new SecureJWT();
 - [JWT Security Best Practices](https://curity.io/resources/learn/jwt-best-practices/)
 - [Common JWT Security Pitfalls](https://auth0.com/blog/a-look-at-the-latest-draft-for-jwt-bcp/)
 ```
+<!-- markdownlint-disable-line MD040 - Closing fence for markdown code block starting at line 146 -->
 
 **Step 2: Verify file created**
 
