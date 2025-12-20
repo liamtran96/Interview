@@ -433,7 +433,6 @@ function App() {
     <div>
       <DynamicMicroFrontend
         remoteName="productCatalog"
-        remoteUrl={config.productCatalog}
         moduleName="./ProductList"
       />
     </div>

@@ -215,7 +215,9 @@ class InputValidator {
   }
 
   static validateSQLInput(input) {
-    // Remove SQL keywords and special characters
+    // WARNING: This is a CLIENT-SIDE sanity check only!
+    // Real SQL injection protection MUST use server-side parameterized queries.
+    // Never rely on client-side validation alone for security.
     const sqlKeywords = /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|EXECUTE)\b)/gi;
     const dangerousChars = /[';\\]/g;
 
@@ -263,10 +265,10 @@ try {
 - Implement strict CSP to mitigate injection impact
 
 ### Common Pitfalls:
-- Trusting frontend validation alone
+- Trusting frontend validation alone (always validate on server-side)
 - Using innerHTML or eval() with any user data
 - Not sanitizing data from URLs or cookies
-- Forgetting that JSON.parse can execute code in some contexts
+- Unsafe use of parsed data (e.g., passing JSON.parse results to eval or templates without sanitization)
 - Using unsafe template engines without escaping
 
 ### Interview Tips:

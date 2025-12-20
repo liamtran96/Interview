@@ -159,7 +159,8 @@ When a user logs in, the server creates a JWT containing user information and si
 
 ### JWT Structure:
 
-```
+```text
+# Example JWT from jwt.io (not a real secret - for documentation only)
 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
 
 [Header].[Payload].[Signature]

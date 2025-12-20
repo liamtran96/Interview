@@ -13,7 +13,7 @@ When a user logs in, the server creates a JWT containing user information and si
 
 ### JWT Structure:
 
-```
+```text
 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
 
 [Header].[Payload].[Signature]
@@ -378,7 +378,9 @@ graph LR
 // Backend - Generating tokens
 const jwt = require('jsonwebtoken');
 
-function generateTokens(user) {
+async function generateTokens(user) {
+  const tokenId = generateUniqueId(); // Generate unique ID for revocation
+
   // Access token - short-lived, contains user data
   const accessToken = jwt.sign(
     {
@@ -394,15 +396,16 @@ function generateTokens(user) {
   const refreshToken = jwt.sign(
     {
       userId: user.id,
-      tokenId: generateUniqueId() // For revocation
+      tokenId // For revocation
     },
     process.env.REFRESH_TOKEN_SECRET,
     { expiresIn: '7d' } // 7 days
   );
 
-  // Store refresh token in database for revocation
+  // Store refresh token hash in database for revocation
+  // Note: In production, store a hashed version of the token
   await RefreshToken.create({
-    tokenId: refreshToken.tokenId,
+    tokenId,
     userId: user.id,
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
   });

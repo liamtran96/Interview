@@ -13,7 +13,7 @@ TLS (Transport Layer Security), previously known as SSL (Secure Sockets Layer), 
 
 ### How HTTPS/TLS Works:
 
-```
+```text
 ┌─────────────┐         TLS Handshake         ┌─────────────┐
 │   Client    │ ────────────────────────────► │   Server    │
 │  (Browser)  │                               │   (Website) │
@@ -59,7 +59,7 @@ fetch('http://api.example.com/data')
 
 ### TLS Certificate Chain:
 
-```
+```text
 Root CA Certificate (Self-signed)
     ↓
 Intermediate CA Certificate
@@ -106,7 +106,7 @@ CORS (Cross-Origin Resource Sharing) is a mechanism that allows controlled acces
 
 ### Same-Origin Policy - When Requests are Blocked:
 
-```
+```text
 Request from:     https://app.example.com
 To:              https://api.example.com
 
@@ -130,7 +130,7 @@ Origin 2:        https://api.example.com
 
 ### CORS Headers Flow:
 
-```
+```text
 Browser              Server
   │                   │
   ├─ REQUEST ────────>│
@@ -227,7 +227,7 @@ Preflight is triggered when:
 
 ### Preflight Request/Response Flow:
 
-```
+```text
 Browser                         Server
    │                              │
    ├─ OPTIONS Request ───────────>│
@@ -302,7 +302,7 @@ fetch('https://api.example.com/data', {
 
 ### Preflight Response Headers:
 
-```
+```text
 Access-Control-Allow-Origin: https://app.example.com
 Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
 Access-Control-Allow-Headers: Content-Type, Authorization, X-Custom-Header
