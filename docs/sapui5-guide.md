@@ -1,35 +1,36 @@
-# SAPUI5 Complete Learning Guide: Basic to Advanced
+# SAPUI5 Complete Learning Guide: Basic to Advanced (TypeScript Edition)
 
-A comprehensive guide covering all SAPUI5 concepts from fundamentals to advanced topics for deep understanding.
+A comprehensive guide covering all SAPUI5 concepts from fundamentals to advanced topics using TypeScript.
 
 ---
 
 ## Table of Contents
 
 1. [Introduction to SAPUI5](#1-introduction-to-sapui5)
-2. [Architecture Overview](#2-architecture-overview)
-3. [MVC Pattern](#3-mvc-pattern)
-4. [Project Structure](#4-project-structure)
-5. [Views](#5-views)
-6. [Controllers](#6-controllers)
-7. [Models](#7-models)
-8. [Data Binding](#8-data-binding)
-9. [Controls Library](#9-controls-library)
-10. [manifest.json (App Descriptor)](#10-manifestjson-app-descriptor)
-11. [Routing and Navigation](#11-routing-and-navigation)
-12. [Fragments](#12-fragments)
-13. [Internationalization (i18n)](#13-internationalization-i18n)
-14. [Custom Controls](#14-custom-controls)
-15. [OData Integration](#15-odata-integration)
-16. [Expression Binding and Formatters](#16-expression-binding-and-formatters)
-17. [Testing](#17-testing)
-18. [Performance Optimization](#18-performance-optimization)
-19. [SAP Fiori Elements](#19-sap-fiori-elements)
-20. [Smart Controls](#20-smart-controls)
-21. [Security Best Practices](#21-security-best-practices)
-22. [Debugging and Troubleshooting](#22-debugging-and-troubleshooting)
-23. [Deployment](#23-deployment)
-24. [Resources and References](#24-resources-and-references)
+2. [TypeScript Setup](#2-typescript-setup)
+3. [Architecture Overview](#3-architecture-overview)
+4. [MVC Pattern](#4-mvc-pattern)
+5. [Project Structure](#5-project-structure)
+6. [Views](#6-views)
+7. [Controllers](#7-controllers)
+8. [Models](#8-models)
+9. [Data Binding](#9-data-binding)
+10. [Controls Library](#10-controls-library)
+11. [manifest.json (App Descriptor)](#11-manifestjson-app-descriptor)
+12. [Routing and Navigation](#12-routing-and-navigation)
+13. [Fragments](#13-fragments)
+14. [Internationalization (i18n)](#14-internationalization-i18n)
+15. [Custom Controls](#15-custom-controls)
+16. [OData Integration](#16-odata-integration)
+17. [Expression Binding and Formatters](#17-expression-binding-and-formatters)
+18. [Testing](#18-testing)
+19. [Performance Optimization](#19-performance-optimization)
+20. [SAP Fiori Elements](#20-sap-fiori-elements)
+21. [Smart Controls](#21-smart-controls)
+22. [Security Best Practices](#22-security-best-practices)
+23. [Debugging and Troubleshooting](#23-debugging-and-troubleshooting)
+24. [Deployment](#24-deployment)
+25. [Resources and References](#25-resources-and-references)
 
 ---
 
@@ -37,7 +38,7 @@ A comprehensive guide covering all SAPUI5 concepts from fundamentals to advanced
 
 ### What is SAPUI5?
 
-SAPUI5 (SAP UI Development Toolkit for HTML5) is SAP's enterprise-grade JavaScript framework for building responsive web applications. It provides a rich set of UI controls, data binding capabilities, and follows enterprise design guidelines.
+SAPUI5 (SAP UI Development Toolkit for HTML5) is SAP's enterprise-grade JavaScript/TypeScript framework for building responsive web applications. It provides a rich set of UI controls, data binding capabilities, and follows enterprise design guidelines.
 
 ### Key Characteristics
 
@@ -48,9 +49,19 @@ SAPUI5 (SAP UI Development Toolkit for HTML5) is SAP's enterprise-grade JavaScri
 | **MVC Architecture** | Clear separation of concerns |
 | **Rich Control Library** | 500+ pre-built UI controls |
 | **OData Support** | Native integration with SAP backends |
+| **TypeScript Support** | Full TypeScript support since UI5 1.116+ |
 | **Theming** | Multiple SAP themes (Horizon, Quartz, Belize) |
 | **i18n Support** | Built-in internationalization |
-| **Accessibility** | WCAG 2.1 compliant |
+
+### Why TypeScript for SAPUI5?
+
+| Benefit | Description |
+|---------|-------------|
+| **Type Safety** | Catch errors at compile time |
+| **IntelliSense** | Better IDE support and autocompletion |
+| **Refactoring** | Safe and easy code refactoring |
+| **Documentation** | Types serve as documentation |
+| **Modern Syntax** | Use latest ECMAScript features |
 
 ### SAPUI5 vs OpenUI5
 
@@ -61,16 +72,145 @@ SAPUI5 (SAP UI Development Toolkit for HTML5) is SAP's enterprise-grade JavaScri
 | **Charting** | VizFrame charts included | Not included |
 | **Support** | SAP support available | Community support |
 
-### Prerequisites for Learning
+---
 
-- HTML5, CSS3, JavaScript (ES6+)
-- Understanding of MVC pattern
-- Basic knowledge of JSON and XML
-- Familiarity with RESTful services
+## 2. TypeScript Setup
+
+### Project Initialization
+
+```bash
+# Create new UI5 TypeScript project using Easy-UI5 generator
+npm install -g yo generator-easy-ui5
+yo easy-ui5 ts-app
+
+# Or use UI5 CLI
+npm install -g @ui5/cli
+ui5 init
+```
+
+### Required Dependencies
+
+**package.json:**
+```json
+{
+  "name": "myapp",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "ui5 build --clean-dest",
+    "build:ts": "tsc && ui5 build --clean-dest",
+    "start": "ui5 serve --open index.html",
+    "lint": "eslint src --ext .ts",
+    "test": "karma start"
+  },
+  "devDependencies": {
+    "@types/openui5": "^1.120.0",
+    "@ui5/cli": "^3.8.0",
+    "typescript": "^5.3.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "ui5-tooling-transpile": "^3.0.0"
+  }
+}
+```
+
+### TypeScript Configuration
+
+**tsconfig.json:**
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "Node",
+    "strict": true,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "rootDir": "./src",
+    "outDir": "./webapp",
+    "baseUrl": "./",
+    "paths": {
+      "myapp/*": ["./src/*"]
+    },
+    "types": ["@types/openui5", "@types/qunit"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "webapp"]
+}
+```
+
+### UI5 Tooling Configuration
+
+**ui5.yaml:**
+```yaml
+specVersion: "3.0"
+type: application
+metadata:
+  name: myapp
+framework:
+  name: SAPUI5
+  version: "1.120.0"
+  libraries:
+    - name: sap.m
+    - name: sap.ui.core
+    - name: sap.ui.layout
+    - name: sap.f
+
+builder:
+  customTasks:
+    - name: ui5-tooling-transpile-task
+      afterTask: replaceVersion
+      configuration:
+        debug: true
+
+server:
+  customMiddleware:
+    - name: ui5-tooling-transpile-middleware
+      afterMiddleware: compression
+      configuration:
+        debug: true
+```
+
+### Global Type Definitions
+
+**src/types/global.d.ts:**
+```typescript
+// Extend global namespace for custom types
+declare namespace myapp {
+  interface Product {
+    ProductID: string;
+    Name: string;
+    Description: string;
+    Price: number;
+    Currency: string;
+    Category: string;
+    InStock: boolean;
+  }
+
+  interface AppSettings {
+    busy: boolean;
+    delay: number;
+    currency: string;
+  }
+
+  interface ViewModel {
+    busy: boolean;
+    hasUIChanges: boolean;
+    editMode: boolean;
+  }
+}
+```
 
 ---
 
-## 2. Architecture Overview
+## 3. Architecture Overview
 
 ### High-Level Architecture
 
@@ -80,13 +220,15 @@ SAPUI5 (SAP UI Development Toolkit for HTML5) is SAP's enterprise-grade JavaScri
 ├─────────────────────────────────────────────────────────────┤
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
 │  │    Views    │  │ Controllers │  │       Models        │  │
-│  │   (XML/JS)  │  │    (.js)    │  │ (JSON/OData/XML)    │  │
+│  │   (XML)     │  │    (.ts)    │  │ (JSON/OData/XML)    │  │
 │  └─────────────┘  └─────────────┘  └─────────────────────┘  │
 ├─────────────────────────────────────────────────────────────┤
 │                    SAPUI5 Core Framework                     │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌───────────────┐   │
 │  │ Controls │ │  Routing │ │  Binding │ │ Event Handler │   │
 │  └──────────┘ └──────────┘ └──────────┘ └───────────────┘   │
+├─────────────────────────────────────────────────────────────┤
+│               TypeScript Compiler (tsc)                      │
 ├─────────────────────────────────────────────────────────────┤
 │                    Browser (HTML5/CSS3/JS)                   │
 └─────────────────────────────────────────────────────────────┘
@@ -110,33 +252,28 @@ SAPUI5 (SAP UI Development Toolkit for HTML5) is SAP's enterprise-grade JavaScri
 | `sap.f` | SAP Fiori specific controls |
 | `sap.uxap` | Object Page layouts |
 
-### Module Loading (AMD)
+### Module System with TypeScript
 
-SAPUI5 uses Asynchronous Module Definition (AMD) for module loading:
+SAPUI5 uses AMD modules. With TypeScript, use ES6 imports that transpile to AMD:
 
-```javascript
-sap.ui.define([
-    "sap/ui/core/mvc/Controller",
-    "sap/m/MessageToast",
-    "sap/ui/model/json/JSONModel"
-], function(Controller, MessageToast, JSONModel) {
-    "use strict";
+```typescript
+import Controller from "sap/ui/core/mvc/Controller";
+import MessageToast from "sap/m/MessageToast";
+import JSONModel from "sap/ui/model/json/JSONModel";
+import Filter from "sap/ui/model/Filter";
+import FilterOperator from "sap/ui/model/FilterOperator";
 
-    return Controller.extend("myapp.controller.Main", {
-        // Controller implementation
-    });
-});
+/**
+ * @namespace myapp.controller
+ */
+export default class Main extends Controller {
+  // Controller implementation
+}
 ```
-
-**Key Points:**
-- `sap.ui.define` - Define a module with dependencies
-- `sap.ui.require` - Load modules without defining a new one
-- Dependencies are loaded asynchronously
-- Callback receives resolved modules in order
 
 ---
 
-## 3. MVC Pattern
+## 4. MVC Pattern
 
 ### Overview
 
@@ -169,48 +306,44 @@ The Model-View-Controller (MVC) pattern separates an application into three inte
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Model
+### Model (TypeScript)
 
-The Model holds application data and provides methods for data manipulation.
+```typescript
+import JSONModel from "sap/ui/model/json/JSONModel";
+import BindingMode from "sap/ui/model/BindingMode";
 
-**Responsibilities:**
-- Store application data
-- Notify views of data changes
-- Provide data access methods
-- Handle data validation
+interface ProductData {
+  products: myapp.Product[];
+  selectedProduct: myapp.Product | null;
+  settings: {
+    currency: string;
+    showDetails: boolean;
+  };
+}
 
-**Example:**
-```javascript
-// Create a JSON Model
-var oModel = new sap.ui.model.json.JSONModel({
-    products: [
-        { id: "1", name: "Laptop", price: 999.99 },
-        { id: "2", name: "Phone", price: 699.99 }
-    ],
-    selectedProduct: null
-});
+// Create typed JSON Model
+const oData: ProductData = {
+  products: [
+    { ProductID: "1", Name: "Laptop", Description: "Business laptop", Price: 999.99, Currency: "USD", Category: "Electronics", InStock: true },
+    { ProductID: "2", Name: "Phone", Description: "Smartphone", Price: 699.99, Currency: "USD", Category: "Electronics", InStock: true }
+  ],
+  selectedProduct: null,
+  settings: {
+    currency: "USD",
+    showDetails: true
+  }
+};
 
-// Set model to view
-this.getView().setModel(oModel);
+const oModel = new JSONModel(oData);
+oModel.setDefaultBindingMode(BindingMode.TwoWay);
 
-// Access data
-var aProducts = oModel.getProperty("/products");
-
-// Update data
-oModel.setProperty("/products/0/price", 899.99);
+// Type-safe property access
+const products = oModel.getProperty("/products") as myapp.Product[];
+oModel.setProperty("/selectedProduct", products[0]);
 ```
 
-### View
+### View (XML)
 
-The View defines the UI structure and layout.
-
-**Responsibilities:**
-- Define UI structure
-- Display data from models
-- Handle user interface elements
-- Bind to model data
-
-**Example (XML View):**
 ```xml
 <mvc:View
     controllerName="myapp.controller.Main"
@@ -221,8 +354,9 @@ The View defines the UI structure and layout.
         <content>
             <List items="{/products}">
                 <StandardListItem
-                    title="{name}"
-                    description="{price}"
+                    title="{Name}"
+                    description="{Description}"
+                    info="{Price}"
                     type="Navigation"
                     press=".onItemPress" />
             </List>
@@ -231,130 +365,121 @@ The View defines the UI structure and layout.
 </mvc:View>
 ```
 
-### Controller
+### Controller (TypeScript)
 
-The Controller handles user interactions and application logic.
+```typescript
+import Controller from "sap/ui/core/mvc/Controller";
+import MessageToast from "sap/m/MessageToast";
+import Event from "sap/ui/base/Event";
+import ListItemBase from "sap/m/ListItemBase";
+import Context from "sap/ui/model/Context";
 
-**Responsibilities:**
-- Handle user events
-- Update models
-- Control navigation
-- Coordinate between model and view
+/**
+ * @namespace myapp.controller
+ */
+export default class Main extends Controller {
 
-**Example:**
-```javascript
-sap.ui.define([
-    "sap/ui/core/mvc/Controller",
-    "sap/m/MessageToast"
-], function(Controller, MessageToast) {
-    "use strict";
+  public onInit(): void {
+    // Initialization logic
+  }
 
-    return Controller.extend("myapp.controller.Main", {
-
-        onInit: function() {
-            // Initialization logic
-        },
-
-        onItemPress: function(oEvent) {
-            var oItem = oEvent.getSource();
-            var sPath = oItem.getBindingContext().getPath();
-            MessageToast.show("Selected: " + sPath);
-        }
-    });
-});
+  public onItemPress(oEvent: Event): void {
+    const oItem = oEvent.getSource() as ListItemBase;
+    const oContext = oItem.getBindingContext() as Context;
+    const sPath = oContext.getPath();
+    MessageToast.show(`Selected: ${sPath}`);
+  }
+}
 ```
 
 ---
 
-## 4. Project Structure
+## 5. Project Structure
 
-### Standard SAPUI5 Project Layout
+### Complete TypeScript Project Layout
 
 ```
 my-sapui5-app/
-├── webapp/
+├── src/
 │   ├── controller/
-│   │   ├── App.controller.js
-│   │   ├── Main.controller.js
-│   │   └── Detail.controller.js
+│   │   ├── App.controller.ts
+│   │   ├── BaseController.ts
+│   │   ├── Main.controller.ts
+│   │   └── Detail.controller.ts
 │   ├── view/
 │   │   ├── App.view.xml
 │   │   ├── Main.view.xml
-│   │   └── Detail.view.xml
+│   │   ├── Detail.view.xml
+│   │   └── fragments/
+│   │       ├── Dialog.fragment.xml
+│   │       └── ProductCard.fragment.xml
 │   ├── model/
-│   │   ├── models.js
-│   │   └── formatter.js
+│   │   ├── models.ts
+│   │   ├── formatter.ts
+│   │   └── types.ts
+│   ├── service/
+│   │   └── ProductService.ts
+│   ├── types/
+│   │   └── global.d.ts
 │   ├── i18n/
 │   │   ├── i18n.properties
 │   │   ├── i18n_en.properties
 │   │   └── i18n_de.properties
 │   ├── css/
 │   │   └── style.css
-│   ├── test/
-│   │   ├── unit/
-│   │   │   └── unitTests.qunit.html
-│   │   └── integration/
-│   │       └── opaTests.qunit.html
-│   ├── localService/
-│   │   ├── metadata.xml
-│   │   └── mockserver.js
-│   ├── Component.js
+│   ├── Component.ts
 │   ├── manifest.json
 │   └── index.html
+├── test/
+│   ├── unit/
+│   └── integration/
+├── tsconfig.json
 ├── ui5.yaml
 ├── package.json
 └── README.md
 ```
 
-### Key Files Explained
+### Component.ts
 
-| File/Folder | Purpose |
-|-------------|---------|
-| `manifest.json` | Application descriptor (configuration) |
-| `Component.js` | Application component (entry point) |
-| `index.html` | HTML host page |
-| `controller/` | JavaScript controllers |
-| `view/` | XML/JS views |
-| `model/` | Helper models and formatters |
-| `i18n/` | Translation files |
-| `test/` | Unit and integration tests |
-| `localService/` | Mock server for development |
+```typescript
+import UIComponent from "sap/ui/core/UIComponent";
+import Device from "sap/ui/Device";
+import JSONModel from "sap/ui/model/json/JSONModel";
 
-### Component.js
+/**
+ * @namespace myapp
+ */
+export default class Component extends UIComponent {
 
-The component is the central entry point for a SAPUI5 application:
+  public static metadata = {
+    manifest: "json",
+    interfaces: ["sap.ui.core.IAsyncContentCreation"]
+  };
 
-```javascript
-sap.ui.define([
-    "sap/ui/core/UIComponent",
-    "sap/ui/Device",
-    "myapp/model/models"
-], function(UIComponent, Device, models) {
-    "use strict";
+  public init(): void {
+    // Call parent init
+    super.init();
 
-    return UIComponent.extend("myapp.Component", {
+    // Create and set device model
+    const oDeviceModel = new JSONModel(Device);
+    oDeviceModel.setDefaultBindingMode("OneWay");
+    this.setModel(oDeviceModel, "device");
 
-        metadata: {
-            manifest: "json"  // Load configuration from manifest.json
-        },
+    // Initialize router
+    this.getRouter().initialize();
+  }
 
-        init: function() {
-            // Call parent init
-            UIComponent.prototype.init.apply(this, arguments);
+  public destroy(): void {
+    super.destroy();
+  }
 
-            // Set device model
-            this.setModel(models.createDeviceModel(), "device");
-
-            // Initialize router
-            this.getRouter().initialize();
-        },
-
-        destroy: function() {
-            // Cleanup
-            UIComponent.prototype.destroy.apply(this, arguments);
-        }
-    });
-});
+  public getContentDensityClass(): string {
+    if (!Device.support.touch) {
+      return "sapUiSizeCompact";
+    }
+    return "sapUiSizeCozy";
+  }
+}
 ```
 
 ### index.html
@@ -365,7 +490,7 @@ sap.ui.define([
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My SAPUI5 App</title>
+    <title>My SAPUI5 TypeScript App</title>
 
     <script
         id="sap-ui-bootstrap"
@@ -381,7 +506,8 @@ sap.ui.define([
     <div data-sap-ui-component
          data-name="myapp"
          data-id="container"
-         data-settings='{"id": "myapp"}'>
+         data-settings='{"id": "myapp"}'
+         data-handle-validation="true">
     </div>
 </body>
 </html>
@@ -389,22 +515,16 @@ sap.ui.define([
 
 ---
 
-## 5. Views
+## 6. Views
 
 ### View Types
 
-SAPUI5 supports multiple view types:
-
-| Type | Extension | Use Case |
-|------|-----------|----------|
-| **XML** | `.view.xml` | Recommended, declarative, clean |
-| **JavaScript** | `.view.js` | Dynamic UI generation |
-| **JSON** | `.view.json` | Rare, declarative JSON |
-| **HTML** | `.view.html` | Legacy, not recommended |
+| Type | Extension | Recommendation |
+|------|-----------|----------------|
+| **XML** | `.view.xml` | Recommended for declarative UI |
+| **TypeScript** | `.view.ts` | Dynamic UI generation |
 
 ### XML Views (Recommended)
-
-XML Views are the standard and recommended approach:
 
 ```xml
 <mvc:View
@@ -423,14 +543,23 @@ XML Views are the standard and recommended approach:
             <l:VerticalLayout class="sapUiContentPadding" width="100%">
                 <Input id="nameInput"
                        placeholder="{i18n>enterName}"
-                       value="{/userName}" />
+                       value="{/userName}"
+                       liveChange=".onNameChange" />
 
                 <Button text="{i18n>submit}"
                         type="Emphasized"
                         press=".onSubmit" />
 
-                <List items="{/items}">
-                    <StandardListItem title="{name}" description="{desc}" />
+                <List id="productList"
+                      items="{/products}"
+                      mode="SingleSelectMaster"
+                      selectionChange=".onSelectionChange">
+                    <StandardListItem
+                        title="{Name}"
+                        description="{Description}"
+                        info="{Price} {Currency}"
+                        type="Navigation"
+                        press=".onItemPress" />
                 </List>
             </l:VerticalLayout>
         </content>
@@ -438,7 +567,7 @@ XML Views are the standard and recommended approach:
         <footer>
             <Bar>
                 <contentRight>
-                    <Button text="Save" press=".onSave" />
+                    <Button text="{i18n>save}" type="Emphasized" press=".onSave" />
                 </contentRight>
             </Bar>
         </footer>
@@ -446,728 +575,456 @@ XML Views are the standard and recommended approach:
 </mvc:View>
 ```
 
-### JavaScript Views
+---
 
-For dynamic UI generation:
+## 7. Controllers
 
-```javascript
-sap.ui.define([
-    "sap/ui/core/mvc/View",
-    "sap/m/Page",
-    "sap/m/Button",
-    "sap/m/List",
-    "sap/m/StandardListItem"
-], function(View, Page, Button, List, StandardListItem) {
-    "use strict";
+### BaseController.ts
 
-    return View.extend("myapp.view.Dynamic", {
-
-        getControllerName: function() {
-            return "myapp.controller.Dynamic";
-        },
-
-        createContent: function(oController) {
-            var oPage = new Page({
-                title: "Dynamic View",
-                content: [
-                    new Button({
-                        text: "Click Me",
-                        press: [oController.onButtonPress, oController]
-                    }),
-                    new List({
-                        items: {
-                            path: "/items",
-                            template: new StandardListItem({
-                                title: "{name}"
-                            })
-                        }
-                    })
-                ]
-            });
-
-            return oPage;
-        }
-    });
-});
-```
-
-### Typed Views (TypeScript)
-
-With TypeScript support:
+Create a reusable base controller:
 
 ```typescript
 import Controller from "sap/ui/core/mvc/Controller";
-import MessageToast from "sap/m/MessageToast";
-import Event from "sap/ui/base/Event";
+import UIComponent from "sap/ui/core/UIComponent";
+import Router from "sap/ui/core/routing/Router";
+import History from "sap/ui/core/routing/History";
+import Model from "sap/ui/model/Model";
+import ResourceModel from "sap/ui/model/resource/ResourceModel";
+import ResourceBundle from "sap/base/i18n/ResourceBundle";
+import View from "sap/ui/core/mvc/View";
 
 /**
  * @namespace myapp.controller
  */
-export default class Main extends Controller {
+export default class BaseController extends Controller {
 
-    public onInit(): void {
-        // Typed initialization
-    }
+  /**
+   * Get the owner component
+   */
+  public getOwnerComponent(): UIComponent {
+    return super.getOwnerComponent() as UIComponent;
+  }
 
-    public onButtonPress(oEvent: Event): void {
-        MessageToast.show("Button pressed!");
+  /**
+   * Get the router instance
+   */
+  public getRouter(): Router {
+    return this.getOwnerComponent().getRouter();
+  }
+
+  /**
+   * Get model by name
+   */
+  public getModel<T extends Model = Model>(sName?: string): T {
+    return this.getView()?.getModel(sName) as T;
+  }
+
+  /**
+   * Set model to view
+   */
+  public setModel(oModel: Model, sName?: string): View {
+    return this.getView()!.setModel(oModel, sName);
+  }
+
+  /**
+   * Get resource bundle
+   */
+  public getResourceBundle(): ResourceBundle {
+    const oModel = this.getModel<ResourceModel>("i18n");
+    return oModel.getResourceBundle() as ResourceBundle;
+  }
+
+  /**
+   * Get translated text
+   */
+  public getText(sKey: string, aArgs?: string[]): string {
+    return this.getResourceBundle().getText(sKey, aArgs) || sKey;
+  }
+
+  /**
+   * Navigate to route
+   */
+  public navTo(sRouteName: string, oParameters?: object, bReplace?: boolean): void {
+    this.getRouter().navTo(sRouteName, oParameters, bReplace);
+  }
+
+  /**
+   * Navigate back
+   */
+  public onNavBack(): void {
+    const sPreviousHash = History.getInstance().getPreviousHash();
+
+    if (sPreviousHash !== undefined) {
+      window.history.go(-1);
+    } else {
+      this.navTo("main", {}, true);
     }
+  }
 }
 ```
 
-### View Lifecycle
+### Main.controller.ts
 
-| Phase | Description |
-|-------|-------------|
-| **Loading** | View definition is loaded and parsed |
-| **Initialization** | Controls are created but not rendered |
-| **Rendering** | Controls are rendered to DOM |
-| **Re-rendering** | Triggered by model or property changes |
-| **Destruction** | View and controls are destroyed |
+```typescript
+import BaseController from "./BaseController";
+import JSONModel from "sap/ui/model/json/JSONModel";
+import Event from "sap/ui/base/Event";
+import MessageToast from "sap/m/MessageToast";
+import MessageBox from "sap/m/MessageBox";
+import Filter from "sap/ui/model/Filter";
+import FilterOperator from "sap/ui/model/FilterOperator";
+import ListItemBase from "sap/m/ListItemBase";
+import List from "sap/m/List";
+import Input from "sap/m/Input";
+import Context from "sap/ui/model/Context";
+import { Route$PatternMatchedEvent } from "sap/ui/core/routing/Route";
 
----
+interface ViewModelData {
+  busy: boolean;
+  delay: number;
+  currency: string;
+  itemCount: number;
+}
 
-## 6. Controllers
+/**
+ * @namespace myapp.controller
+ */
+export default class Main extends BaseController {
 
-### Controller Structure
+  private _oViewModel!: JSONModel;
 
-```javascript
-sap.ui.define([
-    "sap/ui/core/mvc/Controller",
-    "sap/ui/model/json/JSONModel",
-    "sap/m/MessageBox",
-    "sap/m/MessageToast"
-], function(Controller, JSONModel, MessageBox, MessageToast) {
-    "use strict";
+  /* =========================================================== */
+  /* Lifecycle Methods                                           */
+  /* =========================================================== */
 
-    return Controller.extend("myapp.controller.Main", {
+  public onInit(): void {
+    // Initialize view model
+    this._oViewModel = new JSONModel({
+      busy: false,
+      delay: 0,
+      currency: "USD",
+      itemCount: 0
+    } as ViewModelData);
+    this.setModel(this._oViewModel, "view");
 
-        /* =========================================================== */
-        /* Lifecycle Methods                                           */
-        /* =========================================================== */
+    // Attach route handlers
+    this.getRouter()
+      .getRoute("main")
+      ?.attachPatternMatched(this._onRouteMatched, this);
+  }
 
-        /**
-         * Called when the controller is instantiated.
-         * @public
-         */
-        onInit: function() {
-            // Initialize local model
-            var oViewModel = new JSONModel({
-                busy: false,
-                delay: 0,
-                currency: "USD"
-            });
-            this.getView().setModel(oViewModel, "view");
+  public onBeforeRendering(): void {
+    // Pre-render logic
+  }
 
-            // Attach route matched handler
-            this.getOwnerComponent().getRouter()
-                .getRoute("main")
-                .attachPatternMatched(this._onRouteMatched, this);
-        },
+  public onAfterRendering(): void {
+    // Post-render logic - DOM is available
+  }
 
-        /**
-         * Called before the view is rendered.
-         * @public
-         */
-        onBeforeRendering: function() {
-            // Pre-render logic
-        },
+  public onExit(): void {
+    // Cleanup resources
+  }
 
-        /**
-         * Called after the view is rendered.
-         * @public
-         */
-        onAfterRendering: function() {
-            // DOM manipulation if needed
-        },
+  /* =========================================================== */
+  /* Event Handlers                                              */
+  /* =========================================================== */
 
-        /**
-         * Called when the controller is destroyed.
-         * @public
-         */
-        onExit: function() {
-            // Cleanup resources
-        },
+  public onItemPress(oEvent: Event): void {
+    const oItem = oEvent.getSource() as ListItemBase;
+    const oContext = oItem.getBindingContext() as Context;
+    const sProductId = oContext.getProperty("ProductID") as string;
 
-        /* =========================================================== */
-        /* Event Handlers                                              */
-        /* =========================================================== */
+    this.navTo("detail", { productId: sProductId });
+  }
 
-        /**
-         * Handle button press event.
-         * @param {sap.ui.base.Event} oEvent - The press event
-         * @public
-         */
-        onButtonPress: function(oEvent) {
-            var oButton = oEvent.getSource();
-            MessageToast.show("Button pressed: " + oButton.getText());
-        },
+  public onSearch(oEvent: Event): void {
+    const sQuery = (oEvent.getParameter("query") as string) || "";
+    const oList = this.byId("productList") as List;
+    const oBinding = oList.getBinding("items");
 
-        /**
-         * Handle list item press.
-         * @param {sap.ui.base.Event} oEvent - The press event
-         * @public
-         */
-        onListItemPress: function(oEvent) {
-            var oItem = oEvent.getSource();
-            var oContext = oItem.getBindingContext();
-            var sId = oContext.getProperty("id");
+    const aFilters: Filter[] = [];
+    if (sQuery) {
+      aFilters.push(
+        new Filter({
+          filters: [
+            new Filter("Name", FilterOperator.Contains, sQuery),
+            new Filter("Description", FilterOperator.Contains, sQuery)
+          ],
+          and: false
+        })
+      );
+    }
 
-            this.getOwnerComponent().getRouter().navTo("detail", {
-                id: sId
-            });
-        },
+    oBinding?.filter(aFilters);
+  }
 
-        /**
-         * Handle delete action.
-         * @param {sap.ui.base.Event} oEvent - The press event
-         * @public
-         */
-        onDelete: function(oEvent) {
-            var that = this;
+  public onNameChange(oEvent: Event): void {
+    const oInput = oEvent.getSource() as Input;
+    const sValue = oInput.getValue();
 
-            MessageBox.confirm("Are you sure you want to delete?", {
-                title: "Confirm Delete",
-                onClose: function(oAction) {
-                    if (oAction === MessageBox.Action.OK) {
-                        that._performDelete();
-                    }
-                }
-            });
-        },
+    if (sValue.length < 3) {
+      oInput.setValueState("Error");
+      oInput.setValueStateText(this.getText("minLengthError", ["3"]));
+    } else {
+      oInput.setValueState("None");
+      oInput.setValueStateText("");
+    }
+  }
 
-        /* =========================================================== */
-        /* Private Methods                                             */
-        /* =========================================================== */
+  public onDelete(oEvent: Event): void {
+    const oItem = oEvent.getSource() as ListItemBase;
+    const oContext = oItem.getBindingContext() as Context;
+    const sName = oContext.getProperty("Name") as string;
 
-        /**
-         * Handle route matched event.
-         * @param {sap.ui.base.Event} oEvent - The route matched event
-         * @private
-         */
-        _onRouteMatched: function(oEvent) {
-            var oArgs = oEvent.getParameter("arguments");
-            this._loadData(oArgs.id);
-        },
-
-        /**
-         * Load data for the view.
-         * @param {string} sId - The ID to load
-         * @private
-         */
-        _loadData: function(sId) {
-            var oModel = this.getView().getModel();
-            // Load data logic
-        },
-
-        /**
-         * Perform the delete operation.
-         * @private
-         */
-        _performDelete: function() {
-            // Delete logic
-            MessageToast.show("Item deleted");
-        },
-
-        /* =========================================================== */
-        /* Helper Methods                                              */
-        /* =========================================================== */
-
-        /**
-         * Get the resource bundle for i18n.
-         * @returns {sap.base.i18n.ResourceBundle} The resource bundle
-         * @public
-         */
-        getResourceBundle: function() {
-            return this.getOwnerComponent().getModel("i18n").getResourceBundle();
-        },
-
-        /**
-         * Get translated text.
-         * @param {string} sKey - The i18n key
-         * @param {array} aArgs - Optional arguments
-         * @returns {string} The translated text
-         * @public
-         */
-        getText: function(sKey, aArgs) {
-            return this.getResourceBundle().getText(sKey, aArgs);
+    MessageBox.confirm(this.getText("confirmDelete", [sName]), {
+      title: this.getText("delete"),
+      onClose: (oAction: string) => {
+        if (oAction === MessageBox.Action.OK) {
+          this._performDelete(oContext.getPath());
         }
+      }
     });
-});
+  }
+
+  /* =========================================================== */
+  /* Private Methods                                             */
+  /* =========================================================== */
+
+  private _onRouteMatched(oEvent: Route$PatternMatchedEvent): void {
+    this._loadData();
+  }
+
+  private _loadData(): void {
+    this._setViewBusy(true);
+    // Load data logic
+    setTimeout(() => {
+      this._setViewBusy(false);
+    }, 500);
+  }
+
+  private _setViewBusy(bBusy: boolean): void {
+    this._oViewModel.setProperty("/busy", bBusy);
+  }
+
+  private _performDelete(sPath: string): void {
+    // Delete logic
+    MessageToast.show(this.getText("deleteSuccess"));
+  }
+}
 ```
 
-### Controller Lifecycle Methods
+### Controller Lifecycle
 
 | Method | When Called | Frequency | Use Case |
 |--------|-------------|-----------|----------|
 | `onInit()` | View instantiation | Once | Setup models, attach events |
 | `onBeforeRendering()` | Before render | Each render | Pre-render preparations |
-| `onAfterRendering()` | After render | Each render | DOM access, jQuery plugins |
+| `onAfterRendering()` | After render | Each render | DOM access |
 | `onExit()` | View destruction | Once | Cleanup, detach events |
-
-### Accessing View Elements
-
-```javascript
-// Get control by ID
-var oInput = this.byId("myInput");
-
-// Get the view
-var oView = this.getView();
-
-// Get owner component
-var oComponent = this.getOwnerComponent();
-
-// Get router
-var oRouter = this.getOwnerComponent().getRouter();
-
-// Get model
-var oModel = this.getView().getModel();
-var oNamedModel = this.getView().getModel("modelName");
-```
-
-### Base Controller Pattern
-
-Create a reusable base controller:
-
-```javascript
-// BaseController.js
-sap.ui.define([
-    "sap/ui/core/mvc/Controller",
-    "sap/ui/core/routing/History"
-], function(Controller, History) {
-    "use strict";
-
-    return Controller.extend("myapp.controller.BaseController", {
-
-        getRouter: function() {
-            return this.getOwnerComponent().getRouter();
-        },
-
-        getModel: function(sName) {
-            return this.getView().getModel(sName);
-        },
-
-        setModel: function(oModel, sName) {
-            return this.getView().setModel(oModel, sName);
-        },
-
-        getResourceBundle: function() {
-            return this.getOwnerComponent().getModel("i18n").getResourceBundle();
-        },
-
-        onNavBack: function() {
-            var sPreviousHash = History.getInstance().getPreviousHash();
-
-            if (sPreviousHash !== undefined) {
-                window.history.go(-1);
-            } else {
-                this.getRouter().navTo("main", {}, true);
-            }
-        }
-    });
-});
-```
-
-Usage in other controllers:
-
-```javascript
-sap.ui.define([
-    "myapp/controller/BaseController"
-], function(BaseController) {
-    "use strict";
-
-    return BaseController.extend("myapp.controller.Detail", {
-        onInit: function() {
-            // Use inherited methods
-            this.getRouter().getRoute("detail")
-                .attachPatternMatched(this._onPatternMatched, this);
-        },
-
-        onBack: function() {
-            this.onNavBack();  // From BaseController
-        }
-    });
-});
-```
 
 ---
 
-## 7. Models
+## 8. Models
 
 ### Model Types Overview
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        SAPUI5 Models                         │
-├────────────────┬────────────────┬────────────────┬──────────┤
-│   JSON Model   │   XML Model    │   OData Model  │ Resource │
-│  (Client-Side) │  (Client-Side) │  (Server-Side) │  Model   │
-├────────────────┼────────────────┼────────────────┼──────────┤
-│ Small datasets │ XML data       │ SAP backends   │ i18n     │
-│ Local data     │ Legacy systems │ Large datasets │ texts    │
-│ Two-way bind   │ One-way bind   │ CRUD ops       │ Static   │
-└────────────────┴────────────────┴────────────────┴──────────┘
-```
+| Type | Class | Use Case |
+|------|-------|----------|
+| **JSON** | `sap.ui.model.json.JSONModel` | Client-side, small datasets |
+| **OData V2** | `sap.ui.model.odata.v2.ODataModel` | SAP backends |
+| **OData V4** | `sap.ui.model.odata.v4.ODataModel` | Modern OData |
+| **Resource** | `sap.ui.model.resource.ResourceModel` | i18n texts |
 
-### JSON Model
+### models.ts - Model Factory
 
-Most commonly used for client-side data:
+```typescript
+import JSONModel from "sap/ui/model/json/JSONModel";
+import BindingMode from "sap/ui/model/BindingMode";
+import Device from "sap/ui/Device";
 
-```javascript
-sap.ui.define([
-    "sap/ui/model/json/JSONModel"
-], function(JSONModel) {
-    "use strict";
+export interface DeviceModel {
+  support: typeof Device.support;
+  system: typeof Device.system;
+}
 
-    // Create with initial data
-    var oModel = new JSONModel({
-        products: [],
-        selectedProduct: null,
-        settings: {
-            currency: "USD",
-            showDetails: true
-        }
-    });
+export interface AppStateModel {
+  busy: boolean;
+  delay: number;
+  layout: string;
+}
 
-    // Set size limit (default is 100)
-    oModel.setSizeLimit(1000);
+/**
+ * Create device model
+ */
+export function createDeviceModel(): JSONModel {
+  const oModel = new JSONModel(Device);
+  oModel.setDefaultBindingMode(BindingMode.OneWay);
+  return oModel;
+}
 
-    // Set default binding mode
-    oModel.setDefaultBindingMode(sap.ui.model.BindingMode.TwoWay);
+/**
+ * Create application state model
+ */
+export function createAppStateModel(): JSONModel {
+  const oData: AppStateModel = {
+    busy: false,
+    delay: 0,
+    layout: "OneColumn"
+  };
 
-    // Load from URL
-    oModel.loadData("./model/data.json");
+  const oModel = new JSONModel(oData);
+  oModel.setDefaultBindingMode(BindingMode.TwoWay);
+  return oModel;
+}
 
-    // Load with callback
-    oModel.loadData("./model/data.json").then(function() {
-        console.log("Data loaded");
-    });
+/**
+ * Create product model with sample data
+ */
+export function createProductModel(): JSONModel {
+  const oData = {
+    products: [] as myapp.Product[],
+    selectedProduct: null as myapp.Product | null,
+    filters: {
+      search: "",
+      category: ""
+    }
+  };
 
-    // Get property
-    var sValue = oModel.getProperty("/settings/currency");
-
-    // Set property
-    oModel.setProperty("/selectedProduct", { id: "1", name: "Test" });
-
-    // Get entire data
-    var oData = oModel.getData();
-
-    // Set entire data
-    oModel.setData({ newData: true });
-
-    // Merge data
-    oModel.setData({ additionalProp: "value" }, true);  // merge = true
-
-    return oModel;
-});
-```
-
-### OData V2 Model
-
-For SAP backend integration:
-
-```javascript
-sap.ui.define([
-    "sap/ui/model/odata/v2/ODataModel"
-], function(ODataModel) {
-    "use strict";
-
-    // Create OData V2 Model
-    var oModel = new ODataModel({
-        serviceUrl: "/sap/opu/odata/sap/ZPRODUCT_SRV/",
-        defaultBindingMode: sap.ui.model.BindingMode.TwoWay,
-        useBatch: true,
-        defaultCountMode: sap.ui.model.odata.CountMode.Inline
-    });
-
-    // Read operation
-    oModel.read("/Products", {
-        urlParameters: {
-            "$top": 10,
-            "$skip": 0,
-            "$orderby": "Name"
-        },
-        filters: [
-            new sap.ui.model.Filter("Category", sap.ui.model.FilterOperator.EQ, "Electronics")
-        ],
-        success: function(oData) {
-            console.log("Products:", oData.results);
-        },
-        error: function(oError) {
-            console.error("Error:", oError);
-        }
-    });
-
-    // Create operation
-    oModel.create("/Products", {
-        Name: "New Product",
-        Price: 99.99
-    }, {
-        success: function(oData) {
-            console.log("Created:", oData);
-        },
-        error: function(oError) {
-            console.error("Error:", oError);
-        }
-    });
-
-    // Update operation
-    oModel.update("/Products('123')", {
-        Price: 89.99
-    }, {
-        success: function() {
-            console.log("Updated");
-        }
-    });
-
-    // Delete operation
-    oModel.remove("/Products('123')", {
-        success: function() {
-            console.log("Deleted");
-        }
-    });
-
-    // Batch operations
-    oModel.setDeferredGroups(["batchGroup"]);
-
-    oModel.create("/Products", product1, { groupId: "batchGroup" });
-    oModel.create("/Products", product2, { groupId: "batchGroup" });
-
-    oModel.submitChanges({
-        groupId: "batchGroup",
-        success: function() {
-            console.log("Batch completed");
-        }
-    });
-
-    return oModel;
-});
+  const oModel = new JSONModel(oData);
+  oModel.setSizeLimit(1000);
+  return oModel;
+}
 ```
 
-### OData V4 Model
+### Typed JSON Model Usage
 
-Modern OData standard:
+```typescript
+import JSONModel from "sap/ui/model/json/JSONModel";
 
-```javascript
-sap.ui.define([
-    "sap/ui/model/odata/v4/ODataModel"
-], function(ODataModel) {
-    "use strict";
+interface UserData {
+  id: string;
+  name: string;
+  email: string;
+  role: "admin" | "user" | "guest";
+  preferences: {
+    theme: string;
+    language: string;
+    notifications: boolean;
+  };
+}
 
-    // Create OData V4 Model
-    var oModel = new ODataModel({
-        serviceUrl: "/sap/opu/odata4/sap/API_PRODUCT/",
-        synchronizationMode: "None",
-        groupId: "$auto",
-        autoExpandSelect: true
-    });
+// Create typed model
+const userData: UserData = {
+  id: "1",
+  name: "John Doe",
+  email: "john@example.com",
+  role: "admin",
+  preferences: {
+    theme: "sap_horizon",
+    language: "en",
+    notifications: true
+  }
+};
 
-    // V4 uses binding-based operations
-    // Create in controller:
-    var oListBinding = oModel.bindList("/Products");
+const oUserModel = new JSONModel(userData);
 
-    // Create new entry
-    var oContext = oListBinding.create({
-        Name: "New Product",
-        Price: 99.99
-    });
+// Type-safe access
+const sName = oUserModel.getProperty("/name") as string;
+const sRole = oUserModel.getProperty("/role") as UserData["role"];
+const bNotifications = oUserModel.getProperty("/preferences/notifications") as boolean;
 
-    // Wait for creation
-    oContext.created().then(function() {
-        console.log("Created successfully");
-    });
-
-    // Delete
-    oContext.delete();
-
-    return oModel;
-});
-```
-
-### Resource Model (i18n)
-
-For translations:
-
-```javascript
-sap.ui.define([
-    "sap/ui/model/resource/ResourceModel"
-], function(ResourceModel) {
-    "use strict";
-
-    var oModel = new ResourceModel({
-        bundleName: "myapp.i18n.i18n",
-        supportedLocales: ["en", "de", "fr"],
-        fallbackLocale: "en"
-    });
-
-    // Get resource bundle
-    var oBundle = oModel.getResourceBundle();
-
-    // Get text
-    var sText = oBundle.getText("welcomeMessage", ["John"]);
-
-    return oModel;
-});
-```
-
-### Model Binding Modes
-
-| Mode | Direction | Description |
-|------|-----------|-------------|
-| `OneWay` | Model → View | View reflects model changes |
-| `TwoWay` | Model ↔ View | Bidirectional synchronization |
-| `OneTime` | Model → View (once) | Initial value only |
-
-```javascript
-// Set default binding mode for model
-oModel.setDefaultBindingMode(sap.ui.model.BindingMode.TwoWay);
-
-// Set binding mode for specific binding in XML
-// {path: '/name', mode: 'OneWay'}
+// Type-safe update
+oUserModel.setProperty("/preferences/theme", "sap_horizon_dark");
 ```
 
 ---
 
-## 8. Data Binding
+## 9. Data Binding
 
-### Binding Syntax
+### Binding Types
 
-#### Simple Property Binding
+| Type | Description | Example |
+|------|-------------|---------|
+| **Property** | Bind single property | `text="{/name}"` |
+| **Aggregation** | Bind collections | `items="{/products}"` |
+| **Element** | Bind context | `binding="{/product}"` |
+| **Expression** | Inline expressions | `visible="{= ${/count} > 0}"` |
+
+### Property Binding
+
 ```xml
 <!-- Absolute path -->
 <Text text="{/company/name}" />
 
-<!-- Relative path (requires element binding context) -->
+<!-- Relative path (with context) -->
 <Text text="{name}" />
 
 <!-- Named model -->
-<Text text="{myModel>/company/name}" />
-```
+<Text text="{view>/busy}" />
 
-#### Complex Binding Syntax
-```xml
-<!-- With binding options -->
+<!-- With type and format -->
 <Text text="{
-    path: '/date',
-    type: 'sap.ui.model.type.Date',
-    formatOptions: { style: 'long' }
+    path: '/price',
+    type: 'sap.ui.model.type.Currency',
+    formatOptions: { showMeasure: false }
 }" />
-```
-
-### Property Binding
-
-Bind a control property to model data:
-
-```xml
-<Input value="{/userName}" />
-<Text text="{/userDetails/email}" />
-<CheckBox selected="{/settings/notifications}" />
-```
-
-In JavaScript:
-```javascript
-var oInput = new sap.m.Input({
-    value: "{/userName}"
-});
-
-// Or using bindProperty
-oInput.bindProperty("value", {
-    path: "/userName",
-    type: new sap.ui.model.type.String()
-});
 ```
 
 ### Aggregation Binding
 
-Bind collections to list controls:
-
 ```xml
+<!-- Simple binding -->
 <List items="{/products}">
-    <StandardListItem
-        title="{name}"
-        description="{description}"
-        info="{price}"
-        type="Navigation" />
+    <StandardListItem title="{Name}" description="{Price}" />
 </List>
 
-<!-- With sorting and filtering -->
+<!-- With sorter and filter -->
 <List items="{
     path: '/products',
-    sorter: { path: 'name' },
-    filters: [{ path: 'active', operator: 'EQ', value1: true }]
+    sorter: { path: 'Name', descending: false },
+    filters: [
+        { path: 'InStock', operator: 'EQ', value1: true }
+    ]
 }">
-    <StandardListItem title="{name}" />
+    <StandardListItem title="{Name}" />
 </List>
 ```
 
-In JavaScript:
-```javascript
-var oList = new sap.m.List();
-
-oList.bindAggregation("items", {
-    path: "/products",
-    template: new sap.m.StandardListItem({
-        title: "{name}",
-        description: "{price}"
-    }),
-    sorter: new sap.ui.model.Sorter("name"),
-    filters: [
-        new sap.ui.model.Filter("active", sap.ui.model.FilterOperator.EQ, true)
-    ]
-});
-```
-
-### Element Binding (Context Binding)
-
-Bind a context to a container:
+### Expression Binding
 
 ```xml
-<VBox binding="{/products/0}">
-    <Text text="{name}" />
-    <Text text="{price}" />
-</VBox>
-```
+<!-- Ternary operator -->
+<ObjectStatus
+    text="{= ${status} === 'active' ? 'Available' : 'Unavailable'}"
+    state="{= ${status} === 'active' ? 'Success' : 'Error'}" />
 
-In JavaScript:
-```javascript
-this.getView().bindElement({
-    path: "/products/0",
-    events: {
-        change: this._onBindingChange.bind(this),
-        dataRequested: function() {
-            // Show busy indicator
-        },
-        dataReceived: function() {
-            // Hide busy indicator
-        }
-    }
-});
+<!-- Boolean expressions -->
+<Button enabled="{= ${/items}.length > 0}" />
+<Panel visible="{= !!${/selectedProduct}}" />
+
+<!-- Calculations -->
+<Text text="{= ${/quantity} * ${/price}}" />
+
+<!-- Comparisons (XML escaped) -->
+<Text visible="{= ${/quantity} &lt; 10}" text="Low Stock!" />
+<Text visible="{= ${/price} &gt;= 100}" text="Premium" />
 ```
 
 ### Data Types
-
-SAPUI5 provides built-in data types for formatting and validation:
 
 ```xml
 <!-- String with constraints -->
 <Input value="{
     path: '/name',
     type: 'sap.ui.model.type.String',
-    constraints: { minLength: 2, maxLength: 50 }
+    constraints: { minLength: 2, maxLength: 100 }
 }" />
 
 <!-- Integer -->
 <Input value="{
     path: '/quantity',
     type: 'sap.ui.model.type.Integer',
-    constraints: { minimum: 0, maximum: 100 }
-}" />
-
-<!-- Float/Currency -->
-<Text text="{
-    path: '/price',
-    type: 'sap.ui.model.type.Currency',
-    formatOptions: { showMeasure: false }
+    constraints: { minimum: 0, maximum: 999 }
 }" />
 
 <!-- Date -->
@@ -1177,67 +1034,26 @@ SAPUI5 provides built-in data types for formatting and validation:
     formatOptions: { pattern: 'yyyy-MM-dd' }
 }" />
 
-<!-- DateTime -->
-<DateTimePicker value="{
-    path: '/createdAt',
-    type: 'sap.ui.model.type.DateTime'
-}" />
-```
-
-### Composite Binding
-
-Combine multiple model values:
-
-```xml
-<!-- Simple concatenation -->
-<Text text="{/firstName} {/lastName}" />
-
-<!-- With formatter -->
+<!-- Currency -->
 <Text text="{
-    parts: [
-        { path: '/firstName' },
-        { path: '/lastName' }
-    ],
-    formatter: '.formatFullName'
+    parts: ['/price', '/currency'],
+    type: 'sap.ui.model.type.Currency',
+    formatOptions: { showMeasure: true }
 }" />
-
-<!-- Currency with amount and currency code -->
-<Text text="{
-    parts: [
-        { path: '/amount' },
-        { path: '/currency' }
-    ],
-    type: 'sap.ui.model.type.Currency'
-}" />
-```
-
-Controller formatter:
-```javascript
-formatFullName: function(sFirstName, sLastName) {
-    return sFirstName + " " + sLastName;
-}
 ```
 
 ---
 
-## 9. Controls Library
+## 10. Controls Library
 
-### Control Categories
-
-#### Layout Controls (`sap.ui.layout`)
+### Layout Controls
 
 ```xml
 <!-- VerticalLayout -->
-<l:VerticalLayout>
+<l:VerticalLayout class="sapUiContentPadding">
     <Text text="Item 1" />
     <Text text="Item 2" />
 </l:VerticalLayout>
-
-<!-- HorizontalLayout -->
-<l:HorizontalLayout>
-    <Button text="Left" />
-    <Button text="Right" />
-</l:HorizontalLayout>
 
 <!-- Grid -->
 <l:Grid defaultSpan="L4 M6 S12">
@@ -1246,25 +1062,41 @@ formatFullName: function(sFirstName, sLastName) {
     <Text text="Cell 3" />
 </l:Grid>
 
-<!-- Form Layout -->
+<!-- FlexBox -->
+<FlexBox direction="Row" justifyContent="SpaceBetween" alignItems="Center">
+    <Text text="Left" />
+    <Text text="Right" />
+</FlexBox>
+
+<!-- SimpleForm -->
 <f:SimpleForm editable="true" layout="ResponsiveGridLayout">
     <f:content>
         <Label text="Name" />
         <Input value="{/name}" />
         <Label text="Email" />
-        <Input value="{/email}" />
+        <Input value="{/email}" type="Email" />
     </f:content>
 </f:SimpleForm>
 ```
 
-#### Container Controls (`sap.m`)
+### Container Controls
 
 ```xml
 <!-- Page -->
-<Page title="My Page" showNavButton="true" navButtonPress=".onNavBack">
+<Page title="{i18n>title}" showNavButton="true" navButtonPress=".onNavBack">
+    <headerContent>
+        <Button icon="sap-icon://action" press=".onAction" />
+    </headerContent>
     <content>
-        <!-- Page content -->
+        <!-- Content here -->
     </content>
+    <footer>
+        <Bar>
+            <contentRight>
+                <Button text="Save" type="Emphasized" press=".onSave" />
+            </contentRight>
+        </Bar>
+    </footer>
 </Page>
 
 <!-- Panel -->
@@ -1275,741 +1107,487 @@ formatFullName: function(sFirstName, sLastName) {
 </Panel>
 
 <!-- IconTabBar -->
-<IconTabBar>
+<IconTabBar select=".onTabSelect">
     <items>
-        <IconTabFilter text="Tab 1" key="tab1">
-            <Text text="Content 1" />
+        <IconTabFilter text="Info" key="info" icon="sap-icon://hint">
+            <Text text="Information content" />
         </IconTabFilter>
-        <IconTabFilter text="Tab 2" key="tab2">
-            <Text text="Content 2" />
+        <IconTabFilter text="Products" key="products" icon="sap-icon://product">
+            <List items="{/products}">
+                <StandardListItem title="{Name}" />
+            </List>
         </IconTabFilter>
     </items>
 </IconTabBar>
-
-<!-- Dialog -->
-<Dialog id="myDialog" title="Confirm">
-    <content>
-        <Text text="Are you sure?" />
-    </content>
-    <buttons>
-        <Button text="OK" press=".onConfirm" />
-        <Button text="Cancel" press=".onCancel" />
-    </buttons>
-</Dialog>
 ```
 
-#### Input Controls
+### Input Controls
 
 ```xml
 <!-- Input -->
-<Input value="{/name}" placeholder="Enter name" />
+<Input
+    value="{/name}"
+    placeholder="{i18n>enterName}"
+    required="true"
+    liveChange=".onLiveChange" />
 
 <!-- TextArea -->
-<TextArea value="{/description}" rows="5" />
+<TextArea
+    value="{/description}"
+    rows="5"
+    growing="true"
+    growingMaxLines="10" />
 
 <!-- Select -->
-<Select selectedKey="{/selectedCountry}">
-    <items>
-        <core:Item key="US" text="United States" />
-        <core:Item key="DE" text="Germany" />
-    </items>
+<Select selectedKey="{/selectedCountry}" forceSelection="false">
+    <core:Item key="" text="{i18n>selectCountry}" />
+    <core:Item key="US" text="United States" />
+    <core:Item key="DE" text="Germany" />
 </Select>
 
-<!-- ComboBox -->
-<ComboBox selectedKey="{/city}" items="{/cities}">
-    <core:Item key="{key}" text="{name}" />
+<!-- ComboBox with binding -->
+<ComboBox
+    selectedKey="{/categoryId}"
+    items="{/categories}">
+    <core:Item key="{id}" text="{name}" />
 </ComboBox>
 
-<!-- MultiComboBox -->
-<MultiComboBox selectedKeys="{/selectedTags}" items="{/tags}">
-    <core:Item key="{id}" text="{name}" />
-</MultiComboBox>
-
 <!-- DatePicker -->
-<DatePicker value="{/date}" valueFormat="yyyy-MM-dd" displayFormat="long" />
-
-<!-- TimePicker -->
-<TimePicker value="{/time}" valueFormat="HH:mm" />
-
-<!-- Slider -->
-<Slider value="{/volume}" min="0" max="100" />
+<DatePicker
+    value="{/date}"
+    valueFormat="yyyy-MM-dd"
+    displayFormat="long"
+    change=".onDateChange" />
 
 <!-- Switch -->
-<Switch state="{/isActive}" customTextOn="Yes" customTextOff="No" />
-
-<!-- RadioButtonGroup -->
-<RadioButtonGroup selectedIndex="{/selectedOption}">
-    <buttons>
-        <RadioButton text="Option 1" />
-        <RadioButton text="Option 2" />
-    </buttons>
-</RadioButtonGroup>
+<Switch
+    state="{/isActive}"
+    customTextOn="Yes"
+    customTextOff="No"
+    change=".onSwitchChange" />
 ```
 
-#### List Controls
+### List Controls
 
 ```xml
 <!-- List with StandardListItem -->
-<List items="{/products}" mode="SingleSelectMaster">
+<List
+    id="productList"
+    items="{/products}"
+    mode="SingleSelectMaster"
+    selectionChange=".onSelectionChange">
+    <headerToolbar>
+        <Toolbar>
+            <Title text="Products ({= ${/products}.length})" />
+            <ToolbarSpacer />
+            <SearchField width="30%" search=".onSearch" />
+        </Toolbar>
+    </headerToolbar>
     <StandardListItem
-        title="{name}"
-        description="{description}"
-        icon="{icon}"
-        info="{status}"
+        title="{Name}"
+        description="{Description}"
+        info="{Price} {Currency}"
+        infoState="{= ${InStock} ? 'Success' : 'Error'}"
         type="Navigation"
         press=".onItemPress" />
 </List>
 
-<!-- List with ObjectListItem -->
-<List items="{/orders}">
-    <ObjectListItem
-        title="{orderNumber}"
-        number="{amount}"
-        numberUnit="{currency}">
-        <firstStatus>
-            <ObjectStatus text="{status}" state="{statusState}" />
-        </firstStatus>
-        <attributes>
-            <ObjectAttribute text="{customer}" />
-            <ObjectAttribute text="{date}" />
-        </attributes>
-    </ObjectListItem>
-</List>
-
 <!-- Table -->
-<Table items="{/employees}">
+<Table
+    id="productTable"
+    items="{/products}"
+    growing="true"
+    growingThreshold="20">
+    <headerToolbar>
+        <OverflowToolbar>
+            <Title text="Products" />
+            <ToolbarSpacer />
+            <Button icon="sap-icon://add" press=".onCreate" />
+        </OverflowToolbar>
+    </headerToolbar>
     <columns>
         <Column><Text text="Name" /></Column>
-        <Column><Text text="Department" /></Column>
-        <Column hAlign="End"><Text text="Salary" /></Column>
+        <Column><Text text="Category" /></Column>
+        <Column hAlign="End"><Text text="Price" /></Column>
+        <Column hAlign="Center"><Text text="Stock" /></Column>
     </columns>
     <items>
-        <ColumnListItem>
-            <Text text="{name}" />
-            <Text text="{department}" />
-            <Text text="{salary}" />
+        <ColumnListItem type="Navigation" press=".onItemPress">
+            <Text text="{Name}" />
+            <Text text="{Category}" />
+            <ObjectNumber number="{Price}" unit="{Currency}" />
+            <ObjectStatus
+                text="{= ${InStock} ? 'In Stock' : 'Out of Stock'}"
+                state="{= ${InStock} ? 'Success' : 'Error'}" />
         </ColumnListItem>
     </items>
 </Table>
 ```
 
-#### Display Controls
-
-```xml
-<!-- Text -->
-<Text text="{/message}" maxLines="2" />
-
-<!-- FormattedText -->
-<FormattedText htmlText="&lt;strong&gt;Bold&lt;/strong&gt; text" />
-
-<!-- Title -->
-<Title text="{/pageTitle}" level="H1" />
-
-<!-- Label -->
-<Label text="Name" required="true" labelFor="nameInput" />
-
-<!-- ObjectHeader -->
-<ObjectHeader
-    title="{/product/name}"
-    number="{/product/price}"
-    numberUnit="USD">
-    <statuses>
-        <ObjectStatus text="Available" state="Success" />
-    </statuses>
-</ObjectHeader>
-
-<!-- ObjectStatus -->
-<ObjectStatus text="{status}" state="{= ${status} === 'Active' ? 'Success' : 'Error'}" />
-
-<!-- ProgressIndicator -->
-<ProgressIndicator percentValue="{/progress}" displayValue="{/progress}%" />
-
-<!-- BusyIndicator -->
-<BusyIndicator size="Large" />
-```
-
 ---
 
-## 10. manifest.json (App Descriptor)
-
-The `manifest.json` is the central configuration file for SAPUI5 applications.
+## 11. manifest.json (App Descriptor)
 
 ### Complete Example
 
 ```json
 {
-    "_version": "1.42.0",
+  "_version": "1.49.0",
 
-    "sap.app": {
-        "id": "com.mycompany.myapp",
-        "type": "application",
-        "i18n": "i18n/i18n.properties",
-        "title": "{{appTitle}}",
-        "description": "{{appDescription}}",
-        "applicationVersion": {
-            "version": "1.0.0"
-        },
-        "dataSources": {
-            "mainService": {
-                "uri": "/sap/opu/odata/sap/ZPRODUCT_SRV/",
-                "type": "OData",
-                "settings": {
-                    "odataVersion": "2.0",
-                    "localUri": "localService/metadata.xml"
-                }
-            }
-        },
-        "crossNavigation": {
-            "inbounds": {
-                "displayProducts": {
-                    "semanticObject": "Product",
-                    "action": "display",
-                    "signature": {
-                        "parameters": {},
-                        "additionalParameters": "allowed"
-                    }
-                }
-            }
-        }
+  "sap.app": {
+    "id": "com.mycompany.myapp",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "applicationVersion": {
+      "version": "1.0.0"
     },
-
-    "sap.ui": {
-        "technology": "UI5",
-        "icons": {
-            "icon": "sap-icon://product",
-            "favIcon": "icon/favicon.ico"
-        },
-        "deviceTypes": {
-            "desktop": true,
-            "tablet": true,
-            "phone": true
+    "dataSources": {
+      "mainService": {
+        "uri": "/sap/opu/odata/sap/ZPRODUCT_SRV/",
+        "type": "OData",
+        "settings": {
+          "odataVersion": "2.0",
+          "localUri": "localService/metadata.xml"
         }
-    },
-
-    "sap.ui5": {
-        "flexEnabled": true,
-        "rootView": {
-            "viewName": "com.mycompany.myapp.view.App",
-            "type": "XML",
-            "async": true,
-            "id": "app"
-        },
-        "dependencies": {
-            "minUI5Version": "1.108.0",
-            "libs": {
-                "sap.m": {},
-                "sap.ui.core": {},
-                "sap.ui.layout": {},
-                "sap.f": {}
-            }
-        },
-        "contentDensities": {
-            "compact": true,
-            "cozy": true
-        },
-        "models": {
-            "i18n": {
-                "type": "sap.ui.model.resource.ResourceModel",
-                "settings": {
-                    "bundleName": "com.mycompany.myapp.i18n.i18n",
-                    "supportedLocales": ["en", "de"],
-                    "fallbackLocale": "en"
-                }
-            },
-            "": {
-                "dataSource": "mainService",
-                "preload": true,
-                "settings": {
-                    "defaultBindingMode": "TwoWay",
-                    "defaultCountMode": "Inline",
-                    "refreshAfterChange": false
-                }
-            },
-            "device": {
-                "type": "sap.ui.model.json.JSONModel",
-                "settings": {
-                    "data": {}
-                },
-                "preload": true
-            }
-        },
-        "resources": {
-            "css": [
-                {
-                    "uri": "css/style.css"
-                }
-            ]
-        },
-        "routing": {
-            "config": {
-                "routerClass": "sap.m.routing.Router",
-                "viewType": "XML",
-                "viewPath": "com.mycompany.myapp.view",
-                "controlId": "app",
-                "controlAggregation": "pages",
-                "async": true,
-                "bypassed": {
-                    "target": "notFound"
-                }
-            },
-            "routes": [
-                {
-                    "name": "main",
-                    "pattern": "",
-                    "target": "main"
-                },
-                {
-                    "name": "detail",
-                    "pattern": "product/{productId}",
-                    "target": "detail"
-                },
-                {
-                    "name": "create",
-                    "pattern": "product/create",
-                    "target": "create"
-                }
-            ],
-            "targets": {
-                "main": {
-                    "viewName": "Main",
-                    "viewLevel": 1
-                },
-                "detail": {
-                    "viewName": "Detail",
-                    "viewLevel": 2
-                },
-                "create": {
-                    "viewName": "Create",
-                    "viewLevel": 2
-                },
-                "notFound": {
-                    "viewName": "NotFound",
-                    "viewLevel": 3
-                }
-            }
-        }
-    },
-
-    "sap.platform.abap": {
-        "uri": "/sap/bc/ui5_ui5/sap/zproduct_app"
+      }
     }
+  },
+
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "sap-icon://product"
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+
+  "sap.ui5": {
+    "flexEnabled": true,
+    "rootView": {
+      "viewName": "myapp.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "app"
+    },
+    "dependencies": {
+      "minUI5Version": "1.120.0",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.ui.layout": {},
+        "sap.f": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "myapp.i18n.i18n",
+          "supportedLocales": ["en", "de"],
+          "fallbackLocale": "en",
+          "async": true
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "defaultBindingMode": "TwoWay",
+          "defaultCountMode": "Inline",
+          "useBatch": true
+        }
+      }
+    },
+    "resources": {
+      "css": [
+        { "uri": "css/style.css" }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "viewPath": "myapp.view",
+        "controlId": "app",
+        "controlAggregation": "pages",
+        "async": true,
+        "bypassed": {
+          "target": "notFound"
+        }
+      },
+      "routes": [
+        {
+          "name": "main",
+          "pattern": "",
+          "target": "main"
+        },
+        {
+          "name": "detail",
+          "pattern": "product/{productId}",
+          "target": "detail"
+        }
+      ],
+      "targets": {
+        "main": {
+          "viewName": "Main",
+          "viewLevel": 1
+        },
+        "detail": {
+          "viewName": "Detail",
+          "viewLevel": 2
+        },
+        "notFound": {
+          "viewName": "NotFound",
+          "viewLevel": 3
+        }
+      }
+    }
+  }
 }
 ```
-
-### Key Sections Explained
-
-| Section | Purpose |
-|---------|---------|
-| `sap.app` | General app info, data sources, cross-navigation |
-| `sap.ui` | UI technology, icons, device types |
-| `sap.ui5` | UI5-specific: models, routing, dependencies |
-| `sap.platform.abap` | ABAP deployment settings |
-| `sap.platform.hcp` | SAP BTP deployment settings |
 
 ---
 
-## 11. Routing and Navigation
-
-### Configuration
-
-Routing is configured in `manifest.json` under `sap.ui5.routing`:
-
-```json
-{
-    "sap.ui5": {
-        "routing": {
-            "config": {
-                "routerClass": "sap.m.routing.Router",
-                "viewType": "XML",
-                "viewPath": "myapp.view",
-                "controlId": "app",
-                "controlAggregation": "pages",
-                "async": true
-            },
-            "routes": [
-                {
-                    "name": "home",
-                    "pattern": "",
-                    "target": "home"
-                },
-                {
-                    "name": "productList",
-                    "pattern": "products",
-                    "target": "productList"
-                },
-                {
-                    "name": "productDetail",
-                    "pattern": "products/{productId}",
-                    "target": "productDetail"
-                },
-                {
-                    "name": "productEdit",
-                    "pattern": "products/{productId}/edit",
-                    "target": "productEdit"
-                },
-                {
-                    "name": "search",
-                    "pattern": "search:?query:",
-                    "target": "search"
-                }
-            ],
-            "targets": {
-                "home": {
-                    "viewName": "Home",
-                    "viewLevel": 1
-                },
-                "productList": {
-                    "viewName": "ProductList",
-                    "viewLevel": 2
-                },
-                "productDetail": {
-                    "viewName": "ProductDetail",
-                    "viewLevel": 3
-                },
-                "productEdit": {
-                    "viewName": "ProductEdit",
-                    "viewLevel": 3
-                },
-                "search": {
-                    "viewName": "Search",
-                    "viewLevel": 2
-                }
-            }
-        }
-    }
-}
-```
+## 12. Routing and Navigation
 
 ### Route Patterns
 
-| Pattern | Example URL | Parameters |
+| Pattern | URL Example | Parameters |
 |---------|-------------|------------|
 | `""` | `#/` | None |
 | `products` | `#/products` | None |
-| `products/{id}` | `#/products/123` | `id: "123"` |
-| `products/{id}/edit` | `#/products/123/edit` | `id: "123"` |
-| `search:?query:` | `#/search?query=test` | `query: "test"` (optional) |
-| `*path` | `#/any/path/here` | `path: "any/path/here"` |
+| `product/{id}` | `#/product/123` | `id: "123"` |
+| `search:?query:` | `#/search?query=test` | Optional query |
 
-### Navigation in Controller
+### Navigation in TypeScript Controller
 
-```javascript
-sap.ui.define([
-    "sap/ui/core/mvc/Controller",
-    "sap/ui/core/routing/History"
-], function(Controller, History) {
-    "use strict";
+```typescript
+import BaseController from "./BaseController";
+import Event from "sap/ui/base/Event";
+import ListItemBase from "sap/m/ListItemBase";
+import Context from "sap/ui/model/Context";
+import History from "sap/ui/core/routing/History";
+import { Route$PatternMatchedEvent } from "sap/ui/core/routing/Route";
 
-    return Controller.extend("myapp.controller.Main", {
+/**
+ * @namespace myapp.controller
+ */
+export default class ProductList extends BaseController {
 
-        onInit: function() {
-            // Attach route matched handler
-            var oRouter = this.getOwnerComponent().getRouter();
-            oRouter.getRoute("productDetail")
-                .attachPatternMatched(this._onProductMatched, this);
-        },
+  public onInit(): void {
+    this.getRouter()
+      .getRoute("productList")
+      ?.attachPatternMatched(this._onRouteMatched, this);
+  }
 
-        // Navigate to a route
-        onNavigateToDetail: function(oEvent) {
-            var oItem = oEvent.getSource();
-            var sProductId = oItem.getBindingContext().getProperty("ProductID");
+  /**
+   * Navigate to detail view
+   */
+  public onItemPress(oEvent: Event): void {
+    const oItem = oEvent.getSource() as ListItemBase;
+    const oContext = oItem.getBindingContext() as Context;
+    const sProductId = oContext.getProperty("ProductID") as string;
 
-            this.getOwnerComponent().getRouter().navTo("productDetail", {
-                productId: sProductId
-            });
-        },
+    this.navTo("detail", { productId: sProductId });
+  }
 
-        // Navigate with query parameters
-        onSearch: function(sQuery) {
-            this.getOwnerComponent().getRouter().navTo("search", {
-                "?query": {
-                    search: sQuery,
-                    page: 1
-                }
-            });
-        },
-
-        // Navigate back
-        onNavBack: function() {
-            var oHistory = History.getInstance();
-            var sPreviousHash = oHistory.getPreviousHash();
-
-            if (sPreviousHash !== undefined) {
-                window.history.go(-1);
-            } else {
-                this.getOwnerComponent().getRouter().navTo("home", {}, true);
-            }
-        },
-
-        // Handle route matched
-        _onProductMatched: function(oEvent) {
-            var sProductId = oEvent.getParameter("arguments").productId;
-
-            // Bind element to the view
-            this.getView().bindElement({
-                path: "/Products('" + sProductId + "')",
-                events: {
-                    change: this._onBindingChange.bind(this),
-                    dataRequested: function() {
-                        this.getView().setBusy(true);
-                    }.bind(this),
-                    dataReceived: function() {
-                        this.getView().setBusy(false);
-                    }.bind(this)
-                }
-            });
-        },
-
-        _onBindingChange: function() {
-            var oView = this.getView();
-            var oContext = oView.getBindingContext();
-
-            if (!oContext) {
-                // Product not found - navigate to not found page
-                this.getOwnerComponent().getRouter()
-                    .getTargets()
-                    .display("notFound");
-            }
-        }
+  /**
+   * Navigate with query parameters
+   */
+  public onSearch(sQuery: string): void {
+    this.navTo("search", {
+      "?query": {
+        search: sQuery
+      }
     });
-});
-```
+  }
 
-### Hash Changer
+  /**
+   * Navigate back with history check
+   */
+  public onNavBack(): void {
+    const sPreviousHash = History.getInstance().getPreviousHash();
 
-Direct hash manipulation (use sparingly):
-
-```javascript
-var oHashChanger = sap.ui.core.routing.HashChanger.getInstance();
-
-// Get current hash
-var sHash = oHashChanger.getHash();
-
-// Set hash
-oHashChanger.setHash("products/123");
-
-// Replace hash (no history entry)
-oHashChanger.replaceHash("products/456");
-```
-
-### Cross-Application Navigation (Fiori Launchpad)
-
-```javascript
-// Navigate to external app
-var oCrossAppNav = sap.ushell.Container.getService("CrossApplicationNavigation");
-
-oCrossAppNav.toExternal({
-    target: {
-        semanticObject: "SalesOrder",
-        action: "display"
-    },
-    params: {
-        orderNumber: "12345"
+    if (sPreviousHash !== undefined) {
+      window.history.go(-1);
+    } else {
+      this.navTo("main", {}, true /* replace */);
     }
-});
+  }
 
-// Check if navigation is supported
-oCrossAppNav.isNavigationSupported([{
-    target: {
-        semanticObject: "SalesOrder",
-        action: "display"
-    }
-}]).done(function(aResults) {
-    if (aResults[0].supported) {
-        // Navigation is supported
-    }
-});
+  /**
+   * Handle route matched
+   */
+  private _onRouteMatched(oEvent: Route$PatternMatchedEvent): void {
+    const oArgs = oEvent.getParameter("arguments") as Record<string, string>;
+    const oQuery = oArgs["?query"] as Record<string, string> | undefined;
 
-// Generate external link
-oCrossAppNav.hrefForExternal({
-    target: {
-        semanticObject: "SalesOrder",
-        action: "display"
-    },
-    params: {
-        orderNumber: "12345"
+    if (oQuery?.search) {
+      this._applySearch(oQuery.search);
     }
-});
+  }
+
+  private _applySearch(sQuery: string): void {
+    // Implementation
+  }
+}
 ```
 
 ---
 
-## 12. Fragments
+## 13. Fragments
 
-Fragments are reusable UI pieces that don't have their own controller. They use the controller of the hosting view.
+### XML Fragment Definition
 
-### XML Fragment
-
-**Dialog.fragment.xml:**
+**view/fragments/ProductDialog.fragment.xml:**
 ```xml
 <core:FragmentDefinition
     xmlns="sap.m"
-    xmlns:core="sap.ui.core">
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.ui.layout.form">
 
-    <Dialog id="confirmDialog" title="{i18n>confirmTitle}">
+    <Dialog id="productDialog" title="{i18n>productDetails}">
         <content>
-            <VBox class="sapUiSmallMargin">
-                <Text text="{i18n>confirmMessage}" />
-                <Input id="reasonInput"
-                       placeholder="{i18n>enterReason}"
-                       value="{/reason}" />
-            </VBox>
+            <f:SimpleForm editable="true" layout="ResponsiveGridLayout">
+                <f:content>
+                    <Label text="{i18n>name}" required="true" />
+                    <Input id="nameInput" value="{/Name}" />
+
+                    <Label text="{i18n>description}" />
+                    <TextArea value="{/Description}" rows="3" />
+
+                    <Label text="{i18n>price}" required="true" />
+                    <Input value="{/Price}" type="Number" />
+
+                    <Label text="{i18n>inStock}" />
+                    <Switch state="{/InStock}" />
+                </f:content>
+            </f:SimpleForm>
         </content>
         <beginButton>
-            <Button text="{i18n>confirm}"
-                    type="Emphasized"
-                    press=".onConfirmDialog" />
+            <Button text="{i18n>save}" type="Emphasized" press=".onSaveProduct" />
         </beginButton>
         <endButton>
-            <Button text="{i18n>cancel}"
-                    press=".onCancelDialog" />
+            <Button text="{i18n>cancel}" press=".onCancelDialog" />
         </endButton>
     </Dialog>
 
 </core:FragmentDefinition>
 ```
 
-**ProductCard.fragment.xml:**
-```xml
-<core:FragmentDefinition
-    xmlns="sap.m"
-    xmlns:core="sap.ui.core"
-    xmlns:f="sap.f">
+### Loading Fragments with TypeScript
 
-    <f:Card>
-        <f:header>
-            <f:cards.Header
-                title="{name}"
-                subtitle="{category}"
-                iconSrc="sap-icon://product" />
-        </f:header>
-        <f:content>
-            <VBox class="sapUiSmallMargin">
-                <ObjectStatus text="{status}" state="{statusState}" />
-                <Text text="{description}" maxLines="3" />
-                <HBox justifyContent="SpaceBetween">
-                    <Text text="{price} {currency}" />
-                    <Button icon="sap-icon://cart" press=".onAddToCart" />
-                </HBox>
-            </VBox>
-        </f:content>
-    </f:Card>
+```typescript
+import BaseController from "./BaseController";
+import Fragment from "sap/ui/core/Fragment";
+import Dialog from "sap/m/Dialog";
+import JSONModel from "sap/ui/model/json/JSONModel";
+import Input from "sap/m/Input";
+import MessageToast from "sap/m/MessageToast";
 
-</core:FragmentDefinition>
-```
+/**
+ * @namespace myapp.controller
+ */
+export default class ProductController extends BaseController {
 
-### Loading Fragments
+  private _pDialog: Promise<Dialog> | null = null;
+  private _oDialogModel: JSONModel | null = null;
 
-#### Lazy Loading (Recommended)
+  /**
+   * Open product dialog for creating/editing
+   */
+  public async onOpenProductDialog(oProduct?: myapp.Product): Promise<void> {
+    const oView = this.getView()!;
 
-```javascript
-sap.ui.define([
-    "sap/ui/core/mvc/Controller",
-    "sap/ui/core/Fragment"
-], function(Controller, Fragment) {
-    "use strict";
-
-    return Controller.extend("myapp.controller.Main", {
-
-        _pDialog: null,
-
-        onOpenDialog: function() {
-            var oView = this.getView();
-
-            // Lazy load - create only once
-            if (!this._pDialog) {
-                this._pDialog = Fragment.load({
-                    id: oView.getId(),
-                    name: "myapp.view.fragments.Dialog",
-                    controller: this
-                }).then(function(oDialog) {
-                    // Add as dependent for lifecycle management
-                    oView.addDependent(oDialog);
-                    return oDialog;
-                });
-            }
-
-            this._pDialog.then(function(oDialog) {
-                oDialog.open();
-            });
-        },
-
-        onConfirmDialog: function() {
-            // Handle confirm
-            this._closeDialog();
-        },
-
-        onCancelDialog: function() {
-            this._closeDialog();
-        },
-
-        _closeDialog: function() {
-            this.byId("confirmDialog").close();
-        }
+    // Initialize dialog model
+    this._oDialogModel = new JSONModel(oProduct || {
+      Name: "",
+      Description: "",
+      Price: 0,
+      InStock: true
     });
-});
+
+    // Lazy load dialog
+    if (!this._pDialog) {
+      this._pDialog = Fragment.load({
+        id: oView.getId(),
+        name: "myapp.view.fragments.ProductDialog",
+        controller: this
+      }).then((oDialog) => {
+        const dialog = oDialog as Dialog;
+        oView.addDependent(dialog);
+        return dialog;
+      });
+    }
+
+    const oDialog = await this._pDialog;
+    oDialog.setModel(this._oDialogModel);
+    oDialog.open();
+  }
+
+  /**
+   * Save product from dialog
+   */
+  public onSaveProduct(): void {
+    const oNameInput = this.byId("nameInput") as Input;
+    const sName = oNameInput.getValue();
+
+    if (!sName || sName.trim().length < 2) {
+      oNameInput.setValueState("Error");
+      oNameInput.setValueStateText(this.getText("nameRequired"));
+      return;
+    }
+
+    oNameInput.setValueState("None");
+
+    const oData = this._oDialogModel?.getData() as myapp.Product;
+    this._saveProduct(oData);
+    this._closeDialog();
+  }
+
+  /**
+   * Cancel dialog
+   */
+  public onCancelDialog(): void {
+    this._closeDialog();
+  }
+
+  private async _closeDialog(): Promise<void> {
+    if (this._pDialog) {
+      const oDialog = await this._pDialog;
+      oDialog.close();
+    }
+  }
+
+  private _saveProduct(oProduct: myapp.Product): void {
+    MessageToast.show(this.getText("productSaved"));
+  }
+}
 ```
-
-#### Inline Fragment in XML View
-
-```xml
-<mvc:View
-    xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m"
-    xmlns:core="sap.ui.core">
-
-    <Page>
-        <content>
-            <!-- Inline fragment -->
-            <core:Fragment fragmentName="myapp.view.fragments.ProductCard" type="XML" />
-        </content>
-    </Page>
-
-</mvc:View>
-```
-
-### Fragment vs View
-
-| Aspect | Fragment | View |
-|--------|----------|------|
-| **Controller** | Uses host controller | Has own controller |
-| **Lifecycle** | Managed by host | Independent |
-| **Routing** | Cannot be routed to | Can be routing target |
-| **Use Case** | Reusable UI pieces | Full pages/screens |
-
-### Best Practices
-
-1. **Use fragments for dialogs, popovers, and reusable UI pieces**
-2. **Always add fragments as dependents** for proper lifecycle management
-3. **Lazy load fragments** to improve initial load time
-4. **Use view ID prefix** when accessing fragment controls: `this.byId("fragmentControlId")`
 
 ---
 
-## 13. Internationalization (i18n)
+## 14. Internationalization (i18n)
 
-### File Structure
+### Resource Bundle Files
 
-```
-webapp/
-  i18n/
-    i18n.properties          # Default (fallback)
-    i18n_en.properties       # English
-    i18n_en_US.properties    # US English
-    i18n_de.properties       # German
-    i18n_fr.properties       # French
-    i18n_ja.properties       # Japanese
-```
-
-### Resource Bundle Format
-
-**i18n.properties (default):**
+**i18n/i18n.properties (default):**
 ```properties
-# App Titles
+# App
 appTitle=Product Management
 appDescription=Manage your products efficiently
 
-# Common Actions
+# Actions
 save=Save
 cancel=Cancel
 delete=Delete
@@ -2017,35 +1595,28 @@ edit=Edit
 create=Create
 
 # Messages
-welcomeMessage=Welcome, {0}!
-itemCount=You have {0} item(s)
+saveSuccess=Changes saved successfully
+deleteSuccess=Item deleted successfully
 confirmDelete=Are you sure you want to delete "{0}"?
+noChanges=No changes to save
 
 # Validation
-requiredField=This field is required
-invalidEmail=Please enter a valid email address
-minLength=Minimum {0} characters required
+nameRequired=Name is required (minimum 2 characters)
+fieldRequired=This field is required
 
 # Product
 productName=Product Name
 productDescription=Description
 productPrice=Price
-productCategory=Category
-productStatus=Status
-
-# Status
-statusActive=Active
-statusInactive=Inactive
-statusPending=Pending
 ```
 
-**i18n_de.properties:**
+**i18n/i18n_de.properties:**
 ```properties
-# App Titles
+# App
 appTitle=Produktverwaltung
 appDescription=Verwalten Sie Ihre Produkte effizient
 
-# Common Actions
+# Actions
 save=Speichern
 cancel=Abbrechen
 delete=Löschen
@@ -2053,282 +1624,173 @@ edit=Bearbeiten
 create=Erstellen
 
 # Messages
-welcomeMessage=Willkommen, {0}!
-itemCount=Sie haben {0} Artikel
+saveSuccess=Änderungen erfolgreich gespeichert
+deleteSuccess=Eintrag erfolgreich gelöscht
 confirmDelete=Möchten Sie "{0}" wirklich löschen?
 ```
 
-### Configuration in manifest.json
+### Using i18n in TypeScript
 
-```json
-{
-    "sap.ui5": {
-        "models": {
-            "i18n": {
-                "type": "sap.ui.model.resource.ResourceModel",
-                "settings": {
-                    "bundleName": "myapp.i18n.i18n",
-                    "supportedLocales": ["en", "de", "fr", "ja"],
-                    "fallbackLocale": "en",
-                    "async": true
-                }
-            }
+```typescript
+import BaseController from "./BaseController";
+import ResourceBundle from "sap/base/i18n/ResourceBundle";
+import ResourceModel from "sap/ui/model/resource/ResourceModel";
+import MessageBox from "sap/m/MessageBox";
+import MessageToast from "sap/m/MessageToast";
+
+/**
+ * @namespace myapp.controller
+ */
+export default class I18nExample extends BaseController {
+
+  /**
+   * Get resource bundle
+   */
+  public getResourceBundle(): ResourceBundle {
+    const oModel = this.getModel<ResourceModel>("i18n");
+    return oModel.getResourceBundle() as ResourceBundle;
+  }
+
+  /**
+   * Get translated text
+   */
+  public getText(sKey: string, aArgs?: string[]): string {
+    return this.getResourceBundle().getText(sKey, aArgs) || sKey;
+  }
+
+  /**
+   * Example: Confirm delete with translated message
+   */
+  public onDeleteProduct(sProductName: string): void {
+    const sMessage = this.getText("confirmDelete", [sProductName]);
+    const sTitle = this.getText("delete");
+
+    MessageBox.confirm(sMessage, {
+      title: sTitle,
+      onClose: (oAction: string) => {
+        if (oAction === MessageBox.Action.OK) {
+          this._performDelete();
         }
-    }
-}
-```
-
-### Using in XML Views
-
-```xml
-<mvc:View
-    xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m">
-
-    <Page title="{i18n>appTitle}">
-        <content>
-            <Label text="{i18n>productName}" />
-            <Input placeholder="{i18n>productName}" />
-
-            <Button text="{i18n>save}" press=".onSave" />
-            <Button text="{i18n>cancel}" press=".onCancel" />
-        </content>
-    </Page>
-
-</mvc:View>
-```
-
-### Using in Controllers
-
-```javascript
-sap.ui.define([
-    "sap/ui/core/mvc/Controller",
-    "sap/m/MessageBox"
-], function(Controller, MessageBox) {
-    "use strict";
-
-    return Controller.extend("myapp.controller.Main", {
-
-        getResourceBundle: function() {
-            return this.getOwnerComponent().getModel("i18n").getResourceBundle();
-        },
-
-        getText: function(sKey, aArgs) {
-            return this.getResourceBundle().getText(sKey, aArgs);
-        },
-
-        onDelete: function() {
-            var sProductName = this.getView().getModel().getProperty("/name");
-            var sMessage = this.getText("confirmDelete", [sProductName]);
-
-            MessageBox.confirm(sMessage, {
-                title: this.getText("delete"),
-                onClose: function(oAction) {
-                    if (oAction === MessageBox.Action.OK) {
-                        this._performDelete();
-                    }
-                }.bind(this)
-            });
-        },
-
-        showWelcome: function(sUserName) {
-            var sMessage = this.getText("welcomeMessage", [sUserName]);
-            sap.m.MessageToast.show(sMessage);
-        }
+      }
     });
-});
-```
+  }
 
-### Language Determination
-
-SAPUI5 determines language in this order:
-1. URL parameter: `?sap-language=de`
-2. Configuration in bootstrap
-3. Browser language setting
-4. Fallback locale
-
-### Date, Number, and Currency Formatting
-
-```xml
-<!-- Date formatting -->
-<Text text="{
-    path: '/createdAt',
-    type: 'sap.ui.model.type.Date',
-    formatOptions: { style: 'long' }
-}" />
-
-<!-- Number formatting -->
-<Text text="{
-    path: '/quantity',
-    type: 'sap.ui.model.type.Integer',
-    formatOptions: { groupingEnabled: true }
-}" />
-
-<!-- Currency formatting -->
-<Text text="{
-    parts: ['/price', '/currency'],
-    type: 'sap.ui.model.type.Currency',
-    formatOptions: { showMeasure: true }
-}" />
+  private _performDelete(): void {
+    MessageToast.show(this.getText("deleteSuccess"));
+  }
+}
 ```
 
 ---
 
-## 14. Custom Controls
+## 15. Custom Controls
 
-### Creating a Custom Control
+### Creating a Custom Control with TypeScript
 
-**controls/RatingIndicator.js:**
-```javascript
-sap.ui.define([
-    "sap/ui/core/Control",
-    "sap/ui/core/Icon"
-], function(Control, Icon) {
-    "use strict";
+**controls/RatingIndicator.ts:**
+```typescript
+import Control from "sap/ui/core/Control";
+import RenderManager from "sap/ui/core/RenderManager";
+import Icon from "sap/ui/core/Icon";
+import type { MetadataOptions } from "sap/ui/core/Element";
 
-    return Control.extend("myapp.controls.RatingIndicator", {
+/**
+ * @namespace myapp.controls
+ */
+export default class RatingIndicator extends Control {
 
-        metadata: {
-            // Properties
-            properties: {
-                value: {
-                    type: "float",
-                    defaultValue: 0
-                },
-                maxValue: {
-                    type: "int",
-                    defaultValue: 5
-                },
-                editable: {
-                    type: "boolean",
-                    defaultValue: true
-                },
-                iconSize: {
-                    type: "sap.ui.core.CSSSize",
-                    defaultValue: "1rem"
-                }
-            },
+  static readonly metadata: MetadataOptions = {
+    properties: {
+      value: { type: "float", defaultValue: 0 },
+      maxValue: { type: "int", defaultValue: 5 },
+      editable: { type: "boolean", defaultValue: true },
+      iconSize: { type: "sap.ui.core.CSSSize", defaultValue: "1.5rem" }
+    },
+    aggregations: {
+      _icons: { type: "sap.ui.core.Icon", multiple: true, visibility: "hidden" }
+    },
+    events: {
+      change: { parameters: { value: { type: "float" } } }
+    }
+  };
 
-            // Aggregations
-            aggregations: {
-                _icons: {
-                    type: "sap.ui.core.Icon",
-                    multiple: true,
-                    visibility: "hidden"
-                }
-            },
+  static renderer = {
+    apiVersion: 2,
+    render(oRm: RenderManager, oControl: RatingIndicator): void {
+      oRm.openStart("div", oControl);
+      oRm.class("myRatingIndicator");
+      if (!oControl.getEditable()) {
+        oRm.class("myRatingIndicatorReadOnly");
+      }
+      oRm.openEnd();
 
-            // Events
-            events: {
-                change: {
-                    parameters: {
-                        value: { type: "float" }
-                    }
-                }
-            }
-        },
+      const aIcons = oControl.getAggregation("_icons") as Icon[] || [];
+      aIcons.forEach((oIcon) => {
+        oRm.renderControl(oIcon);
+      });
 
-        // Lifecycle: Initialize
-        init: function() {
-            // Create icons
-            this._createIcons();
-        },
+      oRm.close("div");
+    }
+  };
 
-        // Create star icons
-        _createIcons: function() {
-            var iMaxValue = this.getMaxValue();
+  public init(): void {
+    this._createIcons();
+  }
 
-            for (var i = 0; i < iMaxValue; i++) {
-                var oIcon = new Icon({
-                    src: "sap-icon://favorite",
-                    press: this._onIconPress.bind(this, i + 1)
-                });
-                this.addAggregation("_icons", oIcon);
-            }
-        },
+  public getValue(): number {
+    return this.getProperty("value") as number;
+  }
 
-        // Handle icon press
-        _onIconPress: function(iValue) {
-            if (this.getEditable()) {
-                this.setValue(iValue);
-                this.fireChange({ value: iValue });
-            }
-        },
+  public setValue(fValue: number): this {
+    this.setProperty("value", fValue);
+    this._updateIcons();
+    return this;
+  }
 
-        // Lifecycle: Before rendering
-        onBeforeRendering: function() {
-            this._updateIcons();
-        },
+  public getMaxValue(): number {
+    return this.getProperty("maxValue") as number;
+  }
 
-        // Update icon states
-        _updateIcons: function() {
-            var fValue = this.getValue();
-            var aIcons = this.getAggregation("_icons") || [];
+  public getEditable(): boolean {
+    return this.getProperty("editable") as boolean;
+  }
 
-            aIcons.forEach(function(oIcon, iIndex) {
-                if (iIndex < fValue) {
-                    oIcon.setColor("#f0ab00");  // Filled
-                } else {
-                    oIcon.setColor("#cccccc");  // Empty
-                }
-                oIcon.setSize(this.getIconSize());
-            }.bind(this));
-        },
+  public getIconSize(): string {
+    return this.getProperty("iconSize") as string;
+  }
 
-        // Renderer
-        renderer: {
-            apiVersion: 2,
+  private _createIcons(): void {
+    const iMaxValue = this.getMaxValue();
 
-            render: function(oRm, oControl) {
-                oRm.openStart("div", oControl);
-                oRm.class("myRatingIndicator");
+    for (let i = 0; i < iMaxValue; i++) {
+      const oIcon = new Icon({
+        src: "sap-icon://favorite",
+        press: this._onIconPress.bind(this, i + 1)
+      });
+      this.addAggregation("_icons", oIcon);
+    }
+  }
 
-                if (!oControl.getEditable()) {
-                    oRm.class("myRatingIndicatorReadOnly");
-                }
+  private _onIconPress(iValue: number): void {
+    if (this.getEditable()) {
+      this.setValue(iValue);
+      this.fireEvent("change", { value: iValue });
+    }
+  }
 
-                oRm.openEnd();
+  public onBeforeRendering(): void {
+    this._updateIcons();
+  }
 
-                // Render icons
-                var aIcons = oControl.getAggregation("_icons") || [];
-                aIcons.forEach(function(oIcon) {
-                    oRm.renderControl(oIcon);
-                });
+  private _updateIcons(): void {
+    const fValue = this.getValue();
+    const aIcons = this.getAggregation("_icons") as Icon[] || [];
 
-                oRm.close("div");
-            }
-        },
-
-        // Lifecycle: Exit (cleanup)
-        exit: function() {
-            // Cleanup if needed
-        }
+    aIcons.forEach((oIcon, iIndex) => {
+      oIcon.setColor(iIndex < fValue ? "#f0ab00" : "#cccccc");
+      oIcon.setSize(this.getIconSize());
     });
-});
-```
-
-**CSS for the control (css/RatingIndicator.css):**
-```css
-.myRatingIndicator {
-    display: inline-flex;
-    gap: 0.25rem;
-    cursor: pointer;
-}
-
-.myRatingIndicator .sapUiIcon {
-    transition: transform 0.2s, color 0.2s;
-}
-
-.myRatingIndicator .sapUiIcon:hover {
-    transform: scale(1.2);
-}
-
-.myRatingIndicatorReadOnly {
-    cursor: default;
-}
-
-.myRatingIndicatorReadOnly .sapUiIcon:hover {
-    transform: none;
+  }
 }
 ```
 
@@ -2340,402 +1802,19 @@ sap.ui.define([
     xmlns="sap.m"
     xmlns:custom="myapp.controls">
 
-    <Page>
+    <Page title="Custom Controls Demo">
         <content>
-            <custom:RatingIndicator
-                value="{/product/rating}"
-                maxValue="5"
-                editable="true"
-                change=".onRatingChange" />
-        </content>
-    </Page>
-
-</mvc:View>
-```
-
-### Extending Existing Controls
-
-```javascript
-sap.ui.define([
-    "sap/m/Input"
-], function(Input) {
-    "use strict";
-
-    return Input.extend("myapp.controls.EmailInput", {
-
-        metadata: {
-            properties: {
-                validateOnChange: {
-                    type: "boolean",
-                    defaultValue: true
-                }
-            }
-        },
-
-        init: function() {
-            Input.prototype.init.apply(this, arguments);
-
-            this.setType("Email");
-            this.setPlaceholder("Enter email address");
-
-            this.attachLiveChange(this._onLiveChange.bind(this));
-        },
-
-        _onLiveChange: function(oEvent) {
-            if (this.getValidateOnChange()) {
-                this._validateEmail();
-            }
-        },
-
-        _validateEmail: function() {
-            var sValue = this.getValue();
-            var rEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-            if (sValue && !rEmail.test(sValue)) {
-                this.setValueState("Error");
-                this.setValueStateText("Invalid email format");
-            } else {
-                this.setValueState("None");
-                this.setValueStateText("");
-            }
-        },
-
-        renderer: {}  // Use parent renderer
-    });
-});
-```
-
-### Control Lifecycle Hooks
-
-| Hook | Called | Use Case |
-|------|--------|----------|
-| `init()` | Once at instantiation | Create internal controls |
-| `onBeforeRendering()` | Before each render | Update states |
-| `onAfterRendering()` | After each render | DOM operations |
-| `exit()` | At destruction | Cleanup resources |
-
----
-
-## 15. OData Integration
-
-### OData V2 vs V4
-
-| Feature | OData V2 | OData V4 |
-|---------|----------|----------|
-| **Model Class** | `sap.ui.model.odata.v2.ODataModel` | `sap.ui.model.odata.v4.ODataModel` |
-| **Batch Mode** | Deferred groups | Auto batching |
-| **CRUD** | Model methods (read, create, update) | Binding-based |
-| **Count** | $inlinecount | $count |
-| **Supported** | Most SAP systems | Newer SAP systems |
-
-### OData V2 Complete Example
-
-```javascript
-sap.ui.define([
-    "sap/ui/core/mvc/Controller",
-    "sap/ui/model/odata/v2/ODataModel",
-    "sap/ui/model/Filter",
-    "sap/ui/model/FilterOperator",
-    "sap/ui/model/Sorter",
-    "sap/m/MessageToast",
-    "sap/m/MessageBox"
-], function(Controller, ODataModel, Filter, FilterOperator, Sorter, MessageToast, MessageBox) {
-    "use strict";
-
-    return Controller.extend("myapp.controller.Products", {
-
-        onInit: function() {
-            // Model is usually set from Component via manifest.json
-        },
-
-        /* =========================================================== */
-        /* READ Operations                                             */
-        /* =========================================================== */
-
-        // Read entity set
-        onLoadProducts: function() {
-            var oModel = this.getView().getModel();
-
-            oModel.read("/Products", {
-                urlParameters: {
-                    "$top": 20,
-                    "$skip": 0,
-                    "$orderby": "Name asc",
-                    "$expand": "Category,Supplier"
-                },
-                success: function(oData) {
-                    console.log("Products:", oData.results);
-                },
-                error: function(oError) {
-                    MessageBox.error("Failed to load products");
-                }
-            });
-        },
-
-        // Read single entity
-        onLoadProduct: function(sProductId) {
-            var oModel = this.getView().getModel();
-
-            oModel.read("/Products('" + sProductId + "')", {
-                urlParameters: {
-                    "$expand": "Category,Supplier,Reviews"
-                },
-                success: function(oData) {
-                    console.log("Product:", oData);
-                },
-                error: function(oError) {
-                    MessageBox.error("Product not found");
-                }
-            });
-        },
-
-        // Read with filters
-        onSearchProducts: function(sQuery) {
-            var oModel = this.getView().getModel();
-            var aFilters = [];
-
-            if (sQuery) {
-                aFilters.push(new Filter({
-                    filters: [
-                        new Filter("Name", FilterOperator.Contains, sQuery),
-                        new Filter("Description", FilterOperator.Contains, sQuery)
-                    ],
-                    and: false  // OR condition
-                }));
-            }
-
-            aFilters.push(new Filter("Discontinued", FilterOperator.EQ, false));
-
-            oModel.read("/Products", {
-                filters: aFilters,
-                sorters: [new Sorter("Name", false)],
-                success: function(oData) {
-                    console.log("Search results:", oData.results);
-                }
-            });
-        },
-
-        /* =========================================================== */
-        /* CREATE Operations                                           */
-        /* =========================================================== */
-
-        onCreateProduct: function() {
-            var oModel = this.getView().getModel();
-
-            var oNewProduct = {
-                Name: "New Product",
-                Description: "Product description",
-                Price: "99.99",
-                CategoryID: "1",
-                Discontinued: false
-            };
-
-            oModel.create("/Products", oNewProduct, {
-                success: function(oData) {
-                    MessageToast.show("Product created: " + oData.ProductID);
-                },
-                error: function(oError) {
-                    MessageBox.error("Failed to create product");
-                }
-            });
-        },
-
-        /* =========================================================== */
-        /* UPDATE Operations                                           */
-        /* =========================================================== */
-
-        onUpdateProduct: function(sProductId, oChanges) {
-            var oModel = this.getView().getModel();
-            var sPath = "/Products('" + sProductId + "')";
-
-            // PATCH - partial update
-            oModel.update(sPath, oChanges, {
-                success: function() {
-                    MessageToast.show("Product updated");
-                },
-                error: function(oError) {
-                    MessageBox.error("Failed to update product");
-                }
-            });
-        },
-
-        /* =========================================================== */
-        /* DELETE Operations                                           */
-        /* =========================================================== */
-
-        onDeleteProduct: function(sProductId) {
-            var oModel = this.getView().getModel();
-            var sPath = "/Products('" + sProductId + "')";
-
-            MessageBox.confirm("Delete this product?", {
-                onClose: function(oAction) {
-                    if (oAction === MessageBox.Action.OK) {
-                        oModel.remove(sPath, {
-                            success: function() {
-                                MessageToast.show("Product deleted");
-                            },
-                            error: function(oError) {
-                                MessageBox.error("Failed to delete product");
-                            }
-                        });
-                    }
-                }
-            });
-        },
-
-        /* =========================================================== */
-        /* BATCH Operations                                            */
-        /* =========================================================== */
-
-        onBatchUpdate: function(aProducts) {
-            var oModel = this.getView().getModel();
-
-            // Create batch group
-            oModel.setDeferredGroups(["productBatch"]);
-
-            // Queue operations
-            aProducts.forEach(function(oProduct) {
-                var sPath = "/Products('" + oProduct.ProductID + "')";
-                oModel.update(sPath, oProduct, {
-                    groupId: "productBatch"
-                });
-            });
-
-            // Submit batch
-            oModel.submitChanges({
-                groupId: "productBatch",
-                success: function() {
-                    MessageToast.show("Batch update completed");
-                },
-                error: function(oError) {
-                    MessageBox.error("Batch update failed");
-                }
-            });
-        },
-
-        /* =========================================================== */
-        /* Function Imports                                            */
-        /* =========================================================== */
-
-        onCallFunction: function() {
-            var oModel = this.getView().getModel();
-
-            oModel.callFunction("/ActivateProduct", {
-                method: "POST",
-                urlParameters: {
-                    ProductID: "123"
-                },
-                success: function(oData) {
-                    MessageToast.show("Product activated");
-                },
-                error: function(oError) {
-                    MessageBox.error("Activation failed");
-                }
-            });
-        }
-    });
-});
-```
-
-### OData V4 Complete Example
-
-```javascript
-sap.ui.define([
-    "sap/ui/core/mvc/Controller",
-    "sap/m/MessageToast",
-    "sap/m/MessageBox"
-], function(Controller, MessageToast, MessageBox) {
-    "use strict";
-
-    return Controller.extend("myapp.controller.ProductsV4", {
-
-        /* =========================================================== */
-        /* CREATE with V4                                              */
-        /* =========================================================== */
-
-        onCreateProduct: function() {
-            var oList = this.byId("productList");
-            var oBinding = oList.getBinding("items");
-
-            // Create new entry
-            var oContext = oBinding.create({
-                Name: "New Product",
-                Price: 99.99,
-                CategoryID: "1"
-            });
-
-            // Wait for creation to complete
-            oContext.created().then(function() {
-                MessageToast.show("Product created");
-            }).catch(function(oError) {
-                MessageBox.error("Creation failed: " + oError.message);
-            });
-        },
-
-        /* =========================================================== */
-        /* DELETE with V4                                              */
-        /* =========================================================== */
-
-        onDeleteProduct: function(oEvent) {
-            var oContext = oEvent.getSource().getBindingContext();
-
-            oContext.delete().then(function() {
-                MessageToast.show("Product deleted");
-            }).catch(function(oError) {
-                MessageBox.error("Deletion failed");
-            });
-        },
-
-        /* =========================================================== */
-        /* UPDATE with V4 (automatic via Two-Way binding)              */
-        /* =========================================================== */
-
-        onSaveChanges: function() {
-            var oModel = this.getView().getModel();
-
-            // Check for pending changes
-            if (oModel.hasPendingChanges()) {
-                oModel.submitBatch("$auto").then(function() {
-                    MessageToast.show("Changes saved");
-                });
-            }
-        },
-
-        onDiscardChanges: function() {
-            var oModel = this.getView().getModel();
-            oModel.resetChanges();
-        }
-    });
-});
-```
-
-### Binding to OData in XML View
-
-```xml
-<mvc:View
-    xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m">
-
-    <Page title="Products">
-        <content>
-            <!-- List bound to OData entity set -->
-            <List id="productList"
-                  items="{
-                      path: '/Products',
-                      parameters: {
-                          $expand: 'Category',
-                          $orderby: 'Name',
-                          $count: true
-                      },
-                      sorter: { path: 'Name' }
-                  }">
-                <StandardListItem
-                    title="{Name}"
-                    description="{Category/Name}"
-                    info="{Price}"
-                    type="Navigation"
-                    press=".onProductPress" />
-            </List>
+            <VBox class="sapUiMediumMargin">
+                <Label text="Rate this product:" />
+
+                <custom:RatingIndicator
+                    id="productRating"
+                    value="{/rating}"
+                    maxValue="5"
+                    editable="true"
+                    iconSize="2rem"
+                    change=".onRatingChange" />
+            </VBox>
         </content>
     </Page>
 
@@ -2744,126 +1823,292 @@ sap.ui.define([
 
 ---
 
-## 16. Expression Binding and Formatters
+## 16. OData Integration
 
-### Expression Binding
+### OData V2 Service Class
 
-Expression binding allows inline JavaScript expressions in XML views:
+**service/ProductService.ts:**
+```typescript
+import ODataModel from "sap/ui/model/odata/v2/ODataModel";
+import Filter from "sap/ui/model/Filter";
+import FilterOperator from "sap/ui/model/FilterOperator";
+import Sorter from "sap/ui/model/Sorter";
 
-```xml
-<!-- Basic expression -->
-<Text text="{= ${/quantity} * ${/price} }" />
+export interface ReadOptions {
+  top?: number;
+  skip?: number;
+  expand?: string[];
+  select?: string[];
+  filters?: Filter[];
+  sorters?: Sorter[];
+}
 
-<!-- Ternary operator -->
-<ObjectStatus
-    text="{= ${status} === 'active' ? 'Available' : 'Unavailable' }"
-    state="{= ${status} === 'active' ? 'Success' : 'Error' }" />
+/**
+ * @namespace myapp.service
+ */
+export default class ProductService {
+  private _oModel: ODataModel;
 
-<!-- Boolean expressions -->
-<Input enabled="{= ${/editable} === true }" />
-<Button visible="{= ${/items}.length > 0 }" />
+  constructor(oModel: ODataModel) {
+    this._oModel = oModel;
+  }
 
-<!-- Comparison -->
-<Text text="{= ${/price} &gt; 100 ? 'Premium' : 'Standard' }" />
+  /**
+   * Get all products with optional filtering
+   */
+  public async getProducts(options?: ReadOptions): Promise<myapp.Product[]> {
+    return new Promise((resolve, reject) => {
+      const urlParameters: Record<string, string> = {};
 
-<!-- Multiple model values -->
-<Text text="{= ${/firstName} + ' ' + ${/lastName} }" />
+      if (options?.top) urlParameters["$top"] = String(options.top);
+      if (options?.skip) urlParameters["$skip"] = String(options.skip);
+      if (options?.expand?.length) urlParameters["$expand"] = options.expand.join(",");
+      if (options?.select?.length) urlParameters["$select"] = options.select.join(",");
 
-<!-- With formatting -->
-<Text text="{= 'Total: ' + ${/amount}.toFixed(2) + ' ' + ${/currency} }" />
-
-<!-- Null check -->
-<Text text="{= ${/description} || 'No description available' }" />
-
-<!-- Array length -->
-<Title text="{= 'Items (' + ${/items}.length + ')' }" />
-```
-
-### Special Characters in Expression Binding
-
-XML requires escaping certain characters:
-
-| Character | Escaped Form |
-|-----------|--------------|
-| `<` | `&lt;` |
-| `>` | `&gt;` |
-| `&` | `&amp;` |
-| `"` | `&quot;` |
-
-```xml
-<!-- Less than comparison -->
-<Text visible="{= ${/quantity} &lt; 10 }" text="Low Stock" />
-
-<!-- Greater than or equal -->
-<Text visible="{= ${/price} &gt;= 100 }" text="Premium" />
-```
-
-### Formatter Functions
-
-#### In Controller
-
-```javascript
-sap.ui.define([
-    "sap/ui/core/mvc/Controller"
-], function(Controller) {
-    "use strict";
-
-    return Controller.extend("myapp.controller.Main", {
-
-        // Simple formatter
-        formatPrice: function(fPrice) {
-            if (!fPrice) {
-                return "N/A";
-            }
-            return parseFloat(fPrice).toFixed(2) + " USD";
-        },
-
-        // Formatter with multiple values
-        formatFullName: function(sFirstName, sLastName) {
-            return [sFirstName, sLastName].filter(Boolean).join(" ");
-        },
-
-        // Status formatter
-        formatStatus: function(sStatus) {
-            var mStatusText = {
-                "A": "Active",
-                "I": "Inactive",
-                "P": "Pending"
-            };
-            return mStatusText[sStatus] || "Unknown";
-        },
-
-        // State formatter (for ObjectStatus)
-        formatStatusState: function(sStatus) {
-            var mStatusState = {
-                "A": "Success",
-                "I": "Error",
-                "P": "Warning"
-            };
-            return mStatusState[sStatus] || "None";
-        },
-
-        // Date formatter
-        formatDate: function(oDate) {
-            if (!oDate) {
-                return "";
-            }
-            var oDateFormat = sap.ui.core.format.DateFormat.getDateInstance({
-                pattern: "MMM d, yyyy"
-            });
-            return oDateFormat.format(oDate);
-        },
-
-        // Currency formatter
-        formatCurrency: function(fAmount, sCurrency) {
-            var oNumberFormat = sap.ui.core.format.NumberFormat.getCurrencyInstance();
-            return oNumberFormat.format(fAmount, sCurrency);
-        }
+      this._oModel.read("/Products", {
+        urlParameters,
+        filters: options?.filters || [],
+        sorters: options?.sorters || [],
+        success: (oData: { results: myapp.Product[] }) => resolve(oData.results),
+        error: (oError: Error) => reject(oError)
+      });
     });
-});
+  }
+
+  /**
+   * Get single product by ID
+   */
+  public async getProduct(sId: string, aExpand?: string[]): Promise<myapp.Product> {
+    return new Promise((resolve, reject) => {
+      const urlParameters: Record<string, string> = {};
+      if (aExpand?.length) urlParameters["$expand"] = aExpand.join(",");
+
+      this._oModel.read(`/Products('${sId}')`, {
+        urlParameters,
+        success: (oData: myapp.Product) => resolve(oData),
+        error: (oError: Error) => reject(oError)
+      });
+    });
+  }
+
+  /**
+   * Create new product
+   */
+  public async createProduct(oProduct: Partial<myapp.Product>): Promise<myapp.Product> {
+    return new Promise((resolve, reject) => {
+      this._oModel.create("/Products", oProduct, {
+        success: (oData: myapp.Product) => resolve(oData),
+        error: (oError: Error) => reject(oError)
+      });
+    });
+  }
+
+  /**
+   * Update product
+   */
+  public async updateProduct(sId: string, oChanges: Partial<myapp.Product>): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this._oModel.update(`/Products('${sId}')`, oChanges, {
+        success: () => resolve(),
+        error: (oError: Error) => reject(oError)
+      });
+    });
+  }
+
+  /**
+   * Delete product
+   */
+  public async deleteProduct(sId: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this._oModel.remove(`/Products('${sId}')`, {
+        success: () => resolve(),
+        error: (oError: Error) => reject(oError)
+      });
+    });
+  }
+
+  public refresh(): void {
+    this._oModel.refresh();
+  }
+
+  public hasPendingChanges(): boolean {
+    return this._oModel.hasPendingChanges();
+  }
+
+  public resetChanges(): void {
+    this._oModel.resetChanges();
+  }
+}
 ```
 
-#### Using Formatters in XML
+### Using OData Service in Controller
+
+```typescript
+import BaseController from "./BaseController";
+import ProductService from "myapp/service/ProductService";
+import ODataModel from "sap/ui/model/odata/v2/ODataModel";
+import Filter from "sap/ui/model/Filter";
+import FilterOperator from "sap/ui/model/FilterOperator";
+import MessageBox from "sap/m/MessageBox";
+import MessageToast from "sap/m/MessageToast";
+
+/**
+ * @namespace myapp.controller
+ */
+export default class Products extends BaseController {
+
+  private _oProductService!: ProductService;
+
+  public onInit(): void {
+    const oModel = this.getModel<ODataModel>();
+    this._oProductService = new ProductService(oModel);
+    this._loadProducts();
+  }
+
+  private async _loadProducts(): Promise<void> {
+    try {
+      this._setViewBusy(true);
+
+      const aProducts = await this._oProductService.getProducts({
+        top: 50,
+        expand: ["Category", "Supplier"]
+      });
+
+      console.log("Loaded products:", aProducts);
+    } catch {
+      MessageBox.error("Failed to load products");
+    } finally {
+      this._setViewBusy(false);
+    }
+  }
+
+  public async onSearch(sQuery: string): Promise<void> {
+    const aFilters = sQuery ? [
+      new Filter({
+        filters: [
+          new Filter("Name", FilterOperator.Contains, sQuery),
+          new Filter("Description", FilterOperator.Contains, sQuery)
+        ],
+        and: false
+      })
+    ] : [];
+
+    const aProducts = await this._oProductService.getProducts({ filters: aFilters });
+    // Update view
+  }
+
+  public async onCreate(oProduct: Partial<myapp.Product>): Promise<void> {
+    try {
+      const oCreated = await this._oProductService.createProduct(oProduct);
+      MessageToast.show(`Product "${oCreated.Name}" created`);
+    } catch {
+      MessageBox.error("Failed to create product");
+    }
+  }
+
+  public async onDelete(sProductId: string): Promise<void> {
+    try {
+      await this._oProductService.deleteProduct(sProductId);
+      MessageToast.show("Product deleted");
+    } catch {
+      MessageBox.error("Failed to delete product");
+    }
+  }
+
+  private _setViewBusy(bBusy: boolean): void {
+    this.getModel<JSONModel>("view").setProperty("/busy", bBusy);
+  }
+}
+```
+
+---
+
+## 17. Expression Binding and Formatters
+
+### formatter.ts
+
+```typescript
+import DateFormat from "sap/ui/core/format/DateFormat";
+import NumberFormat from "sap/ui/core/format/NumberFormat";
+
+/**
+ * Formatter functions for data binding
+ * @namespace myapp.model
+ */
+const formatter = {
+
+  formatPrice(fPrice: number | null | undefined): string {
+    if (fPrice == null) return "N/A";
+
+    const oFormat = NumberFormat.getCurrencyInstance({
+      currencyCode: false,
+      minFractionDigits: 2,
+      maxFractionDigits: 2
+    });
+
+    return oFormat.format(fPrice);
+  },
+
+  formatCurrency(fAmount: number | null, sCurrency: string | null): string {
+    if (fAmount == null) return "";
+
+    const oFormat = NumberFormat.getCurrencyInstance();
+    return oFormat.format(fAmount, sCurrency || "USD");
+  },
+
+  formatDate(oDate: Date | string | null): string {
+    if (!oDate) return "";
+
+    const oDateFormat = DateFormat.getDateInstance({ style: "medium" });
+    const date = typeof oDate === "string" ? new Date(oDate) : oDate;
+    return oDateFormat.format(date);
+  },
+
+  formatDateTime(oDate: Date | string | null): string {
+    if (!oDate) return "";
+
+    const oDateFormat = DateFormat.getDateTimeInstance({ style: "medium/short" });
+    const date = typeof oDate === "string" ? new Date(oDate) : oDate;
+    return oDateFormat.format(date);
+  },
+
+  formatStatus(sStatus: string | null): string {
+    const mStatus: Record<string, string> = {
+      "A": "Active",
+      "I": "Inactive",
+      "P": "Pending",
+      "D": "Draft",
+      "C": "Completed"
+    };
+    return mStatus[sStatus || ""] || sStatus || "Unknown";
+  },
+
+  formatStatusState(sStatus: string | null): string {
+    const mState: Record<string, string> = {
+      "A": "Success",
+      "I": "Error",
+      "P": "Warning",
+      "D": "None",
+      "C": "Success"
+    };
+    return mState[sStatus || ""] || "None";
+  },
+
+  formatYesNo(bValue: boolean | null): string {
+    return bValue ? "Yes" : "No";
+  },
+
+  truncateText(sText: string | null, iMaxLength: number = 100): string {
+    if (!sText) return "";
+    if (sText.length <= iMaxLength) return sText;
+    return sText.substring(0, iMaxLength - 3) + "...";
+  }
+};
+
+export default formatter;
+```
+
+### Using Formatter in XML View
 
 ```xml
 <mvc:View
@@ -2871,418 +2116,167 @@ sap.ui.define([
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m">
 
-    <!-- Simple formatter -->
-    <Text text="{ path: '/price', formatter: '.formatPrice' }" />
+    <Table items="{/products}">
+        <columns>
+            <Column><Text text="Name" /></Column>
+            <Column><Text text="Price" /></Column>
+            <Column><Text text="Status" /></Column>
+        </columns>
+        <items>
+            <ColumnListItem>
+                <Text text="{Name}" />
 
-    <!-- Composite formatter -->
-    <Text text="{
-        parts: [
-            { path: '/firstName' },
-            { path: '/lastName' }
-        ],
-        formatter: '.formatFullName'
-    }" />
+                <!-- Formatter function -->
+                <Text text="{
+                    parts: [{path: 'Price'}, {path: 'Currency'}],
+                    formatter: '.formatter.formatCurrency'
+                }" />
 
-    <!-- Status with state -->
-    <ObjectStatus
-        text="{ path: '/status', formatter: '.formatStatus' }"
-        state="{ path: '/status', formatter: '.formatStatusState' }" />
-
-    <!-- Currency formatter -->
-    <Text text="{
-        parts: [
-            { path: '/amount' },
-            { path: '/currency' }
-        ],
-        formatter: '.formatCurrency'
-    }" />
+                <!-- Status with state -->
+                <ObjectStatus
+                    text="{path: 'Status', formatter: '.formatter.formatStatus'}"
+                    state="{path: 'Status', formatter: '.formatter.formatStatusState'}" />
+            </ColumnListItem>
+        </items>
+    </Table>
 
 </mvc:View>
 ```
 
-### Separate Formatter Module
-
-**model/formatter.js:**
-```javascript
-sap.ui.define([
-    "sap/ui/core/format/DateFormat",
-    "sap/ui/core/format/NumberFormat"
-], function(DateFormat, NumberFormat) {
-    "use strict";
-
-    return {
-
-        formatPrice: function(fPrice) {
-            if (!fPrice) {
-                return "0.00";
-            }
-            var oNumberFormat = NumberFormat.getCurrencyInstance({
-                currencyCode: false
-            });
-            return oNumberFormat.format(fPrice);
-        },
-
-        formatDate: function(oDate) {
-            if (!oDate) {
-                return "";
-            }
-            var oDateFormat = DateFormat.getDateTimeInstance({
-                style: "medium"
-            });
-            return oDateFormat.format(new Date(oDate));
-        },
-
-        formatStatus: function(sStatus) {
-            var mStatus = {
-                "A": "Active",
-                "I": "Inactive",
-                "P": "Pending",
-                "D": "Draft"
-            };
-            return mStatus[sStatus] || sStatus;
-        },
-
-        formatStatusState: function(sStatus) {
-            var mState = {
-                "A": "Success",
-                "I": "Error",
-                "P": "Warning",
-                "D": "None"
-            };
-            return mState[sStatus] || "None";
-        },
-
-        formatPercentage: function(fValue) {
-            if (!fValue && fValue !== 0) {
-                return "";
-            }
-            var oNumberFormat = NumberFormat.getPercentInstance({
-                maxFractionDigits: 1
-            });
-            return oNumberFormat.format(fValue / 100);
-        }
-    };
-});
-```
-
-**Using in Controller:**
-```javascript
-sap.ui.define([
-    "sap/ui/core/mvc/Controller",
-    "myapp/model/formatter"
-], function(Controller, formatter) {
-    "use strict";
-
-    return Controller.extend("myapp.controller.Main", {
-
-        formatter: formatter,
-
-        onInit: function() {
-            // Formatter is now available as this.formatter
-        }
-    });
-});
-```
-
-**Using in XML View:**
-```xml
-<Text text="{ path: '/status', formatter: '.formatter.formatStatus' }" />
-```
-
 ---
 
-## 17. Testing
+## 18. Testing
 
-### Test Project Structure
+### Unit Testing with QUnit and TypeScript
 
-```
-webapp/
-  test/
-    unit/
-      controller/
-        Main.controller.js
-      model/
-        formatter.js
-      AllTests.js
-      unitTests.qunit.html
-      unitTests.qunit.js
-    integration/
-      pages/
-        Main.js
-        Detail.js
-      arrangements/
-        Startup.js
-      AllJourneys.js
-      MainJourney.js
-      opaTests.qunit.html
-      opaTests.qunit.js
-    testsuite.qunit.html
-    testsuite.qunit.js
-```
+**test/unit/model/formatter.ts:**
+```typescript
+import formatter from "myapp/model/formatter";
 
-### Unit Testing with QUnit
+QUnit.module("Formatter Tests");
 
-**test/unit/model/formatter.js:**
-```javascript
-sap.ui.define([
-    "myapp/model/formatter"
-], function(formatter) {
-    "use strict";
-
-    QUnit.module("Formatter Tests");
-
-    QUnit.test("formatPrice - should format price correctly", function(assert) {
-        // Arrange
-        var fPrice = 99.5;
-
-        // Act
-        var sResult = formatter.formatPrice(fPrice);
-
-        // Assert
-        assert.strictEqual(sResult, "99.50", "Price formatted with 2 decimals");
-    });
-
-    QUnit.test("formatPrice - should handle null", function(assert) {
-        var sResult = formatter.formatPrice(null);
-        assert.strictEqual(sResult, "0.00", "Null returns 0.00");
-    });
-
-    QUnit.test("formatStatus - should return correct status text", function(assert) {
-        assert.strictEqual(formatter.formatStatus("A"), "Active");
-        assert.strictEqual(formatter.formatStatus("I"), "Inactive");
-        assert.strictEqual(formatter.formatStatus("X"), "X", "Unknown status returns input");
-    });
+QUnit.test("formatPrice - should format price correctly", (assert) => {
+  const fPrice = 99.5;
+  const sResult = formatter.formatPrice(fPrice);
+  assert.ok(sResult.includes("99"), "Price contains correct value");
 });
-```
 
-**test/unit/controller/Main.controller.js:**
-```javascript
-sap.ui.define([
-    "myapp/controller/Main.controller",
-    "sap/ui/model/json/JSONModel",
-    "sap/ui/thirdparty/sinon",
-    "sap/ui/thirdparty/sinon-qunit"
-], function(MainController, JSONModel) {
-    "use strict";
+QUnit.test("formatPrice - should handle null", (assert) => {
+  const sResult = formatter.formatPrice(null);
+  assert.strictEqual(sResult, "N/A", "Null returns N/A");
+});
 
-    QUnit.module("Main Controller", {
-        beforeEach: function() {
-            this.oController = new MainController();
+QUnit.test("formatStatus - should return correct status text", (assert) => {
+  assert.strictEqual(formatter.formatStatus("A"), "Active");
+  assert.strictEqual(formatter.formatStatus("I"), "Inactive");
+  assert.strictEqual(formatter.formatStatus("P"), "Pending");
+});
 
-            // Mock the view
-            this.oViewStub = {
-                getModel: sinon.stub(),
-                setModel: sinon.stub(),
-                byId: sinon.stub()
-            };
+QUnit.test("formatStatusState - should return correct state", (assert) => {
+  assert.strictEqual(formatter.formatStatusState("A"), "Success");
+  assert.strictEqual(formatter.formatStatusState("I"), "Error");
+  assert.strictEqual(formatter.formatStatusState("P"), "Warning");
+});
 
-            sinon.stub(this.oController, "getView").returns(this.oViewStub);
-        },
-        afterEach: function() {
-            this.oController.destroy();
-        }
-    });
+QUnit.test("truncateText - should truncate long text", (assert) => {
+  const sLongText = "This is a very long text that should be truncated";
+  const sResult = formatter.truncateText(sLongText, 20);
 
-    QUnit.test("onInit - should initialize view model", function(assert) {
-        // Act
-        this.oController.onInit();
-
-        // Assert
-        assert.ok(this.oViewStub.setModel.called, "Model was set");
-    });
-
-    QUnit.test("formatFullName - should concatenate names", function(assert) {
-        // Act
-        var sResult = this.oController.formatFullName("John", "Doe");
-
-        // Assert
-        assert.strictEqual(sResult, "John Doe");
-    });
+  assert.strictEqual(sResult.length, 20);
+  assert.ok(sResult.endsWith("..."));
 });
 ```
 
 ### Integration Testing with OPA5
 
-**test/integration/pages/Main.js:**
-```javascript
-sap.ui.define([
-    "sap/ui/test/Opa5",
-    "sap/ui/test/actions/Press",
-    "sap/ui/test/actions/EnterText",
-    "sap/ui/test/matchers/PropertyStrictEquals",
-    "sap/ui/test/matchers/AggregationLengthEquals"
-], function(Opa5, Press, EnterText, PropertyStrictEquals, AggregationLengthEquals) {
-    "use strict";
+**test/integration/pages/Main.ts:**
+```typescript
+import Opa5 from "sap/ui/test/Opa5";
+import Press from "sap/ui/test/actions/Press";
+import EnterText from "sap/ui/test/actions/EnterText";
+import { PropertyStrictEquals } from "sap/ui/test/matchers";
 
-    Opa5.createPageObjects({
-        onTheMainPage: {
+const sViewName = "myapp.view.Main";
 
-            // Arrangements
-            arrangements: {
-                iStartTheApp: function() {
-                    return this.iStartMyUIComponent({
-                        componentConfig: {
-                            name: "myapp",
-                            async: true
-                        }
-                    });
-                }
-            },
+class MainPage extends Opa5 {
 
-            // Actions
-            actions: {
-                iPressTheCreateButton: function() {
-                    return this.waitFor({
-                        controlType: "sap.m.Button",
-                        matchers: new PropertyStrictEquals({
-                            name: "text",
-                            value: "Create"
-                        }),
-                        actions: new Press(),
-                        errorMessage: "Create button not found"
-                    });
-                },
-
-                iEnterProductName: function(sName) {
-                    return this.waitFor({
-                        id: "productNameInput",
-                        actions: new EnterText({ text: sName }),
-                        errorMessage: "Product name input not found"
-                    });
-                },
-
-                iPressListItem: function(sTitle) {
-                    return this.waitFor({
-                        controlType: "sap.m.StandardListItem",
-                        matchers: new PropertyStrictEquals({
-                            name: "title",
-                            value: sTitle
-                        }),
-                        actions: new Press(),
-                        errorMessage: "List item not found: " + sTitle
-                    });
-                }
-            },
-
-            // Assertions
-            assertions: {
-                iShouldSeeTheProductList: function() {
-                    return this.waitFor({
-                        id: "productList",
-                        success: function() {
-                            Opa5.assert.ok(true, "Product list is visible");
-                        },
-                        errorMessage: "Product list not found"
-                    });
-                },
-
-                theListShouldHaveItems: function(iCount) {
-                    return this.waitFor({
-                        id: "productList",
-                        matchers: new AggregationLengthEquals({
-                            name: "items",
-                            length: iCount
-                        }),
-                        success: function() {
-                            Opa5.assert.ok(true, "List has " + iCount + " items");
-                        },
-                        errorMessage: "List does not have " + iCount + " items"
-                    });
-                },
-
-                iShouldSeeThePageTitle: function(sTitle) {
-                    return this.waitFor({
-                        controlType: "sap.m.Page",
-                        matchers: new PropertyStrictEquals({
-                            name: "title",
-                            value: sTitle
-                        }),
-                        success: function() {
-                            Opa5.assert.ok(true, "Page title is: " + sTitle);
-                        }
-                    });
-                }
-            }
-        }
+  iStartTheApp(): this {
+    return this.iStartMyUIComponent({
+      componentConfig: { name: "myapp", async: true }
     });
-});
+  }
+
+  iPressTheCreateButton(): this {
+    return this.waitFor({
+      controlType: "sap.m.Button",
+      viewName: sViewName,
+      matchers: new PropertyStrictEquals({ name: "text", value: "Create" }),
+      actions: new Press(),
+      errorMessage: "Create button not found"
+    });
+  }
+
+  iEnterSearchText(sText: string): this {
+    return this.waitFor({
+      id: "searchField",
+      viewName: sViewName,
+      actions: new EnterText({ text: sText }),
+      errorMessage: "Search field not found"
+    });
+  }
+
+  iShouldSeeTheProductList(): this {
+    return this.waitFor({
+      id: "productList",
+      viewName: sViewName,
+      success: () => Opa5.assert.ok(true, "Product list is visible"),
+      errorMessage: "Product list not found"
+    });
+  }
+
+  iShouldSeeThePageTitle(sTitle: string): this {
+    return this.waitFor({
+      controlType: "sap.m.Page",
+      viewName: sViewName,
+      matchers: new PropertyStrictEquals({ name: "title", value: sTitle }),
+      success: () => Opa5.assert.ok(true, `Page title is "${sTitle}"`),
+      errorMessage: `Page with title "${sTitle}" not found`
+    });
+  }
+}
+
+export default new MainPage();
 ```
 
-**test/integration/MainJourney.js:**
-```javascript
-sap.ui.define([
-    "sap/ui/test/opaQunit",
-    "./pages/Main"
-], function(opaTest) {
-    "use strict";
+**test/integration/MainJourney.ts:**
+```typescript
+import opaTest from "sap/ui/test/opaQunit";
+import MainPage from "./pages/Main";
 
-    QUnit.module("Product List Journey");
+QUnit.module("Product List Journey");
 
-    opaTest("Should see the product list", function(Given, When, Then) {
-        // Arrangements
-        Given.onTheMainPage.iStartTheApp();
-
-        // Assertions
-        Then.onTheMainPage.iShouldSeeTheProductList();
-        Then.onTheMainPage.iShouldSeeThePageTitle("Products");
-
-        // Cleanup
-        Then.iTeardownMyApp();
-    });
-
-    opaTest("Should navigate to detail when clicking item", function(Given, When, Then) {
-        Given.onTheMainPage.iStartTheApp();
-
-        // Actions
-        When.onTheMainPage.iPressListItem("Product 1");
-
-        // Assertions
-        Then.onTheDetailPage.iShouldSeeTheDetailPage();
-
-        Then.iTeardownMyApp();
-    });
+opaTest("Should see the product list", (Given, When, Then) => {
+  Given.iStartTheApp();
+  Then.iShouldSeeTheProductList();
+  Then.iShouldSeeThePageTitle("Products");
+  Then.iTeardownMyApp();
 });
-```
 
-### Running Tests
-
-**testsuite.qunit.html:**
-```html
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>QUnit Test Suite</title>
-    <script
-        src="https://ui5.sap.com/resources/sap/ui/qunit/qunit-redirect.js">
-    </script>
-</head>
-<body>
-    <script>
-        var defined = QUnit.config.modules.length;
-        QUnit.config.modules.push({ name: "All Tests" });
-
-        // Load test modules
-        sap.ui.require([
-            "myapp/test/unit/AllTests",
-            "myapp/test/integration/AllJourneys"
-        ], function() {
-            QUnit.start();
-        });
-    </script>
-</body>
-</html>
+opaTest("Should filter products when searching", (Given, When, Then) => {
+  Given.iStartTheApp();
+  When.iEnterSearchText("Laptop");
+  Then.theListShouldHaveItems(1);
+  Then.iTeardownMyApp();
+});
 ```
 
 ---
 
-## 18. Performance Optimization
+## 19. Performance Optimization
 
-### Loading Optimization
+### Async Loading
 
-#### Async Loading
 ```html
-<!-- Enable async loading in bootstrap -->
 <script
     id="sap-ui-bootstrap"
     src="https://ui5.sap.com/resources/sap-ui-core.js"
@@ -3292,111 +2286,62 @@ sap.ui.define([
 </script>
 ```
 
-#### Component Preload
+### Lazy Loading Fragments
 
-Build preload files for production:
-```bash
-ui5 build preload
-```
+```typescript
+import Fragment from "sap/ui/core/Fragment";
+import Dialog from "sap/m/Dialog";
 
-This creates `Component-preload.js` with all bundled modules.
+private _pHeavyDialog: Promise<Dialog> | null = null;
 
-### Lazy Loading
+public async onOpenHeavyDialog(): Promise<void> {
+  const oView = this.getView()!;
 
-#### Lazy Target Loading
-```json
-{
-    "routing": {
-        "targets": {
-            "heavyView": {
-                "viewName": "HeavyView",
-                "viewLevel": 2
-            }
-        }
-    }
-}
-```
-
-#### Lazy Fragment Loading
-```javascript
-// Load fragment only when needed
-onOpenDialog: function() {
-    if (!this._pDialog) {
-        this._pDialog = Fragment.load({
-            name: "myapp.view.fragments.HeavyDialog",
-            controller: this
-        });
-    }
-    this._pDialog.then(function(oDialog) {
-        oDialog.open();
+  if (!this._pHeavyDialog) {
+    this._pHeavyDialog = Fragment.load({
+      id: oView.getId(),
+      name: "myapp.view.fragments.HeavyDialog",
+      controller: this
+    }).then((oDialog) => {
+      const dialog = oDialog as Dialog;
+      oView.addDependent(dialog);
+      return dialog;
     });
+  }
+
+  const oDialog = await this._pHeavyDialog;
+  oDialog.open();
 }
 ```
 
 ### OData Optimization
 
-#### Select and Expand
-```javascript
+```typescript
 // Only request needed fields
-oModel.read("/Products", {
-    urlParameters: {
-        "$select": "ProductID,Name,Price",
-        "$expand": "Category($select=Name)"
-    }
+this._oModel.read("/Products", {
+  urlParameters: {
+    "$select": "ProductID,Name,Price,Currency",
+    "$expand": "Category($select=Name)"
+  }
 });
 ```
 
-#### Batch Requests
-```javascript
-// Combine multiple requests
-oModel.setDeferredGroups(["batch"]);
+### Growing List (Pagination)
 
-oModel.read("/Products", { groupId: "batch" });
-oModel.read("/Categories", { groupId: "batch" });
-
-oModel.submitChanges({ groupId: "batch" });
-```
-
-#### Growing List (Pagination)
 ```xml
-<List items="{/Products}"
-      growing="true"
-      growingThreshold="20"
-      growingScrollToLoad="true">
+<List
+    items="{/Products}"
+    growing="true"
+    growingThreshold="20"
+    growingScrollToLoad="true">
     <StandardListItem title="{Name}" />
 </List>
-```
-
-### Rendering Optimization
-
-#### Busy Indicators
-```javascript
-// Show busy during data load
-this.getView().setBusy(true);
-
-oModel.read("/Products", {
-    success: function() {
-        this.getView().setBusy(false);
-    }.bind(this)
-});
-```
-
-#### Avoid Unnecessary Re-renders
-```javascript
-// Batch property changes
-oModel.setProperty("/prop1", value1);
-oModel.setProperty("/prop2", value2);
-// vs single update
-oModel.setData({
-    prop1: value1,
-    prop2: value2
-}, true);
 ```
 
 ### Performance Checklist
 
 | Area | Best Practice |
-|------|--------------|
+|------|---------------|
 | **Bootstrap** | Use `data-sap-ui-async="true"` |
 | **Preload** | Build Component-preload.js |
 | **CDN** | Load UI5 from SAP CDN |
@@ -3404,150 +2349,45 @@ oModel.setData({
 | **Models** | Use `$select` and `$expand` |
 | **Lists** | Enable growing/pagination |
 | **Fragments** | Lazy load dialogs |
-| **Images** | Use lazy loading |
 
 ---
 
-## 19. SAP Fiori Elements
+## 20. SAP Fiori Elements
 
-### Overview
-
-SAP Fiori Elements are pre-built, metadata-driven application templates that automatically generate UIs based on OData service annotations.
-
-### Template Types
-
-| Template | Use Case |
-|----------|----------|
-| **List Report** | Display and filter entity collections |
-| **Object Page** | Display detailed entity information |
-| **Worklist** | Simple list with actions |
-| **Analytical List Page** | Analytics with charts and KPIs |
-| **Overview Page** | Dashboard with cards |
-
-### Annotations
-
-Annotations drive the UI generation:
-
-**CDS View (Backend):**
-```abap
-@UI.lineItem: [{ position: 10, importance: #HIGH }]
-@UI.selectionField: [{ position: 10 }]
-@UI.identification: [{ position: 10 }]
-element ProductName;
-
-@UI.lineItem: [{ position: 20, importance: #MEDIUM }]
-element Price;
-
-@UI.facet: [{
-    id: 'GeneralInfo',
-    type: #IDENTIFICATION_REFERENCE,
-    label: 'General Information',
-    position: 10
-}]
-```
-
-**Local Annotations (annotations.xml):**
-```xml
-<Annotations Target="ProductService.Products">
-
-    <Annotation Term="UI.LineItem">
-        <Collection>
-            <Record Type="UI.DataField">
-                <PropertyValue Property="Value" Path="ProductName" />
-                <PropertyValue Property="Label" String="Product Name" />
-            </Record>
-            <Record Type="UI.DataField">
-                <PropertyValue Property="Value" Path="Price" />
-                <PropertyValue Property="Label" String="Price" />
-            </Record>
-        </Collection>
-    </Annotation>
-
-    <Annotation Term="UI.SelectionFields">
-        <Collection>
-            <PropertyPath>Category</PropertyPath>
-            <PropertyPath>Supplier</PropertyPath>
-        </Collection>
-    </Annotation>
-
-    <Annotation Term="UI.HeaderInfo">
-        <Record Type="UI.HeaderInfoType">
-            <PropertyValue Property="TypeName" String="Product" />
-            <PropertyValue Property="TypeNamePlural" String="Products" />
-            <PropertyValue Property="Title">
-                <Record Type="UI.DataField">
-                    <PropertyValue Property="Value" Path="ProductName" />
-                </Record>
-            </PropertyValue>
-        </Record>
-    </Annotation>
-
-</Annotations>
-```
-
-### Creating a Fiori Elements App
+### List Report Template
 
 **manifest.json:**
 ```json
 {
-    "sap.app": {
-        "id": "myapp",
-        "type": "application",
-        "dataSources": {
-            "mainService": {
-                "uri": "/sap/opu/odata/sap/ZPRODUCT_SRV/",
-                "type": "OData",
-                "settings": {
-                    "odataVersion": "4.0",
-                    "localUri": "localService/metadata.xml",
-                    "annotations": ["annotation"]
-                }
-            },
-            "annotation": {
-                "uri": "annotations/annotation.xml",
-                "type": "ODataAnnotation"
+  "sap.ui5": {
+    "routing": {
+      "routes": [{
+        "pattern": ":?query:",
+        "name": "ProductsList",
+        "target": "ProductsList"
+      }],
+      "targets": {
+        "ProductsList": {
+          "type": "Component",
+          "id": "ProductsList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "entitySet": "Products",
+              "variantManagement": "Page",
+              "initialLoad": true
             }
+          }
         }
-    },
-    "sap.ui5": {
-        "routing": {
-            "routes": [{
-                "pattern": ":?query:",
-                "name": "ProductsList",
-                "target": "ProductsList"
-            }],
-            "targets": {
-                "ProductsList": {
-                    "type": "Component",
-                    "id": "ProductsList",
-                    "name": "sap.fe.templates.ListReport",
-                    "options": {
-                        "settings": {
-                            "entitySet": "Products",
-                            "variantManagement": "Page",
-                            "navigation": {
-                                "Products": {
-                                    "detail": {
-                                        "route": "ProductDetail"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+      }
     }
+  }
 }
 ```
 
 ---
 
-## 20. Smart Controls
-
-### Overview
-
-Smart Controls interpret OData metadata and annotations to generate appropriate UI controls automatically.
+## 21. Smart Controls
 
 ### Smart Table
 
@@ -3559,19 +2399,10 @@ Smart Controls interpret OData metadata and annotations to generate appropriate 
     tableType="ResponsiveTable"
     useExportToExcel="true"
     useVariantManagement="true"
-    useTablePersonalisation="true"
     header="Products"
     showRowCount="true"
     enableAutoBinding="true"
     beforeRebindTable=".onBeforeRebindTable">
-
-    <smartTable:customToolbar>
-        <OverflowToolbar>
-            <ToolbarSpacer />
-            <Button icon="sap-icon://add" text="Create" press=".onCreate" />
-        </OverflowToolbar>
-    </smartTable:customToolbar>
-
 </smartTable:SmartTable>
 ```
 
@@ -3584,35 +2415,7 @@ Smart Controls interpret OData metadata and annotations to generate appropriate 
     persistencyKey="ProductFilter"
     liveMode="true"
     showClearButton="true"
-    showRestoreButton="true"
-    clear=".onFilterClear">
-
-    <smartFilterBar:controlConfiguration>
-        <smartFilterBar:ControlConfiguration
-            key="Category"
-            visibleInAdvancedArea="true"
-            preventInitialDataFetchInValueHelpDialog="false" />
-    </smartFilterBar:controlConfiguration>
-
-</smartFilterBar:SmartFilterBar>
-```
-
-### Smart Field
-
-```xml
-<smartField:SmartField
-    value="{ProductName}"
-    editable="true"
-    showValueHelp="true" />
-
-<smartField:SmartField
-    value="{Price}"
-    editable="true"
-    uomEditState="0" />
-
-<smartField:SmartField
-    value="{Category}"
-    editable="true" />
+    search=".onSearch" />
 ```
 
 ### Smart Form
@@ -3620,25 +2423,16 @@ Smart Controls interpret OData metadata and annotations to generate appropriate 
 ```xml
 <smartForm:SmartForm
     id="productForm"
-    editable="true"
+    editable="{view>/editable}"
     editTogglable="true"
     title="Product Details">
 
-    <smartForm:Group label="General Information">
+    <smartForm:Group label="General">
         <smartForm:GroupElement>
-            <smartField:SmartField value="{ProductName}" />
+            <smartField:SmartField value="{Name}" />
         </smartForm:GroupElement>
-        <smartForm:GroupElement>
-            <smartField:SmartField value="{Description}" />
-        </smartForm:GroupElement>
-    </smartForm:Group>
-
-    <smartForm:Group label="Pricing">
         <smartForm:GroupElement>
             <smartField:SmartField value="{Price}" />
-        </smartForm:GroupElement>
-        <smartForm:GroupElement>
-            <smartField:SmartField value="{Currency}" />
         </smartForm:GroupElement>
     </smartForm:Group>
 
@@ -3647,120 +2441,96 @@ Smart Controls interpret OData metadata and annotations to generate appropriate 
 
 ---
 
-## 21. Security Best Practices
+## 22. Security Best Practices
 
-### XSS Prevention
+### Input Validation
 
-```javascript
-// Always encode user input
-var sUserInput = jQuery.sap.encodeHTML(sRawInput);
+```typescript
+import Input from "sap/m/Input";
 
-// Use FormattedText for safe HTML
-var oFormattedText = new sap.m.FormattedText({
-    htmlText: sEncodedHtml
-});
+function validateInput(oInput: Input): boolean {
+  const sValue = oInput.getValue().trim();
 
-// Avoid innerHTML manipulation
-// BAD: element.innerHTML = userInput;
-// GOOD: element.textContent = userInput;
-```
+  if (!sValue) {
+    oInput.setValueState("Error");
+    oInput.setValueStateText("This field is required");
+    return false;
+  }
 
-### CSRF Protection
+  // Check for XSS patterns
+  const rXSS = /<script|javascript:|on\w+=/i;
+  if (rXSS.test(sValue)) {
+    oInput.setValueState("Error");
+    oInput.setValueStateText("Invalid characters detected");
+    return false;
+  }
 
-```javascript
-// CSRF token is automatically handled by ODataModel
-var oModel = new sap.ui.model.odata.v2.ODataModel({
-    serviceUrl: "/sap/opu/odata/...",
-    headers: {
-        "X-CSRF-Token": "Fetch"  // Token is fetched automatically
-    }
-});
-```
-
-### Secure Data Handling
-
-```javascript
-// Validate input
-function validateEmail(sEmail) {
-    var rEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return rEmail.test(sEmail);
+  oInput.setValueState("None");
+  return true;
 }
 
-// Sanitize before display
-function sanitizeInput(sInput) {
-    return sInput.replace(/[<>]/g, '');
+function sanitizeHtml(sHtml: string): string {
+  const oDiv = document.createElement("div");
+  oDiv.textContent = sHtml;
+  return oDiv.innerHTML;
 }
-```
-
-### Content Security Policy
-
-```html
-<!-- Recommended CSP header -->
-<meta http-equiv="Content-Security-Policy"
-      content="default-src 'self';
-               script-src 'self' 'unsafe-eval' https://ui5.sap.com;
-               style-src 'self' 'unsafe-inline';">
 ```
 
 ---
 
-## 22. Debugging and Troubleshooting
+## 23. Debugging and Troubleshooting
 
-### UI5 Diagnostics
+### Debug Mode
 
-Access via keyboard shortcut: `Ctrl + Alt + Shift + S`
+```
+# URL parameters for debugging
+?sap-ui-debug=true          # Load debug sources
+?sap-ui-trace=true          # Enable tracing
+?sap-ui-xx-viewCache=false  # Disable view cache
+```
 
-Features:
-- Control Tree inspection
-- Binding information
-- Performance traces
-- Console access
+### UI5 Inspector
 
-### URL Parameters
+- Chrome Extension: UI5 Inspector
+- Keyboard shortcut: `Ctrl + Alt + Shift + S`
 
-| Parameter | Purpose |
-|-----------|---------|
-| `sap-ui-debug=true` | Load debug sources |
-| `sap-ui-trace=true` | Enable tracing |
-| `sap-ui-xx-viewCache=false` | Disable view cache |
-| `sap-ui-theme=sap_horizon_dark` | Change theme |
+### Common Debugging
 
-### Common Debugging Techniques
+```typescript
+import Log from "sap/base/Log";
 
-```javascript
-// Log levels
-jQuery.sap.log.setLevel(jQuery.sap.log.Level.DEBUG);
+// Enable debug logging
+Log.setLevel(Log.Level.DEBUG);
 
-// Trace binding issues
-console.log(oControl.getBinding("items"));
-console.log(oControl.getBindingContext());
+// Log messages
+Log.debug("Debug message");
+Log.info("Info message");
+Log.warning("Warning message");
+Log.error("Error message");
+
+// Debug binding
+const oBinding = oControl.getBinding("items");
+console.log("Binding path:", oBinding?.getPath());
 
 // Inspect model data
-console.log(oModel.getData());
-console.log(oModel.getProperty("/path"));
-
-// Check OData requests
-// Network tab in browser DevTools
-
-// Breakpoints in controller
-debugger;  // Will pause execution
+const oModel = this.getView()?.getModel();
+console.log("Model data:", oModel?.getData());
 ```
-
-### Support Assistant
-
-Access via: `Ctrl + Alt + Shift + P`
-
-Checks for:
-- Deprecated API usage
-- Performance issues
-- Best practice violations
-- Accessibility problems
 
 ---
 
-## 23. Deployment
+## 24. Deployment
 
-### SAP Business Technology Platform (BTP)
+### Build for Production
+
+```bash
+# Build with UI5 CLI
+ui5 build preload --clean-dest --all
+
+# Output in dist/ folder
+```
+
+### Deploy to SAP BTP
 
 **mta.yaml:**
 ```yaml
@@ -3775,86 +2545,31 @@ modules:
     parameters:
       disk-quota: 256M
       memory: 256M
-    requires:
-      - name: myapp-uaa
-      - name: myapp-destination
 
   - name: myapp-ui
     type: html5
-    path: webapp
+    path: dist
     build-parameters:
       builder: custom
       commands:
-        - npm run build
-      supported-platforms: []
-
-resources:
-  - name: myapp-uaa
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: xsuaa
-      service-plan: application
-
-  - name: myapp-destination
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: destination
-      service-plan: lite
-```
-
-### SAP NetWeaver ABAP
-
-Deploy via:
-1. SAP Web IDE → Deploy to SAPUI5 ABAP Repository
-2. UI5 Tooling with `@sap/ux-ui5-tooling`
-
-```bash
-# Deploy using UI5 CLI
-ui5 deploy
-```
-
-### Build for Production
-
-**ui5.yaml:**
-```yaml
-specVersion: "2.6"
-type: application
-metadata:
-  name: myapp
-
-builder:
-  customTasks:
-    - name: ui5-task-minify
-      afterTask: generateComponentPreload
-
-resources:
-  configuration:
-    propertiesFileSourceEncoding: UTF-8
-```
-
-```bash
-# Build for production
-ui5 build preload --all --clean-dest
-
-# Output in dist/ folder
+        - npm run build:ts
 ```
 
 ---
 
-## 24. Resources and References
+## 25. Resources and References
 
 ### Official Documentation
 
 - [SAPUI5 SDK Demo Kit](https://sapui5.hana.ondemand.com/)
+- [UI5 TypeScript Tutorial](https://sap.github.io/ui5-typescript/)
 - [SAP Developers Portal](https://developers.sap.com/topics/ui5.html)
-- [SAP Help Portal](https://help.sap.com/docs/SAPUI5)
-- [OpenUI5 Documentation](https://openui5.org/)
 
-### Learning Resources
+### TypeScript Resources
 
-- [SAP Learning Journey - SAPUI5](https://learning.sap.com/learning-journeys/develop-sapui5-applications)
-- [UI5 Walkthrough Tutorial](https://sapui5.hana.ondemand.com/#/topic/3da5f4be63264db99f2e5b04c5e853db)
-- [DSAG UI5 Best Practice Guide](https://1dsag.github.io/UI5-Best-Practice/)
+- [@types/openui5](https://www.npmjs.com/package/@types/openui5)
+- [UI5 TypeScript Guidelines](https://sap.github.io/ui5-typescript/docs/guidelines)
+- [Easy-UI5 Generator](https://github.com/SAP/generator-easy-ui5)
 
 ### Community
 
@@ -3862,19 +2577,42 @@ ui5 build preload --all --clean-dest
 - [Stack Overflow - SAPUI5](https://stackoverflow.com/questions/tagged/sapui5)
 - [GitHub - OpenUI5](https://github.com/SAP/openui5)
 
-### Tools
-
-- [SAP Business Application Studio](https://www.sap.com/products/business-application-studio.html)
-- [UI5 Tooling](https://sap.github.io/ui5-tooling/)
-- [UI5 Inspector (Chrome Extension)](https://chrome.google.com/webstore/detail/ui5-inspector/)
-
 ---
 
 ## Quick Reference Card
 
+### TypeScript Imports
+
+```typescript
+// Core
+import UIComponent from "sap/ui/core/UIComponent";
+import Controller from "sap/ui/core/mvc/Controller";
+import Fragment from "sap/ui/core/Fragment";
+
+// Models
+import JSONModel from "sap/ui/model/json/JSONModel";
+import ODataModel from "sap/ui/model/odata/v2/ODataModel";
+import Filter from "sap/ui/model/Filter";
+import FilterOperator from "sap/ui/model/FilterOperator";
+import Sorter from "sap/ui/model/Sorter";
+
+// Controls
+import MessageToast from "sap/m/MessageToast";
+import MessageBox from "sap/m/MessageBox";
+import Dialog from "sap/m/Dialog";
+
+// Events
+import Event from "sap/ui/base/Event";
+
+// Routing
+import Router from "sap/ui/core/routing/Router";
+import History from "sap/ui/core/routing/History";
+import { Route$PatternMatchedEvent } from "sap/ui/core/routing/Route";
+```
+
 ### Common Patterns
 
-```javascript
+```typescript
 // Get component
 this.getOwnerComponent()
 
@@ -3882,21 +2620,21 @@ this.getOwnerComponent()
 this.getOwnerComponent().getRouter()
 
 // Navigate
-this.getOwnerComponent().getRouter().navTo("route", { id: "123" })
+this.getRouter().navTo("route", { id: "123" })
 
 // Get model
-this.getView().getModel()
-this.getView().getModel("modelName")
+this.getView()?.getModel()
+this.getView()?.getModel<JSONModel>("view")
 
 // Get control by ID
-this.byId("controlId")
+this.byId("controlId") as Button
 
 // Get i18n text
-this.getOwnerComponent().getModel("i18n").getResourceBundle().getText("key")
+this.getResourceBundle().getText("key", ["arg1"])
 
-// Show message
-sap.m.MessageToast.show("Message")
-sap.m.MessageBox.error("Error message")
+// Show messages
+MessageToast.show("Message")
+MessageBox.error("Error message")
 ```
 
 ### XML Namespaces
@@ -3907,8 +2645,6 @@ xmlns="sap.m"
 xmlns:core="sap.ui.core"
 xmlns:l="sap.ui.layout"
 xmlns:f="sap.ui.layout.form"
-xmlns:t="sap.ui.table"
-xmlns:semantic="sap.f.semantic"
 xmlns:smartTable="sap.ui.comp.smarttable"
 xmlns:smartField="sap.ui.comp.smartfield"
 xmlns:smartForm="sap.ui.comp.smartform"
@@ -3916,6 +2652,6 @@ xmlns:smartForm="sap.ui.comp.smartform"
 
 ---
 
-*Document Version: 1.0*
+*Document Version: 2.0 (TypeScript Edition)*
 *Last Updated: January 2026*
-*Covers SAPUI5 version 1.120+*
+*Covers SAPUI5 version 1.120+ with TypeScript*
