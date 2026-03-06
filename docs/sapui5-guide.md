@@ -21,16 +21,17 @@ A comprehensive guide covering all SAPUI5 concepts from fundamentals to advanced
 13. [Fragments](#13-fragments)
 14. [Internationalization (i18n)](#14-internationalization-i18n)
 15. [Custom Controls](#15-custom-controls)
-16. [OData Integration](#16-odata-integration)
-17. [Expression Binding and Formatters](#17-expression-binding-and-formatters)
-18. [Testing](#18-testing)
-19. [Performance Optimization](#19-performance-optimization)
-20. [SAP Fiori Elements](#20-sap-fiori-elements)
-21. [Smart Controls](#21-smart-controls)
-22. [Security Best Practices](#22-security-best-practices)
-23. [Debugging and Troubleshooting](#23-debugging-and-troubleshooting)
-24. [Deployment](#24-deployment)
-25. [Resources and References](#25-resources-and-references)
+16. [OData Core Protocol (v4.01)](#16-odata-core-protocol-v401)
+17. [OData Integration in SAPUI5](#17-odata-integration-in-sapui5)
+18. [Expression Binding and Formatters](#18-expression-binding-and-formatters)
+19. [Testing](#19-testing)
+20. [Performance Optimization](#20-performance-optimization)
+21. [SAP Fiori Elements](#21-sap-fiori-elements)
+22. [Smart Controls](#22-smart-controls)
+23. [Security Best Practices](#23-security-best-practices)
+24. [Debugging and Troubleshooting](#24-debugging-and-troubleshooting)
+25. [Deployment](#25-deployment)
+26. [Resources and References](#26-resources-and-references)
 
 ---
 
@@ -1823,7 +1824,398 @@ export default class RatingIndicator extends Control {
 
 ---
 
-## 16. OData Integration
+## 16. OData Core Protocol (v4.01)
+
+### What is OData?
+
+OData (Open Data Protocol) is an ISO/IEC approved, OASIS standard that defines best practices for building and consuming RESTful APIs. It provides uniform conventions for request/response headers, status codes, HTTP methods, URL conventions, media types, payload formats, and query options — so developers can focus on business logic rather than API plumbing.
+
+| Aspect | Detail |
+|--------|--------|
+| **Current Version** | 4.01 (OASIS Standard, April 2020) |
+| **Payload Formats** | JSON (primary), XML/Atom (legacy) |
+| **Transport** | HTTPS with standard HTTP methods |
+| **Metadata** | Machine-readable via CSDL (XML or JSON) |
+| **Compatibility** | v4.01 is fully backward-compatible with v4.0 |
+
+### Entity Data Model (EDM)
+
+The EDM is the abstract data model describing data exposed by an OData service. Central concepts:
+
+| Concept | Description |
+|---------|-------------|
+| **Entity Type** | Named structured type with a key (e.g., `Product`, `Customer`). Supports single inheritance |
+| **Complex Type** | Keyless named structured type — a value type that cannot be referenced outside its containing entity |
+| **Primitive Types** | `Edm.String`, `Edm.Int32`, `Edm.Decimal`, `Edm.Boolean`, `Edm.DateTimeOffset`, `Edm.Guid`, etc. |
+| **Enum Types** | Named type with discrete named values (e.g., `Color { Red, Green, Blue }`) |
+| **Type Definitions** | Named alias for a primitive type with optional facets (e.g., `typedef Money = Edm.Decimal(precision=19, scale=4)`) |
+| **Navigation Properties** | Represent relationships between entities; can be single-valued or collection-valued |
+| **Structural Properties** | Primitive, complex, or enum-typed properties of an entity or complex type |
+| **Entity Sets** | Named collections of entities of a particular entity type (analogous to database tables) |
+| **Singletons** | Named single entities accessible as direct children of the entity container (e.g., `Me`, `Company`) |
+| **Containment** | Navigation property where the target entities are contained within the source, not in a top-level entity set |
+| **Edm.Untyped** | *(v4.01)* Allows a property to hold any type — for variant-typed properties, mixed collections, or collections of collections |
+
+### Service Document and Metadata Document
+
+Every OData service exposes two well-known resources:
+
+```
+Service Document:   GET https://host/service/
+Metadata Document:  GET https://host/service/$metadata
+```
+
+| Resource | Purpose |
+|----------|---------|
+| **Service Document** (`/`) | Lists available entity sets, singletons, and function imports. Entry point for hypermedia-driven navigation |
+| **Metadata Document** (`/$metadata`) | Describes the full data model in CSDL (Common Schema Definition Language). Clients use it to understand entity types, properties, relationships, actions, and functions |
+
+**v4.01**: Metadata can now be represented in JSON (CSDL JSON) in addition to XML.
+
+### URL Conventions and Resource Paths
+
+```
+https://host/service/EntitySet                          → Collection
+https://host/service/EntitySet(key)                     → Single entity by key
+https://host/service/EntitySet(key)/Property             → Single property
+https://host/service/EntitySet(key)/Property/$value      → Raw property value
+https://host/service/EntitySet(key)/NavigationProperty   → Related entities
+https://host/service/Singleton                           → Singleton entity
+https://host/service/EntitySet/$count                    → Count of entities
+```
+
+**v4.01 Key-as-Segment**: Keys can be expressed as path segments instead of parentheses:
+```
+GET /service/Products/42          ← Key-as-Segment (v4.01)
+GET /service/Products(42)         ← Parentheses style (v4.0)
+```
+
+### System Query Options
+
+System query options control the data returned. In v4.01, the `$` prefix is optional and names are case-insensitive.
+
+| Query Option | Purpose | Example |
+|-------------|---------|---------|
+| `$filter` | Filter collection by a boolean expression | `?$filter=Price lt 50 and Status eq 'Active'` |
+| `$select` | Return only specified properties | `?$select=Name,Price,Category` |
+| `$expand` | Include related entities inline | `?$expand=Category,Supplier` |
+| `$orderby` | Sort results ascending (`asc`) or descending (`desc`) | `?$orderby=Price desc,Name asc` |
+| `$top` | Return only the first N results | `?$top=10` |
+| `$skip` | Skip the first N results (for pagination) | `?$skip=20` |
+| `$count` | Include total count of matching resources | `?$count=true` |
+| `$search` | Free-text search | `?$search="blue OR green"` |
+| `$format` | Specify response format | `?$format=json` |
+| `$compute` | *(v4.01)* Define computed properties on-the-fly | `?$compute=Price mul Quantity as Total&$select=Name,Total` |
+| `$index` | *(v4.01)* Positional insert into an ordered collection | Used with POST to insert at a position |
+| `$apply` | Aggregation transformations (groupby, aggregate, filter) | `?$apply=groupby((Category),aggregate(Price with sum as Total))` |
+
+### `$filter` Operators
+
+#### Comparison Operators
+
+| Operator | Meaning | Example |
+|----------|---------|---------|
+| `eq` | Equal | `$filter=City eq 'Berlin'` |
+| `ne` | Not equal | `$filter=Status ne 'Closed'` |
+| `gt` | Greater than | `$filter=Price gt 100` |
+| `lt` | Less than | `$filter=Rating lt 3` |
+| `ge` | Greater than or equal | `$filter=Age ge 18` |
+| `le` | Less than or equal | `$filter=Stock le 0` |
+| `in` | *(v4.01)* Value in set | `$filter=City in ('Berlin','Paris','London')` |
+| `has` | Has flag (enum) | `$filter=Style has Sales.Color'Yellow'` |
+
+#### Logical Operators
+
+| Operator | Example |
+|----------|---------|
+| `and` | `$filter=Price gt 10 and Price lt 50` |
+| `or` | `$filter=City eq 'Berlin' or City eq 'Munich'` |
+| `not` | `$filter=not endswith(Name,'milk')` |
+
+#### String Functions
+
+| Function | Example |
+|----------|---------|
+| `contains(field, value)` | `$filter=contains(Name,'Pro')` |
+| `startswith(field, value)` | `$filter=startswith(Name,'SAP')` |
+| `endswith(field, value)` | `$filter=endswith(Email,'.com')` |
+| `length(field)` | `$filter=length(Name) gt 10` |
+| `indexof(field, value)` | `$filter=indexof(Name,'X') eq 0` |
+| `substring(field, pos)` | `$filter=substring(Name,0,3) eq 'SAP'` |
+| `tolower(field)` | `$filter=tolower(Name) eq 'product'` |
+| `toupper(field)` | `$filter=toupper(Name) eq 'PRODUCT'` |
+| `trim(field)` | `$filter=trim(Name) eq 'Product'` |
+| `concat(a, b)` | `$filter=concat(FirstName,' ',LastName) eq 'John Doe'` |
+
+#### Date/Math/Geo Functions
+
+| Function | Example |
+|----------|---------|
+| `year(field)`, `month()`, `day()` | `$filter=year(BirthDate) eq 1990` |
+| `hour()`, `minute()`, `second()` | `$filter=hour(CreatedAt) ge 9` |
+| `now()` | `$filter=DueDate lt now()` |
+| `round()`, `floor()`, `ceiling()` | `$filter=round(Price) eq 100` |
+| `geo.distance()` | `$filter=geo.distance(Location,geography'POINT(...)') lt 10` |
+
+#### Lambda Operators (Collection Filtering)
+
+| Operator | Purpose | Example |
+|----------|---------|---------|
+| `any` | True if **at least one** element matches | `$filter=Items/any(i:i/Quantity gt 100)` |
+| `all` | True if **every** element matches | `$filter=Tasks/all(t:t/Status eq 'Done')` |
+| `any` (no predicate) | True if collection is not empty | `$filter=Addresses/any()` |
+
+### Nested Query Options in `$expand`
+
+Query options can be applied within `$expand` using parentheses:
+
+```
+GET /Products?$expand=Reviews(
+  $filter=Rating ge 4;
+  $select=Author,Rating,Text;
+  $orderby=Rating desc;
+  $top=5
+)
+```
+
+### Data Modification (CRUD)
+
+| Operation | HTTP Method | URL Pattern | Body |
+|-----------|-------------|-------------|------|
+| **Create** | `POST` | `/EntitySet` | Entity JSON |
+| **Read** | `GET` | `/EntitySet` or `/EntitySet(key)` | — |
+| **Update (full)** | `PUT` | `/EntitySet(key)` | Complete entity JSON |
+| **Update (partial)** | `PATCH` | `/EntitySet(key)` | Partial entity JSON |
+| **Upsert** | `PUT`/`PATCH` | `/EntitySet(key)` | If entity doesn't exist, create it |
+| **Delete** | `DELETE` | `/EntitySet(key)` | — |
+
+**Deep Insert**: Create a parent entity and its related child entities in a single POST:
+```json
+POST /Orders
+{
+  "CustomerID": "CUST1",
+  "Items": [
+    { "ProductID": "P1", "Quantity": 2 },
+    { "ProductID": "P2", "Quantity": 1 }
+  ]
+}
+```
+
+**Deep Update** *(v4.01)*: Update an entity and nested related entities in a single PATCH.
+
+**Delta Update Payload** *(v4.01)*: Use a delta payload in a PATCH to a collection to submit adds, changes, and deletes in one request.
+
+### ETags and Optimistic Concurrency
+
+ETags prevent lost updates when multiple clients modify the same resource:
+
+```
+Step 1: GET /Products(1)
+        → Response Header: ETag: W/"v1abc"
+
+Step 2: PATCH /Products(1)
+        Request Header: If-Match: W/"v1abc"
+        Body: { "Price": 29.99 }
+
+        → 200 OK (if ETag matches)
+        → 412 Precondition Failed (if resource changed since read)
+        → 428 Precondition Required (if ETag required but not sent — v4.01)
+```
+
+| Header | Purpose |
+|--------|---------|
+| `ETag` | Response header with the entity's version tag |
+| `If-Match` | Request header — proceed only if ETag matches (for updates/deletes) |
+| `If-None-Match` | Request header — proceed only if ETag does NOT match (for conditional GETs / caching) |
+
+### Actions and Functions
+
+| Feature | Actions | Functions |
+|---------|---------|-----------|
+| **Side Effects** | Yes (data modification allowed) | No (read-only, no side effects) |
+| **Composability** | Cannot be further composed | Can be composed (piped in URLs) |
+| **HTTP Method** | `POST` | `GET` |
+| **Bound** | Called on an entity instance | Called on an entity instance |
+| **Unbound** | Called as static operations | Called as static operations |
+
+```
+Bound Function:     GET /Products(1)/Store.GetRelatedProducts()
+Unbound Function:   GET /GetTopSellingProducts(count=10)
+Bound Action:       POST /Products(1)/Store.Discontinue
+Unbound Action:     POST /ResetDataSource
+```
+
+**v4.01**: Actions/functions in a default namespace can omit namespace qualification if no name collision exists.
+
+### Batch Requests
+
+Batch requests bundle multiple operations into a single HTTP request to reduce round trips:
+
+**Multipart Format (v4.0)**:
+```
+POST /service/$batch
+Content-Type: multipart/mixed; boundary=batch_123
+
+--batch_123
+Content-Type: application/http
+
+GET /Products(1) HTTP/1.1
+
+--batch_123
+Content-Type: multipart/mixed; boundary=changeset_456
+
+--changeset_456
+Content-Type: application/http
+Content-ID: 1
+
+POST /Products HTTP/1.1
+Content-Type: application/json
+
+{"Name":"New Product","Price":9.99}
+
+--changeset_456--
+--batch_123--
+```
+
+**JSON Batch Format (v4.01)** — simpler to construct:
+```json
+POST /service/$batch
+Content-Type: application/json
+
+{
+  "requests": [
+    {
+      "id": "1",
+      "method": "GET",
+      "url": "Products(1)"
+    },
+    {
+      "id": "2",
+      "method": "POST",
+      "url": "Products",
+      "headers": { "Content-Type": "application/json" },
+      "body": { "Name": "New Product", "Price": 9.99 },
+      "dependsOn": ["1"]
+    }
+  ]
+}
+```
+
+**v4.01 batch improvements**:
+- JSON format with `dependsOn` for flexible inter-request dependencies
+- Content-ID referencing across change sets
+- Conditional requests that reference ETags from earlier operations
+- `Continue-on-Error` preference allows processing to continue despite failures
+
+### Delta Queries (Change Tracking)
+
+Delta queries enable clients to track changes since their last request without re-fetching the full dataset:
+
+```
+Step 1:  GET /Products?$deltatoken=start
+         → Response includes a @odata.deltaLink
+
+Step 2:  GET <deltaLink>
+         → Returns only changes since last request:
+           - Added/modified entities (full representation)
+           - Deleted entities (marked with @removed in v4.01)
+           - Added/removed links
+```
+
+**v4.01 delta improvements**:
+- Simplified delta payloads — deleted entities look like regular entities with an `@removed` annotation
+- Nested delta — expanded navigation properties can include their own delta sets
+- Delta payloads can be used in PATCH requests to submit bulk changes
+
+### Asynchronous Requests
+
+For long-running operations, clients can request async processing:
+
+```
+Request:   GET /LargeEntitySet
+           Prefer: respond-async
+
+Response:  202 Accepted
+           Location: /status-monitor/abc123
+
+Poll:      GET /status-monitor/abc123
+           → 200 OK with AsyncResult header when complete (v4.01)
+           → or 202 Accepted if still processing
+```
+
+**v4.01**: The `AsyncResult` header provides the final HTTP status code in the 200 OK response from the status monitor, removing the need for the `application/http` wrapper.
+
+### Important HTTP Headers
+
+| Header | Direction | Purpose |
+|--------|-----------|---------|
+| `OData-Version` | Both | Protocol version of the payload (e.g., `4.01`) |
+| `OData-MaxVersion` | Request | Maximum version the client can accept |
+| `Content-Type` | Both | Media type (`application/json`) |
+| `Accept` | Request | Desired response format |
+| `If-Match` | Request | ETag conditional (for updates/deletes) |
+| `If-None-Match` | Request | ETag conditional (for caching/conditional GETs) |
+| `Prefer` | Request | Client preferences: `return=representation`, `return=minimal`, `respond-async`, `continue-on-error`, `maxpagesize=N`, `odata.track-changes` |
+| `Preference-Applied` | Response | Confirms which preferences were applied |
+| `ETag` | Response | Entity version for optimistic concurrency |
+| `Isolation` / `OData-Isolation` | Request | `snapshot` — requests are executed against a snapshot (v4.01 drops the OData- prefix) |
+| `AsyncResult` | Response | *(v4.01)* Final HTTP status code for async operations |
+
+### Error Response Format
+
+OData services return errors in a structured JSON format:
+
+```json
+{
+  "error": {
+    "code": "InvalidRequest",
+    "message": "The property 'Naem' does not exist on type 'Product'. Did you mean 'Name'?",
+    "target": "Naem",
+    "details": [
+      {
+        "code": "PropertyNotFound",
+        "message": "The property 'Naem' does not exist.",
+        "target": "Naem"
+      }
+    ],
+    "innererror": {
+      "trace": "...",
+      "context": "..."
+    }
+  }
+}
+```
+
+**v4.01**: In-line error annotations can appear within success responses when `continue-on-error` is used, marking individual values that are in error.
+
+### What's New in OData v4.01 (vs v4.0)
+
+| Feature | Description |
+|---------|-------------|
+| **JSON Batch** | New JSON format for `$batch` requests/responses |
+| **CSDL JSON** | Metadata can be represented in JSON |
+| **Key-as-Segment** | `/Products/42` as alternative to `/Products(42)` |
+| **`in` Operator** | `$filter=City in ('Berlin','Paris')` |
+| **`$compute`** | Computed properties on-the-fly |
+| **`$index`** | Positional insert into ordered collections |
+| **Case-insensitive** | Operators, functions, and query option names |
+| **`$` prefix optional** | System query options work without the dollar sign |
+| **Edm.Untyped** | Properties can hold any type |
+| **Keyless entity types** | For singletons that don't need a key |
+| **Ordered collections** | Zero-based indexing for primitive/complex collections |
+| **Simplified deltas** | `@removed` annotation, nested delta, delta update payloads |
+| **Deep Update** | PATCH with nested related entities |
+| **Set operations** | Update/delete/invoke actions on resources matching criteria |
+| **Omit null values** | Responses can skip null/default properties to reduce size |
+| **`POST /$query`** | Transport long query options in a POST body instead of URL |
+| **AsyncResult header** | Simpler async response handling |
+| **Isolation header** | Dropped the `OData-` prefix |
+| **In-line errors** | Error annotations within success responses |
+| **Default namespaces** | Actions/functions without namespace qualification |
+
+---
+
+## 17. OData Integration in SAPUI5
 
 ### OData V2 Service Class
 
@@ -2023,7 +2415,7 @@ export default class Products extends BaseController {
 
 ---
 
-## 17. Expression Binding and Formatters
+## 18. Expression Binding and Formatters
 
 ### formatter.ts
 
@@ -2145,7 +2537,7 @@ export default formatter;
 
 ---
 
-## 18. Testing
+## 19. Testing
 
 ### Unit Testing with QUnit and TypeScript
 
@@ -2272,7 +2664,7 @@ opaTest("Should filter products when searching", (Given, When, Then) => {
 
 ---
 
-## 19. Performance Optimization
+## 20. Performance Optimization
 
 ### Async Loading
 
@@ -2352,7 +2744,7 @@ this._oModel.read("/Products", {
 
 ---
 
-## 20. SAP Fiori Elements
+## 21. SAP Fiori Elements
 
 ### List Report Template
 
@@ -2387,7 +2779,7 @@ this._oModel.read("/Products", {
 
 ---
 
-## 21. Smart Controls
+## 22. Smart Controls
 
 ### Smart Table
 
@@ -2441,7 +2833,7 @@ this._oModel.read("/Products", {
 
 ---
 
-## 22. Security Best Practices
+## 23. Security Best Practices
 
 ### Input Validation
 
@@ -2478,7 +2870,7 @@ function sanitizeHtml(sHtml: string): string {
 
 ---
 
-## 23. Debugging and Troubleshooting
+## 24. Debugging and Troubleshooting
 
 ### Debug Mode
 
@@ -2519,7 +2911,7 @@ console.log("Model data:", oModel?.getData());
 
 ---
 
-## 24. Deployment
+## 25. Deployment
 
 ### Build for Production
 
@@ -2557,7 +2949,7 @@ modules:
 
 ---
 
-## 25. Resources and References
+## 26. Resources and References
 
 ### Official Documentation
 
