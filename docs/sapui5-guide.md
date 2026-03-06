@@ -31,7 +31,8 @@ A comprehensive guide covering all SAPUI5 concepts from fundamentals to advanced
 23. [Security Best Practices](#23-security-best-practices)
 24. [Debugging and Troubleshooting](#24-debugging-and-troubleshooting)
 25. [Deployment](#25-deployment)
-26. [Resources and References](#26-resources-and-references)
+26. [Walkthrough Tutorial (38 Steps)](#26-walkthrough-tutorial-38-steps)
+27. [Resources and References](#27-resources-and-references)
 
 ---
 
@@ -1356,6 +1357,103 @@ oUserModel.setProperty("/preferences/theme", "sap_horizon_dark");
   }
 }
 ```
+
+### Descriptor Dependencies to Libraries and Components
+
+Performance-relevant attributes in the descriptor allow SAPUI5 to optimize loading of libraries and components. Properly declaring dependencies ensures asynchronous preloading and avoids unnecessary 404 requests.
+
+#### Dependencies to Libraries
+
+Libraries can be declared as **mandatory** (preloaded immediately) or **lazy** (loaded on demand):
+
+**For Applications/Components (`manifest.json`):**
+```json
+"sap.ui5": {
+  "dependencies": {
+    "libs": {
+      "sap.m": {},
+      "sap.ui.core": {},
+      "sap.suite.ui.commons": { "lazy": true }
+    }
+  }
+}
+```
+
+**For Libraries (`.library` file):**
+```xml
+<dependencies>
+  <dependency>
+    <libraryName>sap.m</libraryName>
+  </dependency>
+  <dependency>
+    <libraryName>sap.suite.ui.commons</libraryName>
+    <lazy>true</lazy>
+  </dependency>
+</dependencies>
+```
+
+**In `library.js`** — only non-lazy libraries are listed:
+```typescript
+import Library from "sap/ui/core/Lib";
+
+Library.init({
+  name: "my.lib",
+  dependencies: ["sap.ui.core", "sap.m"]
+});
+```
+
+#### Loading Lazy Libraries Manually
+
+Lazy libraries must be loaded manually via the `sap/ui/core/Lib.load` API **before** accessing any of their resources. This ensures the entire library is preloaded rather than loading individual modules one by one:
+
+```typescript
+import Lib from "sap/ui/core/Lib";
+
+// Load lazy library before using its controls
+Lib.load({ name: "sap.suite.ui.commons" }).then(() => {
+  // Now safe to use controls from sap.suite.ui.commons
+});
+```
+
+#### Dependencies to Components
+
+**Scenario 1 — Components Inside a Library:**
+When multiple components are bundled inside a library, declare **library dependencies only**. Do not add component-specific dependency declarations, as this would trigger unnecessary 404 requests for non-existent `Component-preload.js` files.
+
+**Scenario 2 — Standalone Components:**
+Use `sap.ui5/componentUsages` to declare reuse components in `manifest.json`:
+
+```json
+"sap.ui5": {
+  "componentUsages": {
+    "myReuseComponent": {
+      "name": "sap.reuse.component",
+      "lazy": true
+    }
+  }
+}
+```
+
+Instantiate using the `createComponent` factory method on `sap.ui.core.Component`:
+
+```typescript
+// In your Component or Controller
+const pReuseComponent = this.getOwnerComponent().createComponent("myReuseComponent");
+pReuseComponent.then((oComponent) => {
+  // Use the reuse component
+});
+```
+
+> **Note (v1.56+):** It is sufficient to declare `sap.ui5/componentUsages` and indicate whether the component should be loaded lazily. The older `sap.ui5/dependencies/components` section is deprecated and should be avoided.
+
+#### Quick Reference
+
+| Dependency Type | Manifest Section | Lazy Support | Loading API |
+|----------------|-----------------|-------------|-------------|
+| **Library (mandatory)** | `sap.ui5/dependencies/libs` | No | Automatic preload |
+| **Library (lazy)** | `sap.ui5/dependencies/libs` with `"lazy": true` | Yes | `Lib.load({ name: "..." })` |
+| **Component (reuse)** | `sap.ui5/componentUsages` | Yes | `this.createComponent("...")` |
+| **Component (deprecated)** | `sap.ui5/dependencies/components` | No | Deprecated since v1.56 |
 
 ---
 
@@ -2949,7 +3047,1081 @@ modules:
 
 ---
 
-## 26. Resources and References
+## 26. Walkthrough Tutorial (38 Steps)
+
+The official SAPUI5 Walkthrough introduces all major development paradigms step by step, building a complete app from "Hello World" to a production-ready build. Each step below includes the key concepts and essential code.
+
+> **Source:** [SAPUI5 Walkthrough Tutorial](https://ui5.sap.com/#/topic/3da5f4be63264db99f2e5b04c5e853db) | [Samples](https://ui5.sap.com/#/entity/sap.m.tutorial.walkthrough)
+
+### Step 1: Hello World
+
+Create a basic `webapp/index.html` page that displays "Hello World":
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>UI5 Walkthrough</title>
+</head>
+<body>
+  <div id="content">
+    <p>Hello World</p>
+  </div>
+</body>
+</html>
+```
+
+### Step 2: Bootstrap
+
+Load the SAPUI5 framework via the bootstrap script tag:
+
+```html
+<script
+  id="sap-ui-bootstrap"
+  src="resources/sap-ui-core.js"
+  data-sap-ui-theme="sap_horizon"
+  data-sap-ui-compat-version="edge"
+  data-sap-ui-async="true"
+  data-sap-ui-on-init="module:ui5/walkthrough/index"
+  data-sap-ui-resource-roots='{
+    "ui5.walkthrough": "./"
+  }'>
+</script>
+```
+
+**Key attributes:**
+- `data-sap-ui-theme`: Sets the visual theme (e.g., `sap_horizon`)
+- `data-sap-ui-async`: Enables asynchronous loading for better performance
+- `data-sap-ui-resource-roots`: Maps namespace to folder path
+
+### Step 3: Controls
+
+Replace static HTML with SAPUI5 controls. Use `sap.m.Text` to display text:
+
+```javascript
+sap.ui.define(["sap/m/Text"], (Text) => {
+  "use strict";
+  new Text({
+    text: "Hello World"
+  }).placeAt("content");
+});
+```
+
+### Step 4: XML Views
+
+Move UI definition from JavaScript to an XML view for better separation:
+
+**webapp/view/App.view.xml:**
+```xml
+<mvc:View
+  xmlns="sap.m"
+  xmlns:mvc="sap.ui.core.mvc">
+  <Text text="Hello World"/>
+</mvc:View>
+```
+
+**webapp/index.js:**
+```javascript
+sap.ui.define(["sap/ui/core/mvc/XMLView"], (XMLView) => {
+  "use strict";
+  XMLView.create({
+    viewName: "ui5.walkthrough.view.App"
+  }).then((oView) => oView.placeAt("content"));
+});
+```
+
+### Step 5: Controllers
+
+Add a controller to handle user interaction:
+
+**webapp/controller/App.controller.js:**
+```javascript
+sap.ui.define(["sap/ui/core/mvc/Controller"], (Controller) => {
+  "use strict";
+  return Controller.extend("ui5.walkthrough.controller.App", {
+    onShowHello() {
+      // show a native JavaScript alert
+      alert("Hello World");
+    }
+  });
+});
+```
+
+**webapp/view/App.view.xml:**
+```xml
+<mvc:View
+  controllerName="ui5.walkthrough.controller.App"
+  xmlns="sap.m"
+  xmlns:mvc="sap.ui.core.mvc">
+  <Button text="Say Hello" press=".onShowHello"/>
+</mvc:View>
+```
+
+### Step 6: Modules
+
+Use SAPUI5 modules instead of native APIs. Import `sap/m/MessageToast`:
+
+```javascript
+sap.ui.define([
+  "sap/ui/core/mvc/Controller",
+  "sap/m/MessageToast"
+], (Controller, MessageToast) => {
+  "use strict";
+  return Controller.extend("ui5.walkthrough.controller.App", {
+    onShowHello() {
+      MessageToast.show("Hello World");
+    }
+  });
+});
+```
+
+### Step 7: JSON Model
+
+Add a JSON model for data binding:
+
+```javascript
+sap.ui.define([
+  "sap/ui/core/mvc/Controller",
+  "sap/m/MessageToast",
+  "sap/ui/model/json/JSONModel"
+], (Controller, MessageToast, JSONModel) => {
+  "use strict";
+  return Controller.extend("ui5.walkthrough.controller.App", {
+    onInit() {
+      const oData = { recipient: { name: "World" } };
+      const oModel = new JSONModel(oData);
+      this.getView().setModel(oModel);
+    },
+    onShowHello() {
+      const sRecipient = this.getView().getModel().getProperty("/recipient/name");
+      MessageToast.show(`Hello ${sRecipient}`);
+    }
+  });
+});
+```
+
+**XML View with data binding:**
+```xml
+<Input value="{/recipient/name}" description="Hello {/recipient/name}" width="100%"/>
+```
+
+### Step 8: Translatable Texts
+
+Use i18n resource bundles for translatable strings:
+
+**webapp/i18n/i18n.properties:**
+```ini
+showHelloButtonText=Say Hello
+helloMsg=Hello {0}
+```
+
+**Controller using i18n:**
+```javascript
+onShowHello() {
+  const oBundle = this.getView().getModel("i18n").getResourceBundle();
+  const sRecipient = this.getView().getModel().getProperty("/recipient/name");
+  const sMsg = oBundle.getText("helloMsg", [sRecipient]);
+  MessageToast.show(sMsg);
+}
+```
+
+### Step 9: Component Configuration
+
+Encapsulate the app in a `UIComponent` for reusability:
+
+**webapp/Component.js:**
+```javascript
+sap.ui.define([
+  "sap/ui/core/UIComponent",
+  "sap/ui/model/json/JSONModel",
+  "sap/ui/model/resource/ResourceModel"
+], (UIComponent, JSONModel, ResourceModel) => {
+  "use strict";
+  return UIComponent.extend("ui5.walkthrough.Component", {
+    metadata: {
+      interfaces: ["sap.ui.core.IAsyncContentCreation"],
+      manifest: "json"
+    },
+    init() {
+      UIComponent.prototype.init.apply(this, arguments);
+      const oData = { recipient: { name: "World" } };
+      const oModel = new JSONModel(oData);
+      this.setModel(oModel);
+    }
+  });
+});
+```
+
+### Step 10: Descriptor for Applications (manifest.json)
+
+Move all configuration to the app descriptor:
+
+```json
+{
+  "_version": "1.65.0",
+  "sap.app": {
+    "id": "ui5.walkthrough",
+    "i18n": "i18n/i18n.properties",
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "type": "application",
+    "applicationVersion": { "version": "1.0.0" }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "deviceTypes": { "desktop": true, "tablet": true, "phone": true }
+  },
+  "sap.ui5": {
+    "dependencies": {
+      "minUI5Version": "1.108.0",
+      "libs": { "sap.ui.core": {}, "sap.m": {} }
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "ui5.walkthrough.i18n.i18n",
+          "supportedLocales": [""],
+          "fallbackLocale": ""
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "ui5.walkthrough.view.App",
+      "type": "XML",
+      "id": "app"
+    }
+  }
+}
+```
+
+**Key concepts:**
+- `sap.app`: App ID, i18n path, title, description
+- `sap.ui`: Technology, supported device types
+- `sap.ui5`: Dependencies, models (auto-instantiated), root view
+
+**index.html with ComponentSupport:**
+```html
+<script
+  id="sap-ui-bootstrap"
+  src="resources/sap-ui-core.js"
+  data-sap-ui-theme="sap_horizon"
+  data-sap-ui-compat-version="edge"
+  data-sap-ui-async="true"
+  data-sap-ui-on-init="module:sap/ui/core/ComponentSupport"
+  data-sap-ui-resource-roots='{ "ui5.walkthrough": "./" }'>
+</script>
+<body class="sapUiBody" id="content">
+  <div data-sap-ui-component data-name="ui5.walkthrough"
+       data-id="container" data-settings='{"id":"walkthrough"}'></div>
+</body>
+```
+
+### Step 11: Pages and Panels
+
+Use `sap.m.App` and `sap.m.Page` for proper page structure:
+
+```xml
+<mvc:View
+  controllerName="ui5.walkthrough.controller.App"
+  xmlns="sap.m"
+  xmlns:mvc="sap.ui.core.mvc"
+  displayBlock="true">
+  <App>
+    <pages>
+      <Page title="{i18n>homePageTitle}">
+        <content>
+          <Panel headerText="{i18n>helloPanelTitle}" class="sapUiResponsiveMargin" width="auto">
+            <content>
+              <Button text="{i18n>showHelloButtonText}" press=".onShowHello" class="sapUiSmallMarginEnd"/>
+              <Input value="{/recipient/name}" width="60%"/>
+              <Text text="Hello {/recipient/name}" class="sapUiSmallMargin"/>
+            </content>
+          </Panel>
+        </content>
+      </Page>
+    </pages>
+  </App>
+</mvc:View>
+```
+
+### Step 12: Shell Control as Container
+
+Wrap the app in `sap.m.Shell` for a centered, desktop-friendly layout:
+
+```xml
+<mvc:View
+  controllerName="ui5.walkthrough.controller.App"
+  xmlns="sap.m"
+  xmlns:mvc="sap.ui.core.mvc"
+  displayBlock="true">
+  <Shell>
+    <App>
+      <pages>
+        <Page title="{i18n>homePageTitle}">
+          <content>...</content>
+        </Page>
+      </pages>
+    </App>
+  </Shell>
+</mvc:View>
+```
+
+### Step 13: Margins and Paddings
+
+Use SAPUI5 CSS classes for consistent spacing instead of custom CSS:
+
+| CSS Class | Description |
+|-----------|-------------|
+| `sapUiSmallMargin` | Small margin on all sides |
+| `sapUiSmallMarginEnd` | Small margin at the end |
+| `sapUiResponsiveMargin` | Responsive margin based on screen size |
+| `sapUiSmallMarginTop` | Small margin on top |
+| `sapUiMediumMarginBottom` | Medium margin at bottom |
+
+### Step 14: Custom CSS and Theme Colors
+
+Add custom CSS using theme-compatible parameters:
+
+**webapp/css/style.css:**
+```css
+html[dir="ltr"] .myAppDemoWT .myCustomButton.sapMBtn {
+  margin-right: 0.125rem;
+}
+html[dir="rtl"] .myAppDemoWT .myCustomButton.sapMBtn {
+  margin-left: 0.125rem;
+}
+.myAppDemoWT .myCustomText {
+  display: inline-block;
+  font-weight: bold;
+}
+```
+
+Register CSS in `manifest.json`:
+```json
+"sap.ui5": {
+  "resources": {
+    "css": [{ "uri": "css/style.css" }]
+  }
+}
+```
+
+> **Convention:** Do not override SAPUI5 control styles directly. Use custom CSS classes and theme parameters.
+
+### Step 15: Nested Views
+
+Break complex views into smaller, reusable sub-views:
+
+**webapp/view/App.view.xml:**
+```xml
+<mvc:View xmlns="sap.m" xmlns:mvc="sap.ui.core.mvc" displayBlock="true">
+  <Shell>
+    <App>
+      <pages>
+        <Page title="{i18n>homePageTitle}">
+          <content>
+            <mvc:XMLView viewName="ui5.walkthrough.view.HelloPanel"/>
+          </content>
+        </Page>
+      </pages>
+    </App>
+  </Shell>
+</mvc:View>
+```
+
+### Step 16: Dialogs and Fragments
+
+Use fragments for lightweight, reusable UI parts like dialogs:
+
+**webapp/view/HelloDialog.fragment.xml:**
+```xml
+<core:FragmentDefinition
+  xmlns="sap.m"
+  xmlns:core="sap.ui.core">
+  <Dialog id="helloDialog" title="Hello {/recipient/name}">
+    <content>
+      <core:Icon src="sap-icon://hello-world" size="8rem" class="sapUiMediumMargin"/>
+    </content>
+    <beginButton>
+      <Button text="{i18n>dialogCloseButtonText}" press=".onCloseDialog"/>
+    </beginButton>
+  </Dialog>
+</core:FragmentDefinition>
+```
+
+**Loading a fragment in the controller:**
+```javascript
+onOpenDialog() {
+  if (!this.pDialog) {
+    this.pDialog = this.loadFragment({
+      name: "ui5.walkthrough.view.HelloDialog"
+    });
+  }
+  this.pDialog.then((oDialog) => oDialog.open());
+}
+```
+
+### Step 17: Fragment Callbacks
+
+Handle events from fragments in the controller:
+
+```javascript
+onCloseDialog() {
+  this.byId("helloDialog").close();
+}
+```
+
+> **Convention:** Fragment event handlers use the `.handlerName` syntax (with leading dot) in XML to reference the controller.
+
+### Step 18: Icons
+
+Use the SAP icon font in controls via the `sap-icon://` protocol:
+
+```xml
+<Button icon="sap-icon://world" text="{i18n>openDialogButtonText}" press=".onOpenDialog"/>
+```
+
+Browse all available icons in the [Icon Explorer](https://ui5.sap.com/iconExplorer.html).
+
+### Step 19: Aggregation Binding
+
+Display a list of items using aggregation binding with a `sap.m.List`:
+
+```xml
+<List
+  headerText="{i18n>invoiceListTitle}"
+  items="{invoice>/Invoices}">
+  <items>
+    <ObjectListItem
+      title="{invoice>Quantity} x {invoice>ProductName}"
+      number="{
+        parts: [{path: 'invoice>ExtendedPrice'}, {path: 'invoice>CurrencyCode'}],
+        type: 'sap.ui.model.type.Currency',
+        formatOptions: { showMeasure: false }
+      }"
+      numberUnit="{invoice>CurrencyCode}"/>
+  </items>
+</List>
+```
+
+**Declare invoice model in manifest.json:**
+```json
+"models": {
+  "invoice": {
+    "type": "sap.ui.model.json.JSONModel",
+    "uri": "Invoices.json"
+  }
+}
+```
+
+### Step 20: Data Types
+
+Use data types for automatic formatting and validation:
+
+```xml
+<ObjectListItem
+  title="{invoice>Quantity} x {invoice>ProductName}"
+  number="{
+    parts: [{path: 'invoice>ExtendedPrice'}, {path: 'invoice>CurrencyCode'}],
+    type: 'sap.ui.model.type.Currency',
+    formatOptions: { showMeasure: false }
+  }"
+  numberUnit="{invoice>CurrencyCode}"
+  numberState="{= ${invoice>ExtendedPrice} > 50 ? 'Error' : 'Success' }"/>
+```
+
+Common data types: `sap.ui.model.type.Currency`, `sap.ui.model.type.Date`, `sap.ui.model.type.Float`, `sap.ui.model.type.Integer`.
+
+### Step 21: Expression Binding
+
+Use JavaScript expressions in XML views for simple formatting logic:
+
+```xml
+numberState="{= ${invoice>ExtendedPrice} > 50 ? 'Error' : 'Success' }"
+```
+
+Expression binding starts with `{=` and can contain:
+- Ternary operators: `{= condition ? 'value1' : 'value2' }`
+- Comparisons: `{= ${path} > 100 }`
+- String concatenation: `{= ${path1} + ' ' + ${path2} }`
+
+### Step 22: Custom Formatters
+
+Create custom formatter functions for complex formatting:
+
+**webapp/model/formatter.js:**
+```javascript
+sap.ui.define([], () => {
+  "use strict";
+  return {
+    statusText(sStatus) {
+      const oBundle = this.getOwnerComponent().getModel("i18n").getResourceBundle();
+      switch (sStatus) {
+        case "A": return oBundle.getText("invoiceStatusA");
+        case "B": return oBundle.getText("invoiceStatusB");
+        case "C": return oBundle.getText("invoiceStatusC");
+        default: return sStatus;
+      }
+    }
+  };
+});
+```
+
+**Using formatter in XML view:**
+```xml
+<firstStatus>
+  <ObjectStatus text="{
+    path: 'invoice>Status',
+    formatter: '.formatter.statusText'
+  }"/>
+</firstStatus>
+```
+
+**Register formatter in controller:**
+```javascript
+sap.ui.define([
+  "sap/ui/core/mvc/Controller",
+  "ui5/walkthrough/model/formatter"
+], (Controller, formatter) => {
+  return Controller.extend("ui5.walkthrough.controller.InvoiceList", {
+    formatter: formatter
+  });
+});
+```
+
+### Step 23: Filtering
+
+Add a search field to filter list items:
+
+```xml
+<headerToolbar>
+  <Toolbar>
+    <Title text="{i18n>invoiceListTitle}"/>
+    <ToolbarSpacer/>
+    <SearchField width="50%" search=".onFilterInvoices"/>
+  </Toolbar>
+</headerToolbar>
+```
+
+**Controller filter logic:**
+```javascript
+onFilterInvoices(oEvent) {
+  const aFilter = [];
+  const sQuery = oEvent.getParameter("query");
+  if (sQuery) {
+    aFilter.push(new Filter("ProductName", FilterOperator.Contains, sQuery));
+  }
+  const oList = this.byId("invoiceList");
+  const oBinding = oList.getBinding("items");
+  oBinding.filter(aFilter);
+}
+```
+
+### Step 24: Sorting and Grouping
+
+Add sorting and grouping via binding configuration:
+
+```xml
+<List
+  id="invoiceList"
+  items="{
+    path: 'invoice>/Invoices',
+    sorter: {
+      path: 'ShipperName',
+      group: true
+    }
+  }">
+```
+
+**Programmatic sorting:**
+```javascript
+const oSorter = new Sorter("ProductName", false); // false = ascending
+oBinding.sort(oSorter);
+```
+
+### Step 25: Remote OData Service
+
+Connect to a real OData service instead of local JSON:
+
+**manifest.json:**
+```json
+"sap.app": {
+  "dataSources": {
+    "invoiceRemote": {
+      "uri": "V2/Northwind/Northwind.svc/",
+      "type": "OData",
+      "settings": { "odataVersion": "2.0" }
+    }
+  }
+},
+"sap.ui5": {
+  "models": {
+    "invoice": {
+      "dataSource": "invoiceRemote"
+    }
+  }
+}
+```
+
+**ui5.yaml proxy configuration (for development):**
+```yaml
+server:
+  customMiddleware:
+    - name: ui5-middleware-simpleproxy
+      afterMiddleware: compression
+      configuration:
+        baseUri: "https://services.odata.org"
+        mountPath: /V2
+```
+
+### Step 26: Mock Server Configuration
+
+Set up a mock server for offline development and testing:
+
+**webapp/test/mockServer.html:**
+```html
+<script
+  data-sap-ui-on-init="module:ui5/walkthrough/test/initMockServer"
+  ...>
+</script>
+```
+
+**webapp/test/initMockServer.js:**
+```javascript
+sap.ui.define([
+  "../localService/mockserver",
+  "sap/ui/core/ComponentSupport"
+], (mockserver) => {
+  "use strict";
+  mockserver.init();
+});
+```
+
+**webapp/localService/mockserver.js:**
+```javascript
+sap.ui.define(["sap/ui/core/util/MockServer"], (MockServer) => {
+  "use strict";
+  return {
+    init() {
+      const oMockServer = new MockServer({ rootUri: "V2/Northwind/Northwind.svc/" });
+      oMockServer.simulate("../localService/metadata.xml", {
+        sMockdataBaseUrl: "../localService/mockdata",
+        bGenerateMissingMockData: true
+      });
+      oMockServer.start();
+    }
+  };
+});
+```
+
+### Step 27: Unit Test with QUnit
+
+Write unit tests using the QUnit framework:
+
+**webapp/test/unit/model/formatter.js:**
+```javascript
+sap.ui.define([
+  "ui5/walkthrough/model/formatter",
+  "sap/ui/model/resource/ResourceModel"
+], (formatter, ResourceModel) => {
+  "use strict";
+
+  QUnit.module("Formatting functions", {});
+
+  QUnit.test("Should return the translated texts", (assert) => {
+    const oResourceModel = new ResourceModel({
+      bundleUrl: sap.ui.require.toUrl("ui5/walkthrough/i18n/i18n.properties"),
+      supportedLocales: [""],
+      fallbackLocale: ""
+    });
+    const oControllerStub = {
+      getOwnerComponent() {
+        return { getModel() { return oResourceModel; } };
+      }
+    };
+    const fnIsolatedFormatter = formatter.statusText.bind(oControllerStub);
+    assert.strictEqual(fnIsolatedFormatter("A"), "New", "Status A is correct");
+    assert.strictEqual(fnIsolatedFormatter("B"), "In Progress", "Status B is correct");
+    assert.strictEqual(fnIsolatedFormatter("C"), "Done", "Status C is correct");
+    assert.strictEqual(fnIsolatedFormatter("Foo"), "Foo", "Unknown status returned as-is");
+  });
+});
+```
+
+### Step 28: Integration Test with OPA
+
+Use OPA5 (One Page Acceptance tests) for integration testing:
+
+**Key concepts:**
+- **Pages**: Encapsulate actions and assertions for specific views
+- **Journeys**: Combine page actions into test scenarios
+- **waitFor**: Wait for conditions before executing assertions
+
+```javascript
+// Journey example
+opaTest("Should see the Hello dialog", (Given, When, Then) => {
+  Given.iStartMyUIComponent({ componentConfig: { name: "ui5.walkthrough" } });
+  When.onTheAppPage.iPressTheSayHelloButton();
+  Then.onTheAppPage.iShouldSeeTheHelloDialog();
+  Then.iTeardownMyApp();
+});
+```
+
+**Page Object pattern:**
+```javascript
+Opa5.createPageObjects({
+  onTheAppPage: {
+    actions: {
+      iPressTheSayHelloButton() {
+        return this.waitFor({
+          controlType: "sap.m.Button",
+          properties: { text: "Say Hello" },
+          actions: new Press(),
+          errorMessage: "Button not found"
+        });
+      }
+    },
+    assertions: {
+      iShouldSeeTheHelloDialog() {
+        return this.waitFor({
+          controlType: "sap.m.Dialog",
+          success() { Opa5.assert.ok(true, "Dialog is open"); },
+          errorMessage: "Dialog not found"
+        });
+      }
+    }
+  }
+});
+```
+
+### Step 29: Debugging Tools
+
+SAPUI5 provides built-in debugging tools:
+
+| Tool | Shortcut / Access | Purpose |
+|------|-------------------|---------|
+| **Technical Information Dialog** | `Ctrl+Shift+Alt+P` | App version, UI5 version, loaded libs |
+| **Diagnostics Window** | `Ctrl+Shift+Alt+S` | Control tree, bindings, properties |
+| **Support Assistant** | Diagnostics → Support Assistant | Best practice rule checks |
+| **UI5 Inspector** | Chrome Extension | Inspect controls and bindings |
+
+### Step 30: Routing and Navigation
+
+Configure routing in `manifest.json`:
+
+```json
+"sap.ui5": {
+  "routing": {
+    "config": {
+      "routerClass": "sap.m.routing.Router",
+      "type": "View",
+      "viewType": "XML",
+      "path": "ui5.walkthrough.view",
+      "controlId": "app",
+      "controlAggregation": "pages"
+    },
+    "routes": [
+      {
+        "pattern": "",
+        "name": "overview",
+        "target": "overview"
+      },
+      {
+        "pattern": "detail/{invoicePath}",
+        "name": "detail",
+        "target": "detail"
+      }
+    ],
+    "targets": {
+      "overview": { "id": "overview", "name": "Overview" },
+      "detail": { "id": "detail", "name": "Detail" }
+    }
+  }
+}
+```
+
+**Initialize router in Component.js:**
+```javascript
+init() {
+  UIComponent.prototype.init.apply(this, arguments);
+  this.getRouter().initialize();
+}
+```
+
+### Step 31: Routing with Parameters
+
+Navigate with parameters and read them in the target controller:
+
+**Navigate to detail:**
+```javascript
+onPress(oEvent) {
+  const oItem = oEvent.getSource();
+  const oRouter = this.getOwnerComponent().getRouter();
+  oRouter.navTo("detail", {
+    invoicePath: window.encodeURIComponent(
+      oItem.getBindingContext("invoice").getPath().substr(1)
+    )
+  });
+}
+```
+
+**Read parameters in detail controller:**
+```javascript
+onInit() {
+  const oRouter = this.getOwnerComponent().getRouter();
+  oRouter.getRoute("detail").attachPatternMatched(this._onObjectMatched, this);
+},
+_onObjectMatched(oEvent) {
+  this.getView().bindElement({
+    path: "/" + window.decodeURIComponent(oEvent.getParameter("arguments").invoicePath),
+    model: "invoice"
+  });
+}
+```
+
+### Step 32: Routing Back and History
+
+Implement back navigation using browser history:
+
+```javascript
+onNavBack() {
+  const oHistory = History.getInstance();
+  const sPreviousHash = oHistory.getPreviousHash();
+
+  if (sPreviousHash !== undefined) {
+    window.history.go(-1);
+  } else {
+    const oRouter = this.getOwnerComponent().getRouter();
+    oRouter.navTo("overview", {}, true /* no history */);
+  }
+}
+```
+
+### Step 33: Custom Controls
+
+Create reusable custom controls by extending existing ones:
+
+**webapp/control/ProductRating.js:**
+```javascript
+sap.ui.define([
+  "sap/ui/core/Control",
+  "sap/m/RatingIndicator",
+  "sap/m/Label",
+  "sap/m/Button"
+], (Control, RatingIndicator, Label, Button) => {
+  "use strict";
+  return Control.extend("ui5.walkthrough.control.ProductRating", {
+    metadata: {
+      properties: { value: { type: "float", defaultValue: 0 } },
+      aggregations: {
+        _rating: { type: "sap.m.RatingIndicator", multiple: false, visibility: "hidden" },
+        _label: { type: "sap.m.Label", multiple: false, visibility: "hidden" },
+        _button: { type: "sap.m.Button", multiple: false, visibility: "hidden" }
+      },
+      events: { change: { parameters: { value: { type: "int" } } } }
+    },
+    init() {
+      this.setAggregation("_rating", new RatingIndicator({ value: this.getValue(), maxValue: 5, liveChange: this._onRate.bind(this) }));
+      this.setAggregation("_label", new Label({ text: "{i18n>productRatingLabelInitial}" }).addStyleClass("sapUiSmallMargin"));
+      this.setAggregation("_button", new Button({ text: "{i18n>productRatingButton}", press: this._onSubmit.bind(this) }));
+    },
+    _onRate(oEvent) {
+      const fValue = oEvent.getParameter("value");
+      this.setProperty("value", fValue, true);
+    },
+    _onSubmit() {
+      this.fireEvent("change", { value: this.getValue() });
+    },
+    renderer(oRm, oControl) {
+      oRm.openStart("div", oControl).class("myAppDemoWTProductRating").openEnd();
+      oRm.renderControl(oControl.getAggregation("_rating"));
+      oRm.renderControl(oControl.getAggregation("_label"));
+      oRm.renderControl(oControl.getAggregation("_button"));
+      oRm.close("div");
+    }
+  });
+});
+```
+
+### Step 34: Responsiveness
+
+Use responsive controls and breakpoints for different screen sizes:
+
+```xml
+<ColumnListItem type="Navigation" press=".onPress">
+  <cells>
+    <ObjectIdentifier title="{invoice>ProductName}"/>
+    <Text text="{
+      path: 'invoice>Quantity',
+      type: 'sap.ui.model.type.Float',
+      formatOptions: { maxFractionDigits: 0 }
+    }"/>
+    <ObjectNumber
+      number="{
+        parts: [{path: 'invoice>ExtendedPrice'}, {path: 'invoice>CurrencyCode'}],
+        type: 'sap.ui.model.type.Currency',
+        formatOptions: { showMeasure: false }
+      }"
+      unit="{invoice>CurrencyCode}"
+      state="{= ${invoice>ExtendedPrice} > 50 ? 'Error' : 'Success' }"/>
+  </cells>
+</ColumnListItem>
+```
+
+Use `sap.m.Table` (responsive) instead of `sap.ui.table.Table` for mobile-friendly layouts.
+
+### Step 35: Device Adaptation
+
+Use the `sap.ui.Device` API to adapt UI to specific devices:
+
+**manifest.json — device model:**
+```json
+"sap.ui5": {
+  "models": {
+    "device": {
+      "type": "sap.ui.model.json.JSONModel",
+      "settings": {
+        "bindingSyntax": "complex"
+      }
+    }
+  }
+}
+```
+
+**Component.js:**
+```javascript
+import Device from "sap/ui/Device";
+
+init() {
+  UIComponent.prototype.init.apply(this, arguments);
+  this.setModel(new JSONModel(Device), "device");
+}
+```
+
+**Conditional rendering in XML view:**
+```xml
+<Panel
+  expandable="{device>/system/phone}"
+  expanded="{= !${device>/system/phone} }">
+```
+
+### Step 36: Content Density
+
+Apply compact or cozy content density based on device:
+
+**Component.js:**
+```javascript
+getContentDensityClass() {
+  if (!this._sContentDensityClass) {
+    if (!Device.support.touch) {
+      this._sContentDensityClass = "sapUiSizeCompact";
+    } else {
+      this._sContentDensityClass = "sapUiSizeCozy";
+    }
+  }
+  return this._sContentDensityClass;
+}
+```
+
+**App.controller.js:**
+```javascript
+onInit() {
+  this.getView().addStyleClass(this.getOwnerComponent().getContentDensityClass());
+}
+```
+
+| Content Density | CSS Class | Use Case |
+|----------------|-----------|----------|
+| **Compact** | `sapUiSizeCompact` | Desktop (mouse/keyboard) |
+| **Cozy** | `sapUiSizeCozy` | Touch devices (tablet/phone) |
+
+### Step 37: Accessibility
+
+Add ARIA landmarks and roles for screen reader support:
+
+```xml
+<Page title="{i18n>homePageTitle}">
+  <landmarkInfo>
+    <PageAccessibleLandmarkInfo
+      rootRole="Region"
+      rootLabel="{i18n>Overview_rootLabel}"
+      contentRole="Main"
+      contentLabel="{i18n>Overview_contentLabel}"
+      headerRole="Banner"
+      headerLabel="{i18n>Overview_headerLabel}"/>
+  </landmarkInfo>
+  <content>...</content>
+</Page>
+```
+
+**Add `accessibleRole` to panels:**
+```xml
+<Panel headerText="{i18n>helloPanelTitle}" accessibleRole="Region">
+```
+
+**i18n labels for ARIA:**
+```ini
+Overview_rootLabel=Overview Page
+Overview_headerLabel=Header
+Overview_contentLabel=Page Content
+```
+
+### Step 38: Build Your Application
+
+Use UI5 CLI to create a production build:
+
+**package.json:**
+```json
+{
+  "scripts": {
+    "start": "ui5 serve -o test/mockServer.html",
+    "build": "ui5 build --all --clean-dest",
+    "serve-dist": "ws --compress -d dist --open"
+  },
+  "devDependencies": {
+    "@ui5/cli": "^3",
+    "local-web-server": "^5",
+    "ui5-middleware-simpleproxy": "^3"
+  }
+}
+```
+
+**Build commands:**
+```bash
+# Build the application
+npm run build
+
+# Serve the built application
+npm run serve-dist
+```
+
+The `--all` flag builds framework dependencies and the `--clean-dest` flag clears previous builds.
+
+### Walkthrough Summary
+
+| Steps | Topic Area | Key Concepts |
+|-------|-----------|--------------|
+| 1-3 | **Basics** | HTML, Bootstrap, Controls |
+| 4-6 | **MVC Foundation** | XML Views, Controllers, Modules |
+| 7-8 | **Data & i18n** | JSON Model, Resource Bundles |
+| 9-10 | **App Structure** | Component, manifest.json |
+| 11-14 | **Layout & Styling** | Pages, Shell, Margins, Custom CSS |
+| 15-18 | **UI Composition** | Nested Views, Fragments, Dialogs, Icons |
+| 19-22 | **Data Binding** | Aggregation, Data Types, Expression, Formatters |
+| 23-24 | **Data Operations** | Filtering, Sorting, Grouping |
+| 25-26 | **Backend** | OData Service, Mock Server |
+| 27-28 | **Testing** | QUnit Unit Tests, OPA Integration Tests |
+| 29 | **Debugging** | Built-in Diagnostic Tools |
+| 30-32 | **Navigation** | Routing, Parameters, History |
+| 33 | **Extensibility** | Custom Controls |
+| 34-36 | **Device Support** | Responsiveness, Device Adaptation, Content Density |
+| 37 | **Accessibility** | ARIA Landmarks |
+| 38 | **Deployment** | UI5 CLI Build |
+
+---
+
+## 27. Resources and References
 
 ### Official Documentation
 
@@ -3044,6 +4216,6 @@ xmlns:smartForm="sap.ui.comp.smartform"
 
 ---
 
-*Document Version: 2.0 (TypeScript Edition)*
-*Last Updated: January 2026*
+*Document Version: 2.1 (TypeScript Edition)*
+*Last Updated: March 2026*
 *Covers SAPUI5 version 1.120+ with TypeScript*
