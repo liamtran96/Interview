@@ -1357,6 +1357,103 @@ oUserModel.setProperty("/preferences/theme", "sap_horizon_dark");
 }
 ```
 
+### Descriptor Dependencies to Libraries and Components
+
+Performance-relevant attributes in the descriptor allow SAPUI5 to optimize loading of libraries and components. Properly declaring dependencies ensures asynchronous preloading and avoids unnecessary 404 requests.
+
+#### Dependencies to Libraries
+
+Libraries can be declared as **mandatory** (preloaded immediately) or **lazy** (loaded on demand):
+
+**For Applications/Components (`manifest.json`):**
+```json
+"sap.ui5": {
+  "dependencies": {
+    "libs": {
+      "sap.m": {},
+      "sap.ui.core": {},
+      "sap.suite.ui.commons": { "lazy": true }
+    }
+  }
+}
+```
+
+**For Libraries (`.library` file):**
+```xml
+<dependencies>
+  <dependency>
+    <libraryName>sap.m</libraryName>
+  </dependency>
+  <dependency>
+    <libraryName>sap.suite.ui.commons</libraryName>
+    <lazy>true</lazy>
+  </dependency>
+</dependencies>
+```
+
+**In `library.js`** — only non-lazy libraries are listed:
+```typescript
+import Library from "sap/ui/core/Lib";
+
+Library.init({
+  name: "my.lib",
+  dependencies: ["sap.ui.core", "sap.m"]
+});
+```
+
+#### Loading Lazy Libraries Manually
+
+Lazy libraries must be loaded manually via the `sap/ui/core/Lib.load` API **before** accessing any of their resources. This ensures the entire library is preloaded rather than loading individual modules one by one:
+
+```typescript
+import Lib from "sap/ui/core/Lib";
+
+// Load lazy library before using its controls
+Lib.load({ name: "sap.suite.ui.commons" }).then(() => {
+  // Now safe to use controls from sap.suite.ui.commons
+});
+```
+
+#### Dependencies to Components
+
+**Scenario 1 — Components Inside a Library:**
+When multiple components are bundled inside a library, declare **library dependencies only**. Do not add component-specific dependency declarations, as this would trigger unnecessary 404 requests for non-existent `Component-preload.js` files.
+
+**Scenario 2 — Standalone Components:**
+Use `sap.ui5/componentUsages` to declare reuse components in `manifest.json`:
+
+```json
+"sap.ui5": {
+  "componentUsages": {
+    "myReuseComponent": {
+      "name": "sap.reuse.component",
+      "lazy": true
+    }
+  }
+}
+```
+
+Instantiate using the `createComponent` factory method on `sap.ui.core.Component`:
+
+```typescript
+// In your Component or Controller
+const pReuseComponent = this.getOwnerComponent().createComponent("myReuseComponent");
+pReuseComponent.then((oComponent) => {
+  // Use the reuse component
+});
+```
+
+> **Note (v1.56+):** It is sufficient to declare `sap.ui5/componentUsages` and indicate whether the component should be loaded lazily. The older `sap.ui5/dependencies/components` section is deprecated and should be avoided.
+
+#### Quick Reference
+
+| Dependency Type | Manifest Section | Lazy Support | Loading API |
+|----------------|-----------------|-------------|-------------|
+| **Library (mandatory)** | `sap.ui5/dependencies/libs` | No | Automatic preload |
+| **Library (lazy)** | `sap.ui5/dependencies/libs` with `"lazy": true` | Yes | `Lib.load({ name: "..." })` |
+| **Component (reuse)** | `sap.ui5/componentUsages` | Yes | `this.createComponent("...")` |
+| **Component (deprecated)** | `sap.ui5/dependencies/components` | No | Deprecated since v1.56 |
+
 ---
 
 ## 12. Routing and Navigation
